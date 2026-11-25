@@ -54,7 +54,7 @@ Bus monitor is off (SYPCR $00).  A read outside every chip select
 
 - CS4, $020000-$021FFF (set up only after the firmware runs).  The 6ch
   board has an AT28C64B; the 8ch part not yet seen.
-- `oncore-eeprom.bin`, 8 KB, SHA-256
+- `B4121P1115-SSG0220999-eeprom.bin`, 8 KB, SHA-256
   `003e9f533d66fb448ad2a5504a70d76f016abdbb2a0c19043d4a818589a44261`.
   Three reads identical.
 - $0000-$0879, $11DE-$1FFF: $AA fill.
