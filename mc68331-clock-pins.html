@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MC68331 Clock Pins</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+/* Layout: one bench sheet. The pin strip on top, the measurement steps below. */
+:root{
+  --bg:#f5f7f4; --fg:#1d2420; --muted:#66706a; --body:#2a302c; --bodytext:#e9eee9;
+  --pin:#b9c0ba; --measure:#d4631c; --done:#2f7d5b; --pll:#2c6aa8; --bdm:#8a5ab8; --line:#d6dcd7;
+  --sans:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141816; --fg:#e4e9e5; --muted:#98a39c; --body:#323a35; --bodytext:#e4e9e5;
+  --pin:#59625c; --measure:#f08a45; --done:#5fbf92; --pll:#6ba5e0; --bdm:#b88be0; --line:#2b322e; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141816; --fg:#e4e9e5; --muted:#98a39c; --body:#323a35; --bodytext:#e4e9e5;
+  --pin:#59625c; --measure:#f08a45; --done:#5fbf92; --pll:#6ba5e0; --bdm:#b88be0; --line:#2b322e; color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.5}
+main{max-width:1120px;margin:0 auto;padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:24px}
+h1{font-size:1.5rem;margin:0;text-wrap:balance}
+p{margin:0;max-width:68ch}
+.sub{color:var(--muted)}
+.scroll{overflow-x:auto}
+svg.pins{display:block;width:100%;min-width:900px;height:auto;font-family:var(--mono)}
+.body{fill:var(--body)}
+.chipname{fill:var(--bodytext);font-size:16px;font-weight:600;font-family:var(--sans)}
+svg .muted{fill:var(--muted);font-size:12px;font-family:var(--sans)}
+.body + text + text.muted{fill:var(--bodytext);opacity:.75}
+.pin rect{fill:var(--pin)}
+.pin .num{fill:var(--fg);font-size:11px}
+.pin .lab{fill:var(--muted);font-size:12px}
+.pin.measure rect{fill:var(--measure)} .pin.measure .num,.pin.measure .lab{fill:var(--measure);font-weight:600}
+.pin.done rect{fill:var(--done)} .pin.done .num,.pin.done .lab{fill:var(--done);font-weight:600}
+.pin.pll rect{fill:var(--pll)} .pin.pll .lab{fill:var(--pll)}
+.pin.bdm rect{fill:var(--bdm)} .pin.bdm .lab{fill:var(--bdm)}
+.pin.power .lab{opacity:.7}
+.key{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:13px;color:var(--muted)}
+.key span{display:inline-flex;align-items:center;gap:6px}
+.key i{width:12px;height:12px;border-radius:2px;display:inline-block}
+figure{margin:0;display:grid;gap:12px}
+figcaption{color:var(--muted);font-size:13px;max-width:80ch}
+ol{margin:0;padding-left:1.4em;display:grid;gap:10px;max-width:75ch}
+li strong{font-family:var(--mono);font-weight:600}
+.m{color:var(--measure)}
+.state{border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:13px}
+</style>
+<main>
+  <header style="display:grid;gap:6px">
+    <h1>MC68331 clock pins: pins 51–83</h1>
+    <p class="sub">Oncore VP 8-channel. Pin numbers from Motorola's MC68331 technical data, Figure 2 (132-pin QFP). Pin 1 is at the middle of the top edge; numbers run counterclockwise, so this bottom edge reads 51 at the left to 83 at the right.</p>
+  </header>
+  <figure>
+    <div class="scroll"><svg viewBox="0 0 1100 330" role="img" aria-label="MC68331 132-pin QFP, top view, the side with pins 51 to 83. EXTAL is pin 62, XTAL pin 60, CLKOUT pin 66, MODCLK pin 78." class="pins">
+<rect x="20" y="40" width="1060" height="90" rx="4" class="body"/>
+<text x="550.0" y="80" text-anchor="middle" class="chipname">MC68331 · 132-pin QFP · top view</text>
+<text x="550.0" y="102" text-anchor="middle" class="muted">this edge holds pins 51–83; chip body above</text>
+<text x="24" y="28" class="muted">← corner with pin 50 (left side)</text>
+<text x="1076" y="28" text-anchor="end" class="muted">corner with pin 84 (right side) →</text>
+<g class="pin power"><rect x="63" y="130" width="14" height="36" rx="1"/>
+<text x="70" y="186" text-anchor="middle" class="num">51</text>
+<text transform="translate(74 198) rotate(90)" class="lab">VSS</text></g>
+<g class="pin"><rect x="93" y="130" width="14" height="36" rx="1"/>
+<text x="100" y="186" text-anchor="middle" class="num">52</text>
+<text transform="translate(104 198) rotate(90)" class="lab">TXD</text></g>
+<g class="pin"><rect x="123" y="130" width="14" height="36" rx="1"/>
+<text x="130" y="186" text-anchor="middle" class="num">53</text>
+<text transform="translate(134 198) rotate(90)" class="lab">RXD</text></g>
+<g class="pin bdm"><rect x="153" y="130" width="14" height="36" rx="1"/>
+<text x="160" y="186" text-anchor="middle" class="num">54</text>
+<text transform="translate(164 198) rotate(90)" class="lab">IPIPE/DSO</text></g>
+<g class="pin bdm"><rect x="183" y="130" width="14" height="36" rx="1"/>
+<text x="190" y="186" text-anchor="middle" class="num">55</text>
+<text transform="translate(194 198) rotate(90)" class="lab">IFETCH/DSI</text></g>
+<g class="pin bdm"><rect x="213" y="130" width="14" height="36" rx="1"/>
+<text x="220" y="186" text-anchor="middle" class="num">56</text>
+<text transform="translate(224 198) rotate(90)" class="lab">BKPT/DSCLK</text></g>
+<g class="pin"><rect x="243" y="130" width="14" height="36" rx="1"/>
+<text x="250" y="186" text-anchor="middle" class="num">57</text>
+<text transform="translate(254 198) rotate(90)" class="lab">TSC</text></g>
+<g class="pin bdm"><rect x="273" y="130" width="14" height="36" rx="1"/>
+<text x="280" y="186" text-anchor="middle" class="num">58</text>
+<text transform="translate(284 198) rotate(90)" class="lab">FREEZE</text></g>
+<g class="pin power"><rect x="303" y="130" width="14" height="36" rx="1"/>
+<text x="310" y="186" text-anchor="middle" class="num">59</text>
+<text transform="translate(314 198) rotate(90)" class="lab">VSS</text></g>
+<g class="pin measure"><rect x="333" y="130" width="14" height="36" rx="1"/>
+<text x="340" y="186" text-anchor="middle" class="num">60</text>
+<text transform="translate(344 198) rotate(90)" class="lab">XTAL</text></g>
+<g class="pin pll"><rect x="363" y="130" width="14" height="36" rx="1"/>
+<text x="370" y="186" text-anchor="middle" class="num">61</text>
+<text transform="translate(374 198) rotate(90)" class="lab">VDDSYN</text></g>
+<g class="pin measure"><rect x="393" y="130" width="14" height="36" rx="1"/>
+<text x="400" y="186" text-anchor="middle" class="num">62</text>
+<text transform="translate(404 198) rotate(90)" class="lab">EXTAL</text></g>
+<g class="pin power"><rect x="423" y="130" width="14" height="36" rx="1"/>
+<text x="430" y="186" text-anchor="middle" class="num">63</text>
+<text transform="translate(434 198) rotate(90)" class="lab">VDD</text></g>
+<g class="pin pll"><rect x="453" y="130" width="14" height="36" rx="1"/>
+<text x="460" y="186" text-anchor="middle" class="num">64</text>
+<text transform="translate(464 198) rotate(90)" class="lab">XFC</text></g>
+<g class="pin power"><rect x="483" y="130" width="14" height="36" rx="1"/>
+<text x="490" y="186" text-anchor="middle" class="num">65</text>
+<text transform="translate(494 198) rotate(90)" class="lab">VDD</text></g>
+<g class="pin done"><rect x="513" y="130" width="14" height="36" rx="1"/>
+<text x="520" y="186" text-anchor="middle" class="num">66</text>
+<text transform="translate(524 198) rotate(90)" class="lab">CLKOUT</text></g>
+<g class="pin power"><rect x="543" y="130" width="14" height="36" rx="1"/>
+<text x="550" y="186" text-anchor="middle" class="num">67</text>
+<text transform="translate(554 198) rotate(90)" class="lab">VSS</text></g>
+<g class="pin bdm"><rect x="573" y="130" width="14" height="36" rx="1"/>
+<text x="580" y="186" text-anchor="middle" class="num">68</text>
+<text transform="translate(584 198) rotate(90)" class="lab">RESET</text></g>
+<g class="pin"><rect x="603" y="130" width="14" height="36" rx="1"/>
+<text x="610" y="186" text-anchor="middle" class="num">69</text>
+<text transform="translate(614 198) rotate(90)" class="lab">HALT</text></g>
+<g class="pin bdm"><rect x="633" y="130" width="14" height="36" rx="1"/>
+<text x="640" y="186" text-anchor="middle" class="num">70</text>
+<text transform="translate(644 198) rotate(90)" class="lab">BERR</text></g>
+<g class="pin"><rect x="663" y="130" width="14" height="36" rx="1"/>
+<text x="670" y="186" text-anchor="middle" class="num">71</text>
+<text transform="translate(674 198) rotate(90)" class="lab">IRQ7</text></g>
+<g class="pin"><rect x="693" y="130" width="14" height="36" rx="1"/>
+<text x="700" y="186" text-anchor="middle" class="num">72</text>
+<text transform="translate(704 198) rotate(90)" class="lab">IRQ6</text></g>
+<g class="pin"><rect x="723" y="130" width="14" height="36" rx="1"/>
+<text x="730" y="186" text-anchor="middle" class="num">73</text>
+<text transform="translate(734 198) rotate(90)" class="lab">IRQ5</text></g>
+<g class="pin"><rect x="753" y="130" width="14" height="36" rx="1"/>
+<text x="760" y="186" text-anchor="middle" class="num">74</text>
+<text transform="translate(764 198) rotate(90)" class="lab">IRQ4</text></g>
+<g class="pin"><rect x="783" y="130" width="14" height="36" rx="1"/>
+<text x="790" y="186" text-anchor="middle" class="num">75</text>
+<text transform="translate(794 198) rotate(90)" class="lab">IRQ3</text></g>
+<g class="pin"><rect x="813" y="130" width="14" height="36" rx="1"/>
+<text x="820" y="186" text-anchor="middle" class="num">76</text>
+<text transform="translate(824 198) rotate(90)" class="lab">IRQ2</text></g>
+<g class="pin"><rect x="843" y="130" width="14" height="36" rx="1"/>
+<text x="850" y="186" text-anchor="middle" class="num">77</text>
+<text transform="translate(854 198) rotate(90)" class="lab">IRQ1</text></g>
+<g class="pin measure"><rect x="873" y="130" width="14" height="36" rx="1"/>
+<text x="880" y="186" text-anchor="middle" class="num">78</text>
+<text transform="translate(884 198) rotate(90)" class="lab">MODCLK</text></g>
+<g class="pin"><rect x="903" y="130" width="14" height="36" rx="1"/>
+<text x="910" y="186" text-anchor="middle" class="num">79</text>
+<text transform="translate(914 198) rotate(90)" class="lab">R/W</text></g>
+<g class="pin"><rect x="933" y="130" width="14" height="36" rx="1"/>
+<text x="940" y="186" text-anchor="middle" class="num">80</text>
+<text transform="translate(944 198) rotate(90)" class="lab">SIZ1</text></g>
+<g class="pin"><rect x="963" y="130" width="14" height="36" rx="1"/>
+<text x="970" y="186" text-anchor="middle" class="num">81</text>
+<text transform="translate(974 198) rotate(90)" class="lab">SIZ0</text></g>
+<g class="pin"><rect x="993" y="130" width="14" height="36" rx="1"/>
+<text x="1000" y="186" text-anchor="middle" class="num">82</text>
+<text transform="translate(1004 198) rotate(90)" class="lab">AS</text></g>
+<g class="pin power"><rect x="1023" y="130" width="14" height="36" rx="1"/>
+<text x="1030" y="186" text-anchor="middle" class="num">83</text>
+<text transform="translate(1034 198) rotate(90)" class="lab">VSS</text></g>
+</svg></div>
+    <div class="key">
+      <span><i style="background:var(--measure)"></i>measure next</span>
+      <span><i style="background:var(--done)"></i>CLKOUT, already measured: 7.4505 MHz at reset</span>
+      <span><i style="background:var(--pll)"></i>PLL supply and filter</span>
+      <span><i style="background:var(--bdm)"></i>BDM / reset lines (pod connected)</span>
+    </div>
+    <figcaption>Count from a corner: pin 51 is the first pin on this edge after the corner shared with pin 50, and pin 83 is the last before the corner shared with pin 84. Check: pin 64 (XFC) should have the PLL filter capacitor to VDDSYN (pin 61), and your CLKOUT wire should be on pin 66.</figcaption>
+  </figure>
+  <section style="display:grid;gap:10px">
+    <h2 style="font-size:1.1rem;margin:0">What to measure, with the CPU halted at reset</h2>
+    <ol>
+      <li><strong class="m">Pin 62, EXTAL</strong>: frequency and waveform, with a 10x probe. Expect about 29.1 kHz (7.4505 MHz ÷ 256). A full logic-level square wave means another chip drives it; a small sine-like signal means a crystal right at the CPU.</li>
+      <li><strong class="m">Pin 60, XTAL</strong>: oscillating, or flat? Oscillating means a crystal sits across pins 60 and 62. Flat or unconnected means EXTAL is driven from outside.</li>
+      <li><strong class="m">Pin 78, MODCLK</strong>: DC level. High means PLL mode, which the 7.45 MHz reading predicts.</li>
+      <li><strong>If EXTAL is a square wave</strong>: probe the MC68HC68T1's CLK OUT (pin 1) for the same 29.1 kHz. If it doesn't match, follow pin 62's trace back to its source.</li>
+    </ol>
+  </section>
+  <p class="state">Pins 61–66 sit between grounds and supplies; probe carefully, since a slip onto VDDSYN or XFC can upset the PLL. Pin 82 is AS and pin 83 is VSS; ADDR5 is pin 24 on this package.</p>
+</main>

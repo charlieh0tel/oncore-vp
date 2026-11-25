@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Oncore VP Teardown</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+/* Layout: one reference sheet, sections stacked, tables scroll sideways on phones. */
+:root{
+  --bg:#f4f6f3; --fg:#1c231f; --muted:#5f6b64; --line:#d3dad5; --panel:#e9eee9;
+  --accent:#c2581a; --ok:#2c7a57;
+  --sans:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#131715; --fg:#e3e8e4; --muted:#97a29b; --line:#2c3430; --panel:#1b211e;
+  --accent:#ef8a48; --ok:#5fbf92; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#131715; --fg:#e3e8e4; --muted:#97a29b; --line:#2c3430; --panel:#1b211e;
+  --accent:#ef8a48; --ok:#5fbf92; color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.5}
+main{max-width:1040px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:36px}
+header{display:grid;gap:6px}
+h1{font-size:1.6rem;margin:0;text-wrap:balance}
+h2{font-size:1.1rem;margin:0;padding-bottom:6px;border-bottom:1px solid var(--line)}
+h3{font-size:.95rem;margin:0;color:var(--muted);font-weight:600}
+section{display:grid;gap:12px;min-width:0}
+p,ul{margin:0}
+ul{padding-left:1.2em;display:grid;gap:4px}
+.sub{color:var(--muted)}
+code,.mono,td,th{font-family:var(--mono);font-size:13px}
+td.t,th.t{font-family:var(--sans);font-size:14px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:5px 10px 5px 0;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600}
+pre{margin:0;padding:12px;background:var(--panel);border-radius:4px;overflow-x:auto;font-family:var(--mono);font-size:13px}
+.hash{word-break:break-all}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px}
+.grid2>*{min-width:0}
+figure{margin:0;display:grid;gap:8px}
+figcaption{color:var(--muted);font-size:13px}
+svg.chain{display:block;width:100%;min-width:760px;height:auto}
+svg .box{fill:var(--panel);stroke:var(--line)}
+svg .hot{stroke:var(--accent);stroke-width:1.5}
+svg .t1{fill:var(--fg);font:600 13px var(--sans)}
+svg .t2{fill:var(--fg);font:12px var(--mono)}
+svg .t3{fill:var(--muted);font:11px var(--sans)}
+svg .arr{stroke:var(--muted);stroke-width:1.5;fill:none}
+svg .ah{fill:var(--muted)}
+svg .meas{fill:var(--ok);font:600 11px var(--mono)}
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.ph{margin:0;display:grid;gap:6px;min-width:0}
+.ph img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:4px;border:1px solid var(--line);background:var(--panel)}
+.ph figcaption{font-size:12px;color:var(--muted)}
+#lb{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));cursor:zoom-out}
+#lb img{max-width:100%;max-height:calc(100% - 3em);object-fit:contain}
+#lb p{color:#e3e8e4;font-size:13px;margin:0;text-align:center}
+.ph a{cursor:zoom-in}
+header a{color:var(--accent)}
+.tag{font-family:var(--sans);font-size:12px;color:var(--ok)}
+</style>
+<main>
+<header>
+  <h1>Oncore VP Teardown</h1>
+  <p class="sub">Motorola Oncore VP 8-channel from an HP 58503A, read over BDM (mc683xx-bdm, bdm 0.4.0, pod firmware 0.5.0), 2026-11-24. Firmware SFTW P/N 98-P36830P, VER 8, REV 8, dated 06 Aug 1996. Model B4121P1115, serial SSG0220999.</p>
+  <p class="sub">See also: <a href="oncore-vp-test-points.html">test points and BDM header</a> · <a href="mc68331-clock-pins.html">MC68331 clock pins</a> · <a href="docs/board.md">board notes</a> · <a href="docs/memory-map.md">memory map notes</a> · <a href="https://github.com/charlieh0tel/oncore-vp">source</a></p>
+</header>
+
+<section>
+  <h2>CPU clock chain</h2>
+  <figure>
+    <div class="scroll">
+    <svg class="chain" viewBox="0 0 1000 250" role="img" aria-label="CPU clock chain: 19.09575 MHz hybrid, divided by 656 to 29.110 kHz at EXTAL, multiplied by the 68331 PLL by 256 at reset and 576 running, giving 7.45 and 16.77 MHz; the SCI divides by 32 times 55 for 9525 baud. The 32.768 kHz crystal feeds only the MC68HC68T1 RTC.">
+      <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="ah"/></marker></defs>
+      <rect class="box" x="10" y="30" width="160" height="90" rx="4"/>
+      <text class="t1" x="90" y="56" text-anchor="middle">Hybrid</text>
+      <text class="t2" x="90" y="76" text-anchor="middle">24M02 / 24M01</text>
+      <text class="t2" x="90" y="96" text-anchor="middle">19.09575 MHz</text>
+      <text class="t3" x="90" y="112" text-anchor="middle">x82.5 = 1575.42 MHz</text>
+
+      <rect class="box" x="210" y="30" width="140" height="90" rx="4"/>
+      <text class="t1" x="280" y="62" text-anchor="middle">Divider ÷656</text>
+      <text class="t3" x="280" y="84" text-anchor="middle">likely in the hybrid</text>
+
+      <rect class="box hot" x="390" y="30" width="150" height="90" rx="4"/>
+      <text class="t1" x="465" y="56" text-anchor="middle">EXTAL, pin 62</text>
+      <text class="t2" x="465" y="78" text-anchor="middle">29,109.4 Hz nom.</text>
+      <text class="meas" x="465" y="100" text-anchor="middle">29.110 kHz square</text>
+
+      <rect class="box" x="580" y="30" width="170" height="90" rx="4"/>
+      <text class="t1" x="665" y="56" text-anchor="middle">68331 PLL</text>
+      <text class="t2" x="665" y="78" text-anchor="middle">reset x256 ($3F08)</text>
+      <text class="t2" x="665" y="98" text-anchor="middle">run x576 ($D102)</text>
+
+      <rect class="box" x="790" y="30" width="200" height="90" rx="4"/>
+      <text class="t1" x="890" y="54" text-anchor="middle">f_sys</text>
+      <text class="t2" x="890" y="74" text-anchor="middle">7.452 / 16.767 MHz nom.</text>
+      <text class="meas" x="890" y="92" text-anchor="middle">CLKOUT 7.4505 MHz</text>
+      <text class="meas" x="890" y="108" text-anchor="middle">GPT 16.769 MHz</text>
+
+      <line class="arr" x1="170" y1="75" x2="208" y2="75" marker-end="url(#ah)"/>
+      <line class="arr" x1="350" y1="75" x2="388" y2="75" marker-end="url(#ah)"/>
+      <line class="arr" x1="540" y1="75" x2="578" y2="75" marker-end="url(#ah)"/>
+      <line class="arr" x1="750" y1="75" x2="788" y2="75" marker-end="url(#ah)"/>
+
+      <rect class="box" x="790" y="160" width="200" height="70" rx="4"/>
+      <text class="t1" x="890" y="186" text-anchor="middle">SCI ÷(32 x 55)</text>
+      <text class="t2" x="890" y="206" text-anchor="middle">9525 baud (9600 host)</text>
+      <line class="arr" x1="890" y1="120" x2="890" y2="158" marker-end="url(#ah)"/>
+
+      <rect class="box" x="10" y="160" width="160" height="70" rx="4"/>
+      <text class="t1" x="90" y="186" text-anchor="middle">Crystal 32.768 VT</text>
+      <text class="meas" x="90" y="206" text-anchor="middle">32.768 kHz sine</text>
+      <rect class="box" x="210" y="160" width="140" height="70" rx="4"/>
+      <text class="t1" x="280" y="186" text-anchor="middle">MC68HC68T1</text>
+      <text class="t3" x="280" y="206" text-anchor="middle">RTC; not the CPU clock</text>
+      <line class="arr" x1="170" y1="195" x2="208" y2="195" marker-end="url(#ah)"/>
+    </svg>
+    </div>
+    <figcaption>Green values were measured on the 8-channel board. Nominal values assume 19.09575 MHz. The firmware's baud table only fits f_sys = 16.762–16.781 MHz, i.e. a 29.10–29.13 kHz reference.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>Memory map, running</h2>
+  <div class="scroll"><table>
+    <tr><th>Range</th><th>Size</th><th>CS</th><th>Width</th><th>Access</th><th class="t">Contents</th></tr>
+    <tr><td>$000000–$01FFFF</td><td>128 KB</td><td>CS8</td><td>8</td><td>R/W</td><td class="t">RAM</td></tr>
+    <tr><td>$020000–$021FFF</td><td>8 KB</td><td>CS4</td><td>8</td><td>R/W, 2 wait</td><td class="t">EEPROM</td></tr>
+    <tr><td>$080000–$0FFFFF</td><td>512 KB</td><td>CSBOOT</td><td>16</td><td>R/W, 1 wait</td><td class="t">Boot flash (256 KB, mirrored)</td></tr>
+    <tr><td>$100000–$17FFFF</td><td>512 KB</td><td>CS9</td><td>16</td><td>R/W, 1 wait</td><td class="t">Reads all $FF</td></tr>
+    <tr><td>$180000–$1FFFFF</td><td>512 KB</td><td>CS10</td><td>16</td><td>R/W, 1 wait</td><td class="t">Reads all $FF</td></tr>
+    <tr><td>$FFC800–$FFCFFF</td><td>2 KB</td><td>CS0 wr, CS2/3 rd</td><td>16</td><td>DS strobe</td><td class="t">Not read</td></tr>
+    <tr><td>$FFD000–$FFD7FF</td><td>2 KB</td><td>CS1</td><td>16</td><td>write, DS</td><td class="t">Not read</td></tr>
+    <tr><td>$FFD800–$FFDFFF</td><td>2 KB</td><td>CS6</td><td>8</td><td>R/W</td><td class="t">Not read</td></tr>
+    <tr><td>$FFE000–$FFE7FF</td><td>2 KB</td><td>CS5</td><td>16</td><td>R/W, DS</td><td class="t">Not read</td></tr>
+    <tr><td>$FFE800–$FFEFFF</td><td>2 KB</td><td>CS7</td><td>16</td><td>R/W</td><td class="t">Not read</td></tr>
+    <tr><td>$FFF000–$FFFFFF</td><td>4 KB</td><td>on-chip</td><td></td><td></td><td class="t">Module registers (MM = 1)</td></tr>
+  </table></div>
+  <ul>
+    <li>At reset only CSBOOT is set: $000000–$0FFFFF, 1 MB, 16-bit. Reset vectors SSP $00020000, PC $00089F5C.</li>
+    <li>All chip selects asynchronous, S+U space, IPL 0, AVEC 0. Bus monitor off (SYPCR $00): a read outside every chip select hangs the BDM link until <code>bdm reset</code>.</li>
+  </ul>
+  <pre>CSPAR0 $3BFF  CSPAR1 $03EE
+CSBOOT $0806 $7870   CS0 $FFC8 $7470   CS1 $FFD0 $7430   CS2 $FFC8 $6C30
+CS3    $FFC8 $6C30   CS4 $0201 $78B0   CS5 $FFE0 $7C70   CS6 $FFD8 $7830
+CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
+</section>
+
+<div class="grid2">
+<section>
+  <h2>Boot flash</h2>
+  <ul>
+    <li>256 KB, two 8-bit chips (one per byte lane).</li>
+    <li><code>third_party/moto/B4121P1115-flash.bin</code>, three reads identical.</li>
+    <li class="hash mono">SHA-256 48ea2488486df858bd81c76d9c52acf761d9ea9389581ac1443a8d44d8e75890</li>
+    <li>Last 8 bytes: $00C5B910 = sum of even bytes, $00EC4899 = sum of odd bytes, over $00000–$3FFF7. Both verified.</li>
+    <li>Reset entry $089F5C: SR $2700, SP $20000, SIMCR $E041, SYPCR $00, SYNCR $D102, wait SLOCK.</li>
+    <li>SCCR0 table $0A20A2: 109, 218, 437, 27, 55 (4800, 2400, 1200, 19200, 9600 baud).</li>
+  </ul>
+</section>
+<section>
+  <h2>EEPROM</h2>
+  <ul>
+    <li>8 KB at CS4 (mapped only after the firmware runs).</li>
+    <li><code>oncore-eeprom.bin</code>, three reads identical.</li>
+    <li class="hash mono">SHA-256 003e9f533d66fb448ad2a5504a70d76f016abdbb2a0c19043d4a818589a44261</li>
+    <li>$087A–$0904: ID text: MODEL B4121P1115, SERIAL SSG0220999, MANUFACTUR DATE 7D01, OPTIONS IB.</li>
+    <li>$0944–$0C4F, $0CC4–$0FC7: two tables of 24-byte per-satellite records.</li>
+    <li>$1020–$11DD: IEEE doubles: WGS-84 constants and a stored position.</li>
+    <li>Rest: $AA fill.</li>
+  </ul>
+</section>
+</div>
+
+<section>
+  <h2>On-chip registers, running</h2>
+  <div class="scroll"><table>
+    <tr><th>Register</th><th>Address</th><th>Value</th><th class="t">Decoded</th></tr>
+    <tr><td>SIMCR</td><td>$FFFA00</td><td>$E041</td><td class="t">CLKOUT off, FRZSW, FRZBM, MM 1, IARB 1. Reset $60CF.</td></tr>
+    <tr><td>SYNCR</td><td>$FFFA04</td><td>$D10A</td><td class="t">W1 X1 Y17 = x576, locked. Reset $3F08 = x256.</td></tr>
+    <tr><td>SYPCR</td><td>$FFFA21</td><td>$00</td><td class="t">Watchdog, bus monitor, halt monitor off</td></tr>
+    <tr><td>PICR / PITR</td><td>$FFFA22</td><td>$000F / $0000</td><td class="t">PIT off</td></tr>
+    <tr><td>QSMCR</td><td>$FFFC00</td><td>$4002</td><td class="t">FRZ1, IARB 2</td></tr>
+    <tr><td>QILR / QIVR</td><td>$FFFC04</td><td>$06 / $41</td><td class="t">SCI level 6, vector $41</td></tr>
+    <tr><td>SCCR0</td><td>$FFFC08</td><td>$0037</td><td class="t">Baud divider 55</td></tr>
+    <tr><td>SCCR1</td><td>$FFFC0A</td><td>$002C</td><td class="t">TE, RE, RIE, 8N1</td></tr>
+    <tr><td>GPTMCR</td><td>$FFF900</td><td>$2000</td><td class="t"></td></tr>
+    <tr><td>TMSK2</td><td>$FFF921</td><td>$00</td><td class="t">GPT prescaler /4</td></tr>
+    <tr><td>DDRGP / PORTGP</td><td>$FFF906</td><td>$DF / $E1</td><td class="t"></td></tr>
+  </table></div>
+  <p class="sub">Host serial port is the SCI: 9600 baud 8N1, Motorola binary. A byte written to SCDR over BDM appeared on the host port.</p>
+</section>
+
+<section>
+  <h2>Boards</h2>
+  <div class="scroll"><table>
+    <tr><th class="t">Part</th><th>8-channel *3W1VE* (jig)</th><th>6-channel *7VGN4*</th><th>6-channel *7VENR*</th></tr>
+    <tr><td class="t">From</td><td>HP 58503A</td><td>HP Z3801A</td><td>HP Z3805A</td></tr>
+    <tr><td class="t">PCB</td><td>TM-AA / BM-AA, 84D44800M01</td><td>TM-AB / BM-AB, 84D43579</td><td>TM-AB / BM-AB, 84D43579M03</td></tr>
+    <tr><td class="t">CPU</td><td>MC68331CFC16 0E93N DEUZ9702</td><td>MC68331CFC16 G91H DENU9621 ('01A)</td><td>MC68331CFC16 G91H DEVT9614 ('05A)</td></tr>
+    <tr><td class="t">SRAM 128K x 8</td><td>Toshiba TC551001BFI-85L 9706HAK</td><td>Hitachi HM628128BLFPI-8 9629</td><td>Hitachi HM628128LFPI-8 9621</td></tr>
+    <tr><td class="t">RTC</td><td>MC68HC68T1 CKAC9703</td><td>MC68HC68T1 CKBG9631</td><td>MC68HC68T1 CKAN9620</td></tr>
+    <tr><td class="t">Crystal</td><td>32.768 VT, MC 9710 <span class="tag">32.768 kHz</span></td><td>32.768 VT, MC 9634</td><td>32.768 VT, MC 9619</td></tr>
+    <tr><td class="t">Hybrid</td><td>24M02, 19.09Mhz, 9711</td><td>24M01, 19.09575M, 9630</td><td>24M01, 19.09 M, 9601</td></tr>
+    <tr><td class="t">Reset supervisor (MC33064, 4.6 V)</td><td>33064</td><td>33064</td><td>33064</td></tr>
+    <tr><td class="t">EEPROM 8K x 8</td><td>Atmel AT28C64B 20JI 9705</td><td>Atmel AT28C64B 20JI 9626</td><td>Atmel AT28C64B 20JI 9612</td></tr>
+    <tr><td class="t">Flash 2 x 128K x 8</td><td>TN28F010 120 U65109J2</td><td>TN28F010 120 U63135J3</td><td>TN28F010 -120 U54362J1</td></tr>
+    <tr><td class="t">ASIC</td><td>XCT38140FD04 AAYW9711</td><td>XCT38140FD04 AARX9552</td><td>XCT38140FD04 AASS9603</td></tr>
+    <tr><td class="t">RF front end (likely)</td><td>58M01 9706</td><td>58M01 9631</td><td>58M01 9623</td></tr>
+    <tr><td class="t">SOT-23 by SAW (LNA?)</td><td>A06</td><td>A06</td><td>A06</td></tr>
+    <tr><td class="t">SAW filter</td><td>95U01 / 711</td><td>95U01 / 627</td><td>95U01 / 624</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2>Host instrument</h2>
+  <p class="sub">CPU hand marks: '03A = 58503A, '01A = Z3801A, '05A = Z3805A.</p>
+</section>
+
+<section>
+  <h2>Pins</h2>
+  <div class="grid2">
+    <div style="display:grid;gap:6px;min-width:0">
+      <h3>MC68331, 132-pin QFP, pins 51–83</h3>
+      <p class="mono">51 VSS · 52 TXD · 53 RXD · 54 DSO · 55 DSI · 56 BKPT/DSCLK · 57 TSC · 58 FREEZE · 59 VSS · 60 XTAL · 61 VDDSYN · 62 EXTAL · 63 VDD · 64 XFC · 65 VDD · 66 CLKOUT · 67 VSS · 68 RESET · 69 HALT · 70 BERR · 71–77 IRQ7–IRQ1 · 78 MODCLK · 79 R/W · 80 SIZ1 · 81 SIZ0 · 82 AS · 83 VSS</p>
+    </div>
+    <div style="display:grid;gap:6px;min-width:0">
+      <h3>MC68HC68T1, 16-pin</h3>
+      <p class="mono">1 CLKOUT · 2 CPUR · 3 INT · 4 SCK · 5 MOSI · 6 MISO · 7 SS · 8 VSS · 9 PSE · 10 POR · 11 LINE · 12 VSYS · 13 VBATT · 14 XTALin · 15 XTALout · 16 VDD</p>
+      <p class="sub">CLKOUT options: XTAL, /2, /4, /8, 1 Hz, 2 Hz, 64 Hz, low.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Photos</h2>
+  <h3>8-channel *3W1VE* (58503A, on the jig)</h3>
+  <div class="photos">
+    <figure class="ph"><a href="photos/8ch-3W1VE-top-on-jig.jpg"><img src="photos/thumbs/8ch-3W1VE-top-on-jig.jpg" alt="8ch, top (TM-AA), on jig, BDM wiring, RF can open (24M02)" loading="lazy"></a><figcaption>8ch, top (TM-AA), on jig, BDM wiring, RF can open (24M02)</figcaption></figure>
+    <figure class="ph"><a href="photos/8ch-3W1VE-top-on-jig-cpu.jpg"><img src="photos/thumbs/8ch-3W1VE-top-on-jig-cpu.jpg" alt="8ch, top on jig before wiring; CPU MC68331CFC16 0E93N DEUZ9702" loading="lazy"></a><figcaption>8ch, top on jig before wiring; CPU MC68331CFC16 0E93N DEUZ9702</figcaption></figure>
+    <figure class="ph"><a href="photos/8ch-3W1VE-crystal-rtc.jpg"><img src="photos/thumbs/8ch-3W1VE-crystal-rtc.jpg" alt="8ch, crystal 32.768 VT MC 9710, MC68HC68T1 CKAC9703" loading="lazy"></a><figcaption>8ch, crystal 32.768 VT MC 9710, MC68HC68T1 CKAC9703</figcaption></figure>
+    <figure class="ph"><a href="photos/8ch-3W1VE-bdm-wiring.jpg"><img src="photos/thumbs/8ch-3W1VE-bdm-wiring.jpg" alt="8ch, hand wiring from CPU pins to BDM header" loading="lazy"></a><figcaption>8ch, hand wiring from CPU pins to BDM header</figcaption></figure>
+    <figure class="ph"><a href="photos/8ch-3W1VE-jig-with-pod.jpg"><img src="photos/thumbs/8ch-3W1VE-jig-with-pod.jpg" alt="8ch on jig with BDM pod on ribbon cable" loading="lazy"></a><figcaption>8ch on jig with BDM pod on ribbon cable</figcaption></figure>
+    <figure class="ph"><a href="photos/8ch-3W1VE-bdm-header.jpg"><img src="photos/thumbs/8ch-3W1VE-bdm-header.jpg" alt="8ch, header soldered to the CPU pins for BDM" loading="lazy"></a><figcaption>8ch, header soldered to the CPU pins for BDM</figcaption></figure>
+    <figure class="ph"><a href="photos/8ch-3W1VE-bottom.jpg"><img src="photos/thumbs/8ch-3W1VE-bottom.jpg" alt="8ch, bottom (BM-AA, 84D44800M01), label *3W1VE*" loading="lazy"></a><figcaption>8ch, bottom (BM-AA, 84D44800M01), label *3W1VE*</figcaption></figure>
+    <figure class="ph"><a href="photos/8ch-3W1VE-bottom-2.jpg"><img src="photos/thumbs/8ch-3W1VE-bottom-2.jpg" alt="8ch, bottom, second shot" loading="lazy"></a><figcaption>8ch, bottom, second shot</figcaption></figure>
+  </div>
+  <h3>6-channel *7VGN4* (Z3801A)</h3>
+  <div class="photos">
+    <figure class="ph"><a href="photos/6ch-7VGN4-top.jpg"><img src="photos/thumbs/6ch-7VGN4-top.jpg" alt="6ch, top (TM-AB), RF can closed (326/2486 2643686MAC)" loading="lazy"></a><figcaption>6ch, top (TM-AB), RF can closed (326/2486 2643686MAC)</figcaption></figure>
+    <figure class="ph"><a href="photos/6ch-7VGN4-top-rf-can-open.jpg"><img src="photos/thumbs/6ch-7VGN4-top-rf-can-open.jpg" alt="6ch, top, RF can open (24M01 19.09575M)" loading="lazy"></a><figcaption>6ch, top, RF can open (24M01 19.09575M)</figcaption></figure>
+    <figure class="ph"><a href="photos/6ch-7VGN4-top-rf-can-open-2.jpg"><img src="photos/thumbs/6ch-7VGN4-top-rf-can-open-2.jpg" alt="6ch, top, RF can open, second shot" loading="lazy"></a><figcaption>6ch, top, RF can open, second shot</figcaption></figure>
+    <figure class="ph"><a href="photos/6ch-7VGN4-hybrid-24M01.jpg"><img src="photos/thumbs/6ch-7VGN4-hybrid-24M01.jpg" alt="6ch, close-up: hybrid 24M01 19.09575M 9630, crystal MC 9634" loading="lazy"></a><figcaption>6ch, close-up: hybrid 24M01 19.09575M 9630, crystal MC 9634</figcaption></figure>
+    <figure class="ph"><a href="photos/6ch-7VGN4-cpu-rtc.jpg"><img src="photos/thumbs/6ch-7VGN4-cpu-rtc.jpg" alt="6ch, close-up: MC68331CFC16 DENU9621 (&#x27;01A), MC68HC68T1 CKBG9631" loading="lazy"></a><figcaption>6ch, close-up: MC68331CFC16 DENU9621 (&#x27;01A), MC68HC68T1 CKBG9631</figcaption></figure>
+    <figure class="ph"><a href="photos/6ch-7VGN4-bottom.jpg"><img src="photos/thumbs/6ch-7VGN4-bottom.jpg" alt="6ch, bottom (BM-AB), RF can closed, label *7VGN4*" loading="lazy"></a><figcaption>6ch, bottom (BM-AB), RF can closed, label *7VGN4*</figcaption></figure>
+    <figure class="ph"><a href="photos/6ch-7VGN4-bottom-rf-can-open.jpg"><img src="photos/thumbs/6ch-7VGN4-bottom-rf-can-open.jpg" alt="6ch, bottom, RF can open (58M01, 95U01)" loading="lazy"></a><figcaption>6ch, bottom, RF can open (58M01, 95U01)</figcaption></figure>
+    <figure class="ph"><a href="photos/6ch-7VGN4-bottom-rf-can-open-2.jpg"><img src="photos/thumbs/6ch-7VGN4-bottom-rf-can-open-2.jpg" alt="6ch, bottom, RF can open, second shot" loading="lazy"></a><figcaption>6ch, bottom, RF can open, second shot</figcaption></figure>
+  </div>
+  <h3>6-channel *7VENR* (Z3805A)</h3>
+  <div class="photos">
+    <figure class="ph"><a href="photos/7VENR-top.jpg"><img src="photos/thumbs/7VENR-top.jpg" alt="*7VENR*, top (TM-AB), RF can closed (326/0816 2643686MAB)" loading="lazy"></a><figcaption>*7VENR*, top (TM-AB), RF can closed (326/0816 2643686MAB)</figcaption></figure>
+    <figure class="ph"><a href="photos/7VENR-top-rf-can-open.jpg"><img src="photos/thumbs/7VENR-top-rf-can-open.jpg" alt="*7VENR*, top, RF can open (24M01 19.09 M 9601)" loading="lazy"></a><figcaption>*7VENR*, top, RF can open (24M01 19.09 M 9601)</figcaption></figure>
+    <figure class="ph"><a href="photos/7VENR-top-antenna-pads.jpg"><img src="photos/thumbs/7VENR-top-antenna-pads.jpg" alt="*7VENR*, close-up: antenna pads, 33064" loading="lazy"></a><figcaption>*7VENR*, close-up: antenna pads, 33064</figcaption></figure>
+    <figure class="ph"><a href="photos/7VENR-cpu-rtc-ruler.jpg"><img src="photos/thumbs/7VENR-cpu-rtc-ruler.jpg" alt="*7VENR*, close-up with ruler: MC68331CFC16 DEVT9614 (&#x27;05A), MC68HC68T1 CKAN9620" loading="lazy"></a><figcaption>*7VENR*, close-up with ruler: MC68331CFC16 DEVT9614 (&#x27;05A), MC68HC68T1 CKAN9620</figcaption></figure>
+    <figure class="ph"><a href="photos/7VENR-cpu-edge.jpg"><img src="photos/thumbs/7VENR-cpu-edge.jpg" alt="*7VENR*, close-up: CPU lower edge" loading="lazy"></a><figcaption>*7VENR*, close-up: CPU lower edge</figcaption></figure>
+    <figure class="ph"><a href="photos/7VENR-bottom.jpg"><img src="photos/thumbs/7VENR-bottom.jpg" alt="*7VENR*, bottom (BM-AB, 84D43579M03), RF can closed" loading="lazy"></a><figcaption>*7VENR*, bottom (BM-AB, 84D43579M03), RF can closed</figcaption></figure>
+    <figure class="ph"><a href="photos/7VENR-bottom-rf-can-open.jpg"><img src="photos/thumbs/7VENR-bottom-rf-can-open.jpg" alt="*7VENR*, bottom, RF can open (58M01 9623, 95U01 624)" loading="lazy"></a><figcaption>*7VENR*, bottom, RF can open (58M01 9623, 95U01 624)</figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>Open</h2>
+  <ul>
+    <li>Confirm the RF chain antenna → A06 → 95U01 SAW → 58M01 by continuity.</li>
+    <li>Confirm the ÷656 is in the hybrid (29.110 kHz on a hybrid pin, traced to EXTAL).</li>
+    <li>Hybrid (TCXO) frequency error.</li>
+    <li>Devices behind CS0–CS3, CS5–CS7.</li>
+    <li>EEPROM record formats.</li>
+    <li>Whether CS9/CS10 have chips fitted.</li>
+  </ul>
+</section>
+<div id="lb" hidden><img alt=""><p></p></div>
+<script>
+(function(){
+  var lb=document.getElementById('lb'),im=lb.querySelector('img'),cap=lb.querySelector('p');
+  document.addEventListener('click',function(e){
+    var a=e.target.closest('.ph a');
+    if(a){e.preventDefault();im.src=a.getAttribute('href');im.alt=a.querySelector('img').alt;cap.textContent=im.alt;lb.hidden=false;return;}
+    if(!lb.hidden&&e.target.closest('#lb')){lb.hidden=true;im.removeAttribute('src');}
+  });
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!lb.hidden){lb.hidden=true;im.removeAttribute('src');}});
+})();
+</script>
+</main>

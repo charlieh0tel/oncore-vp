@@ -1,0 +1,33 @@
+# oncore-vp
+
+The Motorola VP Oncore GPS engine, as found in the HP 58503A (8-channel)
+and the HP Z3801A and Z3805A (6-channel): its board, parts, memory map,
+clocking and firmware, read over BDM.
+
+Pages: <https://charlieh0tel.github.io/oncore-vp/>
+
+| Path | What |
+|---|---|
+| [`index.html`](index.html) | Summary page: clock chain, memory map, dumps, registers, boards, photos, pins |
+| [`oncore-vp-test-points.html`](oncore-vp-test-points.html) | The test points and the CPU's lower-edge pins labeled on a photo, and the wiring to a 10-pin BDM header |
+| [`mc68331-clock-pins.html`](mc68331-clock-pins.html) | MC68331 pins 51-83, with the clock pins |
+| [`docs/memory-map.md`](docs/memory-map.md) | Memory map, chip selects, registers, serial, clock, parts of all three boards, pinouts, open items |
+| [`docs/board.md`](docs/board.md) | The 6-channel board: parts, test points and their positions, BDM header wiring, flash-read procedure |
+| [`docs/images/`](docs/images/) | Photos and a 600 dpi scan used by `docs/board.md` |
+| [`photos/`](photos/) | Photos of all three boards, both sides ([index](photos/README.md)); `thumbs/` for the pages |
+| [`oncore-eeprom.bin`](oncore-eeprom.bin) | EEPROM dump, 8 KB, from the 58503A's receiver (B4121P1115, SSG0220999) |
+| [`third_party/`](third_party/) | Vendor files: the 58503A receiver's flash image, datasheets, VP engineering notes ([NOTICE](third_party/NOTICE)) |
+
+License: [CC BY-SA 4.0](LICENSE) for this repository's own material
+(notes, photos, pages).  The files in `third_party/` belong to their
+owners and are not covered ([NOTICE](third_party/NOTICE)).
+
+Related:
+
+- [smartclock](https://github.com/charlieh0tel/smartclock): the SmartClock
+  firmware's side of the link (the @@ messages each instrument sends and
+  decodes) and a behavioral model of the engine.
+- [mc683xx-bdm](https://github.com/charlieh0tel/mc683xx-bdm): the BDM pod
+  and `bdm` tool used to read the receiver.
+- [smartclock-oncore-emulator](https://github.com/charlieh0tel/smartclock-oncore-emulator):
+  a replacement for the Oncore on a u-blox LEA-M8T.

@@ -1,0 +1,18 @@
+The files in third_party/ belong to their owners and are not covered by
+this repository's license.
+
+moto/B4121P1115-flash.bin
+    Boot flash of a Motorola VP Oncore, model B4121P1115, software P/N
+    98-P36830P, VER 8, REV 8, 06 Aug 1996.  Read over BDM from the
+    receiver in an HP 58503A.  Copyright 1991-1996 Motorola, Inc.
+
+moto/MC68HC68.pdf
+    Motorola MC68HC68T1 real-time clock data sheet, REV 2.
+
+moto/vponcoreengnotesarchive.pdf
+    Motorola VP Oncore engineering notes.  Originally from
+    https://synergy-gps.com/wp-content/uploads/2018/11/vponcoreengnotesarchive.pdf
+
+onsemi/MC34064-D.PDF
+    ON Semiconductor MC34064, MC33064, NCV33064 undervoltage sensing
+    circuit data sheet (originally a Motorola part).
