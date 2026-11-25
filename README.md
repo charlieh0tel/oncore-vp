@@ -15,7 +15,7 @@ Pages: <https://charlieh0tel.github.io/oncore-vp/>
 | [`docs/board.md`](docs/board.md) | The 6-channel board: parts, test points and their positions, BDM header wiring, flash-read procedure |
 | [`docs/images/`](docs/images/) | Photos and a 600 dpi scan used by `docs/board.md` |
 | [`photos/`](photos/) | Photos of all three boards, both sides ([index](photos/README.md)); `thumbs/` for the pages |
-| [`B4121P1115-SSG0220999-eeprom.bin`](B4121P1115-SSG0220999-eeprom.bin) | EEPROM dump, 8 KB, from the 58503A's receiver (B4121P1115, SSG0220999) |
+| [`eeprom/B4121P1115-SSG0220999-eeprom.bin`](eeprom/B4121P1115-SSG0220999-eeprom.bin) | EEPROM dump, 8 KB, from the 58503A's receiver (B4121P1115, SSG0220999) |
 | [`third_party/`](third_party/) | Vendor files: the 58503A receiver's flash image, datasheets, VP engineering notes ([NOTICE](third_party/NOTICE)) |
 
 License: [CC BY-SA 4.0](LICENSE) for this repository's own material
