@@ -1,5 +1,7 @@
-// From github.com/charlieh0tel/smartclock tools/ghidra/SmartClockStackParameters.java;
-// the Oncore firmware uses the same compiler convention (docs/memory-map.md).
+// From github.com/charlieh0tel/smartclock tools/ghidra/SmartClockStackParameters.java
+// (main 720569ad), under smartclock's GPL-3.0 license, not this repository's
+// CC BY-SA 4.0.  The Oncore firmware uses the same compiler convention
+// (docs/memory-map.md, "Compiler").
 // Gives functions the stack parameters their instructions read.  This
 // compiler pushes a char or short argument in a 2-byte slot, its value at
 // the slot's start, and the argument after it 2 bytes on
