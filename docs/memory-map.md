@@ -66,6 +66,41 @@ Bus monitor is off (SYPCR $00).  A read outside every chip select
   1/f = 298.257223563, and a stored position: lat 0.6523 rad,
   lon -2.1309 rad, 12.65.
 
+### EEPROM layout (from the firmware; checksums verified on the dump)
+
+Checksum ($09C7EE): 32-bit, start $FFFFFFFF, subtract each byte.  Every
+block below has its checksum as a big-endian long right after it, and
+all match the dump.
+
+| Offset | Length | Checksum at | Contents |
+|---|---|---|---|
+| $0932, $0933 | 1 + 1 | | Test bytes: written $00 and $80 and read back at start ($09C096); bit 7 polled for write completion ($09B2A6) |
+| $0934 | 884 | $0CA8 | Almanac bank 0 |
+| $0CAC | 884 | $1020 | Almanac bank 1 |
+| $1024 | 1 | | Active almanac bank (0 or 1); dump: 1 |
+| $1026 | 28 | $1042 | Unknown: $01 $02, doubles 1.0, 12.0, 6.0, $0A $AA |
+| $1046 | 78 | $1094 | 10 bytes 0; 3 doubles 0; 1/f; a; datum number $31 (49 = WGS-84 in Oncore numbering, inferred); pad; doubles 12.65, lat 0.6523 rad, lon -2.1309 rad; $01 $00 |
+| $1098 | 6 | $109E | Unknown: 01 01 01 01 02 AA |
+| $10A2 | 42 | $10CC | Unknown: $01 $AA, rest 0 |
+| $10D0 | 42 | $10FA | Unknown: mixed bytes incl. $03E8 (1000) |
+| $10FE | 42 | $1128 | 3 doubles 0; 1/f; a; $32 |
+| $112C | 42 | $1156 | 3 doubles 0; 1/f; a; $33 |
+| $115A | 12 | $1166 | Unknown: 00 07 01 00 40 AC F0 00 00 00 00 00 |
+| $116A | 6 | $1170 | Record 0: byte, word, word ($50, $00B9, $5055) |
+| $1174 | 6 | $117A | Record 1: byte, word, word ($50, $00B9, $501B) |
+| $117E | 1 | | Active record (0 or 1); dump: 1.  If invalid, defaults $67, $015E, $5091 ($09C096) |
+| $1180 | 8 | $1188 | Unknown: 11 FE FE 02 3C F5 FE 0C |
+| $11CC | 14 | $11DA | Unknown: 12 12 24 8E 89 07 00 00 00 00 00 00 00 01 |
+
+Almanac bank ($09BEDE): 32 records of 24 bytes at bank + $18 x SV
+(SV 1-32), then 2 records of 24 bytes at bank + $318, then 44 bytes at
+bank + $348; copied to RAM when the checksum matches.
+
+Block loaders ($09E88E, $09EA04, $09ECDE, $09EE0E, $09EF44, $09F226,
+$09F52A, $09F636, $09F72A) dispatch on an argument (load, save,
+defaults).  Field meanings to follow from the @@ commands that write
+them.
+
 ## On-chip registers (running)
 
 | Register | Address | Value | Decoded |
@@ -136,7 +171,46 @@ auto-analysis.
   RAM arrays.
 - CS7 ($FFE800) offsets referenced: $000-$07A (8 x 16-byte blocks),
   $0E0, $0F0, $0F2, $0F4, $4FC, $7FF.  Also used by $088E96-$08907C
-  and $0A1268-$0A1A4E.  8 blocks match the 8 channels.
+  and $0A1268-$0A1A4E.
+
+### CS7: the tracking channels
+
+8 channels, channel n at $FFE800 + $10 x n.  Read in the level-5
+interrupt every C/A code epoch (1 ms, inferred from the counters
+below); written by the handler's loops and by channel setup ($088E96).
+
+| Offset | Read | Write | Evidence |
+|---|---|---|---|
+| +$0 (long) | Accumulated carrier phase; upper 16 bits = cycles | Carrier NCO rate (Doppler), from the PLL filter; clamped to $26A7EF | $0805B2; $088E96 writes 0 at start |
+| +$4 | | $D0A1 at channel start | $088E96 |
+| +$6 | Prompt I | Code-phase slew: high byte = step count, low byte from table $089E68; $00A1 at start | I^2+Q^2, I^2-Q^2 in $0805B2 |
+| +$8 | Prompt Q | PRN select: G2 tap pair, two 0-based nibbles, from table $088E20 | table matches GPS ICD taps for PRN 1-37 |
+| +$A | Code discriminator (early-late), accumulated with the sign of I | Control: $800F reset, then $F, $E, $6, $2, $0 over successive epochs | $0805B2, $088E96, $088FB8 |
+
+Global registers:
+
+| Offset | Use | Evidence |
+|---|---|---|
+| $0E0 | Written 0 at correlator init | $088FB8 |
+| $0F0 | Written 0 | $088F78 |
+| $0F2 | Written 0 first thing in each level-5 interrupt (acknowledge); used to time interrupts against SYNCR in a self-test | $0805B2, $0A1A4E |
+| $0F4 | Control word, shadow in RAM $2D8: init $86 then $87; bits 0, 1, 2 set and cleared by $088F78-$088FAA | $088FB8 |
+
+Tracking loop ($0805B2), per channel:
+
+- Epoch counters: RAM $2D6 counts 50, $100 counts 20, $78 is the
+  0-19 position in the 20 ms data bit.
+- Code phase in L1 cycles, RAM $382 + 4n, modulo $1809FC = 1,575,420
+  (L1 cycles per 1 ms code period), advanced by the carrier phase
+  read from +$0 (carrier aiding).  Slew steps of $37 = 55 cycles.
+- Pairs of 1 ms samples are summed (2 ms coherent integration).
+- State per channel, RAM $B0 + n: 0 = search (envelope max + 3/8 min
+  against a running noise floor; slews code phase until detection),
+  1 = code tracking, 4 = frequency tracking (phase from a 32 x 32
+  arctangent table at $088A20), 5 = carrier phase tracking (second
+  order filter, coefficients -$7971 and $39C3, output to +$0).
+- Requested SV per channel: RAM $E0 + n; $088E96 restarts a channel
+  when it differs from RAM $E8 + n.
 - Other windows: CS5 $FFE000 read by $08A714; CS0/CS2/CS3, CS1, CS6:
   few references, not yet identified.
 - Reset entry $089F5C also sets PEPAR $37, DDRE $C8, PORTE1 $08,
@@ -275,5 +349,5 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
 - Devices behind CS0-CS3, CS5, CS6.  CS7 ($FFE800) is per-channel
   hardware (8 x 16-byte blocks, level-5 interrupt); chip not traced
   (XCT38140 likely).
-- EEPROM record formats.
+- EEPROM field meanings for the "Unknown" blocks.
 - Whether CS9/CS10 have chips fitted.
