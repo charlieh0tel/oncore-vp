@@ -19,7 +19,10 @@ Pages: <https://charlieh0tel.github.io/oncore-vp/>
 | [`third_party/`](third_party/) | Vendor files: the 58503A receiver's flash image, datasheets, VP engineering notes ([NOTICE](third_party/NOTICE)) |
 
 License: [CC BY-SA 4.0](LICENSE) for this repository's own material
-(notes, photos, pages).  The files in `third_party/` belong to their
+(notes, photos, pages), except
+`tools/ghidra/OncoreStackParameters.java`, which is from
+[smartclock](https://github.com/charlieh0tel/smartclock) and is
+[GPL-3.0](LICENSE-GPL-3.0).  The files in `third_party/` belong to their
 owners and are not covered ([NOTICE](third_party/NOTICE)).
 
 Related:
