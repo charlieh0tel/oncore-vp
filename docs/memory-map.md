@@ -58,7 +58,7 @@ Bus monitor is off (SYPCR $00).  A read outside every chip select
   `003e9f533d66fb448ad2a5504a70d76f016abdbb2a0c19043d4a818589a44261`.
   Three reads identical.
 - $0000-$0879, $11DE-$1FFF: $AA fill.
-- $087A-$0904: ID text.  MODEL # B4121P1115, HDWR P/N # blank,
+- $087B-$0904: ID text (byte $087A is a setting; see below).  MODEL # B4121P1115, HDWR P/N # blank,
   SERIAL # SSG0220999, MANUFACTUR DATE 7D01, OPTIONS LIST IB.
 - $0944-$0C4F and $0CC4-$0FC7: two tables of 24-byte per-satellite
   records.
