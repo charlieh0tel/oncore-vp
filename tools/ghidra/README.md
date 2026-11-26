@@ -21,6 +21,10 @@ Run from the repository root.  The project lives outside the repository.
 | `OncoreSetup.java` | Memory blocks (RAM, EEPROM with its dump, CS9/CS10, CS0-CS7 windows, on-chip registers), SIM/QSM/GPT register labels, vector table |
 | `OncoreReport.java` | References into the EEPROM and each chip-select window |
 | `OncoreVectors.java` | Vector targets and CS7 register usage |
+| `OncoreDecompile.java` | Decompile functions to C files; list references to address ranges |
+| `OncoreEeprom.java` | EEPROM references by function |
+| `OncoreCallers.java` | Call sites of functions, with the pushes before each |
+| `OncoreStackParameters.java` | Narrow stack parameters (from smartclock); run once after analysis |
 
 Report scripts on an existing project:
 

@@ -179,6 +179,30 @@ auto-analysis.
   $0E0, $0F0, $0F2, $0F4, $4FC, $7FF.  Also used by $088E96-$08907C
   and $0A1268-$0A1A4E.
 
+### Compiler
+
+Consistent with HP's B3640 Motorola 68000 Family C Cross Compiler
+(manual B3640-97001, Jan 1994), the same as smartclock's finding for
+the SmartClock firmware.  Not proven: no version string in the image.
+
+| Trait | Firmware | B3640 manual |
+|---|---|---|
+| Prototyped char/short arguments | Not widened: `move.b`/`move.w -(sp)`, 2-byte slot, value at slot start; callee reads (8,A6) | Not widened with prototypes (pp. 37-38); Fig. 4-5 `MOVE.B D0,-(A7)` (p. 75) |
+| Return | D0 (pointers too) | D0, D0:D1 (p. 70) |
+| Saved / scratch | D2-D7, A2-A4 / D0, D1, A0, A1 | Same (pp. 77-78) |
+| Caller cleanup | addq/lea, odd multiples of 2 | Caller removes parameters (p. 70) |
+| Soft double routines | $0B0DEE/$0B0E04/$0B0E08 and $0B1EA4/$0B1EA8/$0B1EAC: three entries each (operands via (A0) and (A1), via (A1), in A0:A1 and D0:D1) | `op64pp`, `op64p`, `op64` interfaces (ch. 11, pp. 276-288) |
+| 32-bit mul/div | Native CPU32 `muls.l`/`divs.l` | Targets include 68331/CPU32 (p. 19) |
+| Library strings | "Prog end, returned", "fp ... error", routine-name table: absent | Present in the SmartClock images |
+
+Whitesmiths C edition 2.2 (MC68000 interface manual, March 1983,
+p. III.a-1) is ruled out: char/short widened to long, return in D7,
+D3-D5/A3-A5 saved.
+
+Decompilation: `tools/ghidra/OncoreStackParameters.java` (from
+smartclock) gives 279 functions their real narrow stack parameters;
+34 still fail to decompile.
+
 ### CS7: the tracking channels
 
 8 channels, channel n at $FFE800 + $10 x n.  Read in the level-5
