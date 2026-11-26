@@ -103,9 +103,28 @@ Almanac bank ($09BEDE): 32 records of 24 bytes at bank + $18 x SV
 bank + $348; copied to RAM when the checksum matches.
 
 Block loaders ($09E88E, $09EA04, $09ECDE, $09EE0E, $09EF44, $09F226,
-$09F52A, $09F636, $09F72A) dispatch on an argument (load, save,
-defaults).  Field meanings to follow from the @@ commands that write
-them.
+$09F52A, $09F636, $09F72A) dispatch on an argument: 2 = load from
+EEPROM, 3 = defaults, 4 = save changed fields ($09F81E).
+
+Block $1046 ($09EA04): +0-9 -> RAM $633C (written by @@Au, @@Av);
++10-49, five doubles -> RAM $7592, defaults 0, 0, 0, 298.257223563,
+6378137.0 (datum: three offsets, 1/f, a), +50 datum number, default 49
+-> $7592+40 (written by @@Ao); +52-75, three doubles -> RAM $81F0
+(written by $0ACC96, which also fills +60/+68 lat/lon order as
+stored), +76 -> $8208 (written by @@At), +77 -> $8209.
+
+RAM copies and the commands whose handlers write them:
+
+| Block | RAM | Written by |
+|---|---|---|
+| $1026 | $633A, $79F6-$79FF, $8FAE-$8FB1 | @@An ($633A), @@AJ ($79F6), @@Ak ($79F8-$79FF) |
+| $1098 | $369A, $81C2, $8216, $8EB8-$8EBD, $9D86 | @@Ar ($369A, $8216), @@Aq ($81C2), @@Aa ($8EBC-$8EBD), @@Aw ($9D86) |
+| $10A2 | $7A3A, $81DA, $8F88-$8F8A, $9D0C | @@AD ($7A3A), @@Ar, @@Ce ($81DA), @@Ah ($9D0C) |
+| $10D0 | $9D0E-$9D12, $819C-$819E, $820A, $79F6 | @@Ab ($819C), @@Az ($820A), @@Aw ($9D0F), B/E commands ($9D0E-$9D12) |
+| $115A | $3624-$362F | @@AF, @@AH ($3624), @@AG ($3626), @@AI ($3628, $362C) |
+| $116A/$1174 | $75BC, $75BE, $75C0 | @@Ta ($75BC, $75C0) |
+| $1180 | $2426-$242D | No command: saved by $08B248 from a table at $243A + 8n |
+| $11CC | $2622-$2631 | No command: saved by $08B248 from a table at $263C + 14n |
 
 ## On-chip registers (running)
 
