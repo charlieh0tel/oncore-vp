@@ -20,8 +20,9 @@ Pages: <https://charlieh0tel.github.io/oncore-vp/>
 
 License: [CC BY-SA 4.0](LICENSE) for this repository's own material
 (notes, photos, pages), except
-`tools/ghidra/OncoreStackParameters.java`, which is from
-[smartclock](https://github.com/charlieh0tel/smartclock) and is
+`tools/ghidra/OncoreNoSwitch.java`, `OncoreSwitches.java` and
+`OncoreStackParameters.java`, which are from
+[smartclock](https://github.com/charlieh0tel/smartclock) and are
 [GPL-3.0](LICENSE-GPL-3.0).  The files in `third_party/` belong to their
 owners and are not covered ([NOTICE](third_party/NOTICE)).
 

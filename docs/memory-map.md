@@ -218,9 +218,21 @@ Whitesmiths C edition 2.2 (MC68000 interface manual, March 1983,
 p. III.a-1) is ruled out: char/short widened to long, return in D7,
 D3-D5/A3-A5 saved.
 
-Decompilation: `tools/ghidra/OncoreStackParameters.java` (from
-smartclock) gives 279 functions their real narrow stack parameters;
-34 still fail to decompile.
+Decompilation (`tools/ghidra/README.md`): switch tables recovered
+first (64), then the soft-float routines given register interfaces,
+then narrow stack parameters (272 functions); none fail to decompile.
+
+Soft double routines (B3640 ch. 11 names; identified from entry code):
+
+| Routine | pp / p / plain entry | How identified |
+|---|---|---|
+| add64 | $0B0E00 / $0B0E04 / $0B0E08 | shared add code |
+| sub64 | $0B0DBC / $0B0DC0 / $0B0DC4 | flips y's sign, joins add |
+| sub64r | $0B0DAA / $0B0DAE / $0B0DB2 | swaps x and y, jumps to sub64 |
+| mul64 | $0B1EA4 / $0B1EA8 / $0B1EAC | XORs signs |
+| div64 | $0B14B0 / $0B14B4 / $0B14B8 | XORs signs |
+| div64r | $0B149E / $0B14A2 / $0B14A6 | swaps x and y, jumps to div64 |
+| add64z | $0B0DEE | adds D0:D1 into the double at (A0) |
 
 ### CS7: the tracking channels
 

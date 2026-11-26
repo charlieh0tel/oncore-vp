@@ -11,8 +11,15 @@ $GHIDRA/support/analyzeHeadless ~/ghidra-projects oncore-vp \
     -loader BinaryLoader -loader-baseAddr 0x80000 \
     -processor 68000:BE:32:CPU32 \
     -scriptPath tools/ghidra \
-    -preScript OncoreSetup.java $PWD/eeprom/B4121P1115-SSG0220999-eeprom.bin
+    -preScript OncoreSetup.java $PWD/eeprom/B4121P1115-SSG0220999-eeprom.bin \
+    -preScript OncoreNoSwitch.java \
+    -postScript OncoreSwitches.java \
+    -postScript OncoreFloat.java \
+    -postScript OncoreStackParameters.java
 ```
+
+Result: 64 switches recovered, 19 soft-float entries named, 272 functions
+given narrow stack parameters, none failing to decompile.
 
 Run from the repository root.  The project lives outside the repository.
 
@@ -24,7 +31,10 @@ Run from the repository root.  The project lives outside the repository.
 | `OncoreDecompile.java` | Decompile functions to C files; list references to address ranges |
 | `OncoreEeprom.java` | EEPROM references by function |
 | `OncoreCallers.java` | Call sites of functions, with the pushes before each |
-| `OncoreStackParameters.java` | Narrow stack parameters (from smartclock); run once after analysis |
+| `OncoreNoSwitch.java` | Turns off Ghidra's switch analysis before auto-analysis (from smartclock) |
+| `OncoreSwitches.java` | Recovers the compiler's switch tables and records jump-table overrides (from smartclock's SmartClockSetup.java) |
+| `OncoreFloat.java` | Names the soft double routines (add64, sub64, sub64r, mul64, div64, div64r, p/pp variants, add64z) and sets their register interfaces |
+| `OncoreStackParameters.java` | Narrow stack parameters (from smartclock); run last |
 
 Report scripts on an existing project:
 
@@ -37,3 +47,6 @@ $GHIDRA/support/analyzeHeadless ~/ghidra-projects oncore-vp \
 The CPU32 has a 24-bit bus; code reaches $FFxxxx with sign-extended
 short addresses, so CS0-CS7 and the on-chip registers are placed at
 $FFFFxxxx, with byte-mapped aliases at $00FFxxxx.
+
+`OncoreNoSwitch.java`, `OncoreSwitches.java` and `OncoreStackParameters.java`
+come from smartclock and are GPL-3.0 (`LICENSE-GPL-3.0`).
