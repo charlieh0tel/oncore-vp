@@ -92,11 +92,11 @@ all match the dump.
 | $10FE | 42 | $1128 | 3 doubles 0; 1/f; a; $32 |
 | $112C | 42 | $1156 | 3 doubles 0; 1/f; a; $33 |
 | $115A | 12 | $1166 | Unknown: 00 07 01 00 40 AC F0 00 00 00 00 00 |
-| $116A | 6 | $1170 | Record 0: byte, word, word ($50, $00B9, $5055) |
-| $1174 | 6 | $117A | Record 1: byte, word, word ($50, $00B9, $501B) |
+| $116A | 6 | $1170 | Oscillator record 0: search center, bin step, learned drift ($50, $00B9, $5055); see "Learned oscillator offset" |
+| $1174 | 6 | $117A | Oscillator record 1: ($50, $00B9, $501B) |
 | $117E | 1 | | Active record (0 or 1); dump: 1.  If invalid, defaults $67, $015E, $5091 ($09C096) |
-| $1180 | 8 | $1188 | Unknown: 11 FE FE 02 3C F5 FE 0C |
-| $11CC | 14 | $11DA | Unknown: 12 12 24 8E 89 07 00 00 00 00 00 00 00 01 |
+| $1180 | 8 | $1188 | Ionosphere model, Klobuchar alpha0-3, beta0-3, one byte each (scales 2^-30, 2^-27, 2^-24, 2^-24; 2^11, 2^14, 2^16, 2^16, used in $08B5CE): 11 FE FE 02 3C F5 FE 0C |
+| $11CC | 14 | $11DA | UTC parameters ($08BF50: 604800, 86400, 2^12, 2^-50 scales): bytes 0, 1 = delta-t LS and delta-t LSF = 18, 18; bytes 3, 4 handled as 8-bit week numbers; dump 12 12 24 8E 89 07 00 00 00 00 00 00 00 01 |
 
 Almanac bank ($09BEDE): 32 records of 24 bytes at bank + $18 x SV
 (SV 1-32), then 2 records of 24 bytes at bank + $318, then 44 bytes at
@@ -233,6 +233,27 @@ Soft double routines (B3640 ch. 11 names; identified from entry code):
 | div64 | $0B14B0 / $0B14B4 / $0B14B8 | XORs signs |
 | div64r | $0B149E / $0B14A2 / $0B14A6 | swaps x and y, jumps to div64 |
 | add64z | $0B0DEE | adds D0:D1 into the double at (A0) |
+
+### Learned oscillator offset
+
+RAM $75BC (byte), $75BE (word), $75C0 (word), saved to the EEPROM
+records at $116A/$1174 (active one selected by $117E); defaults $67,
+$015E, $5091.
+
+- $08C252 computes a drift as RAM $81D2 (double) x 5.2550354685707275
+  (= 1575.42 MHz / c, L1 cycles per meter), rounded: Hz at L1 if $81D2
+  is the clock drift in m/s (inferred).
+- After more than 10 qualifying fixes in a row: if the drift is within
+  $0C3B (3131) of $5091 (20625), $75C0 moves 20% of the way to it
+  (unless already within $97 = 151); otherwise $75BC is shifted by
+  (drift - 20625) / $75BE and $75C0 is reset to 20625.  Then the
+  record is saved ($09F876).
+- $097464 builds the frequency-search bin list around $75BC with step
+  derived from $75BE, limited to 0-$D6.
+- Dump: active record 1 = $50, $00B9, $501B (20507, 118 below the
+  default 20625); record 0 = $50, $00B9, $5055 (20565).
+- Meaning of 20625 and the absolute TCXO offset: not established.
+  Can be watched live over BDM while tracking: $81D2, $75BC-$75C1.
 
 ### CS7: the tracking channels
 
