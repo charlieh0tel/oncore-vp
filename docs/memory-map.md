@@ -117,6 +117,31 @@ Bus monitor is off (SYPCR $00).  A read outside every chip select
 - Nominal clocks from 19.09575 MHz: EXTAL 29,109.38 Hz; f_sys at reset
   (x256) 7.45200 MHz; f_sys running (x576) 16.76700 MHz.
 
+## Firmware (Ghidra)
+
+Ghidra 12.1.4, language 68000:BE:32:CPU32, flash loaded at $080000.
+Project setup: `tools/ghidra/` (README there).  557 functions after
+auto-analysis.
+
+- Short absolute addresses ($xxxx.W) reach $FFxxxx: CS0-CS7 and the
+  on-chip registers appear at $FFFFxxxx in the disassembly.
+- Vector table (flash $080000): 250 vectors -> $088A1E (`rte`).
+  Others: 1 reset -> $089F5C; 29 (level-5 autovector) -> $0805B2;
+  64 -> $08048E.
+- $08048E, vector 64: SCI interrupt handler.  Reads SCSR ($FFFC0C),
+  tests TDRE, writes SCDR ($FFFC0F) from a buffer in RAM.
+- $0805B2, level-5 autovector, 33,880 bytes: per-channel handler for
+  the CS7 window.  Starts by writing 0 to $FFE8F2, then reads 8 blocks
+  of 16 bytes ($FFE800-$FFE87F; long at +0, words at +6, +8, +A) into
+  RAM arrays.
+- CS7 ($FFE800) offsets referenced: $000-$07A (8 x 16-byte blocks),
+  $0E0, $0F0, $0F2, $0F4, $4FC, $7FF.  Also used by $088E96-$08907C
+  and $0A1268-$0A1A4E.  8 blocks match the 8 channels.
+- Other windows: CS5 $FFE000 read by $08A714; CS0/CS2/CS3, CS1, CS6:
+  few references, not yet identified.
+- Reset entry $089F5C also sets PEPAR $37, DDRE $C8, PORTE1 $08,
+  PFPAR $FB, GPTMCR $2000, DDRGP $DF, PORTGP $C1, CFORC $03.
+
 ## 6-channel board *7VGN4*, from the Z3801A (owner's photos)
 
 Top side (marked TM-AB):
@@ -247,6 +272,8 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
 - Confirm the /656 is in the hybrid (29.110 kHz on a hybrid pin, traced
   to EXTAL pin 62).
 - TCXO frequency error (needs a counter, or a long host-timed count).
-- Devices behind CS0-CS3, CS5-CS7.
+- Devices behind CS0-CS3, CS5, CS6.  CS7 ($FFE800) is per-channel
+  hardware (8 x 16-byte blocks, level-5 interrupt); chip not traced
+  (XCT38140 likely).
 - EEPROM record formats.
 - Whether CS9/CS10 have chips fitted.
