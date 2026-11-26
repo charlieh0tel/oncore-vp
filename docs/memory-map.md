@@ -74,6 +74,12 @@ all match the dump.
 
 | Offset | Length | Checksum at | Contents |
 |---|---|---|---|
+| $087A | 1 | | Setting written by the @@AD handler ($0AC5CC, second byte if < $80); default $20 ($0A29BC).  The ID text starts at $087B |
+| $0906 + n | 1 each | | Output rate of binary message n, written by the B and E rate commands through $0ADE56 (RAM copy at $C61E + 2n) |
+| $091F | 1 | | Set to 1 the first time the protocol mode changes ($0A6C3C, $0A6CB2) |
+| $0920 | 1 | | Protocol mode: 0 = Motorola binary, 1 = NMEA, 2 = third mode (RAM $C650) |
+| $0921 | 1 | | @@AE setting, 0 or 1 ($0ACBFC); default 0 |
+| $0922 + n | 1 each | | Per-message setting written through $0ADE12 (RAM $CAF8) |
 | $0932, $0933 | 1 + 1 | | Test bytes: written $00 and $80 and read back at start ($09C096); bit 7 polled for write completion ($09B2A6) |
 | $0934 | 884 | $0CA8 | Almanac bank 0 |
 | $0CAC | 884 | $1020 | Almanac bank 1 |
@@ -215,6 +221,47 @@ Tracking loop ($0805B2), per channel:
   few references, not yet identified.
 - Reset entry $089F5C also sets PEPAR $37, DDRE $C8, PORTE1 $08,
   PFPAR $FB, GPTMCR $2000, DDRGP $DF, PORTGP $C1, CFORC $03.
+
+## Host commands (from the firmware)
+
+Receive path: SCI interrupt ($08048E) -> ring buffer RAM $9DAE-$A52D
+(1920 bytes; write pointer $A532, read pointer $A536, count $A53A) ->
+line assembly at RAM $A9B2 ($0A65D6) -> on CR LF, validate ($0A69E2)
+and dispatch ($0A46DC) by protocol mode (RAM $C650: 0 binary, 1 NMEA,
+2 and 3 other; mode 3 frames on byte $DA).
+
+Binary frames ($0A68C0): `@@`, two command letters, payload, XOR of
+the letters and payload, CR LF.  Frame length comes from per-letter
+tables; a frame of the wrong length is not accepted.  Dispatch by
+first letter ($0A4644), then second.
+
+| Command: total frame length in bytes |
+|---|
+| Aa 10, Ab 10, Ac 11, Ad 11, Ae 11, Af 12, Ag 8, Ah 8, Ai 9, Aj 8, Ak 9, Al 9, Am 12, An 8, Ao 8, Ap 25, Aq 8, Ar 8, As 20, At 8, Au 12, Av 8, Aw 8, Ax 9, Ay 11, Az 11 |
+| AA 8, AB 8, AC 9, AD 9, AE 8, AF 9, AG 8, AH 8, AI 9, AJ 8 |
+| Ba 8, Bb 8, Bc 8, Bd 8, Be 8, Bf 80, Bg 8, Bh 8, Bi 8, Bj 8, Bk 8, Bl 8, Bm 8, Bn 22, Bz 8 |
+| Ca 7, Cb 33, Cd 27, Ce 52, Cf 7, Cg 8, Ci 8, Cj 7, Cl 33, Cm 12 |
+| Ea 8, Ec 8, Eg 8, Ek 8, En 22, Ez 8 |
+| Fa 7, Fd 27 |
+| Ta 12, Tb 11, Tc 8, Td 10, Th 73, Tq 7 |
+
+Length tables: A $0B03E6 (a-z, A-J), B $0B040A, C $0B0424, E $0B0431,
+F $0B044B, T $0B044F; the value is the frame length minus 6.
+
+Handlers (first call in each case of the second-level dispatch):
+
+| Letter | Dispatch | Handlers |
+|---|---|---|
+| A | $0AD03E | Aa $0ACF46, Ab $0AC9F0, Ac $0AC61C, Ad $0ACAEA, Ae $0ACB32, Af $0ACA4E, Ah $0ACF02, Ai $0ACE30, Aj $0AC85A, Ak $0AC764, Al $0AC806, Am $0ACE8E, An $0AC226, Ao $0AC32A, Ap $0AC39C, Aq $0AC90A, Ar $0ACC30, At $0AC938, Au $0AC254, Av $0AC8B6, Aw $0AD2B6, Ax $0ACB7A, Ay $0ACBD2, Az $0ACBA8, AA $0AC8E4, AB $0AC2CE, AC $0AC7B2, AD $0AC5CC, AE $0ACBFC, AF $0ACE02, AG $0AC966, AH $0ACDB4, AI $0ACD6C, AJ $0AC73C |
+| B | $0A4712 | Each rate command saves its rate ($0ADE56), then: Ba $0AA750, Bb $0AAF74, Bc $0A8CD6, Bd $0A8768, Be $0A8560, Bf $0A937E, Bg $0AAE4E, Bh $0AA822, Bi $0A8EA8, Bj $0A9410, Bk $0A8F5C, Bm $0AACA8, Bn $0AAF2C, Bz $0A8D22 |
+| C | $0A5288 | Ca, Cf, Cg stop the channels ($088F78) and write the EEPROM; Cb $0A9160, Cd $0A4FC2, Ce $0A508E, Ci $0A6CB2 or $0A6C3C (protocol mode 1 or 2), Cj $0A9F04, Cl $0A51D2, Cm $0A55C4 |
+| E | $0A4C44 | If-chain: Ea, Ec, Eg, Ek (save rate, then output), En (TRAIM: validates date and time fields) |
+| F | $0A54EA | Jump table, Fa-Fd |
+| T | $0A4EDE | Ta $0AD4F4, Tb $0AD754, Tc $0A8B0E, Td $0A8BAA, Th $0AE7CE (writes the ID block), Tq $0A1E90 |
+
+EEPROM write routine $09B2DE (address, source, count): writes only
+bytes that differ, waits for completion after each, and sets bit 1 of
+RAM $7A38 if a byte reads back wrong.
 
 ## 6-channel board *7VGN4*, from the Z3801A (owner's photos)
 
