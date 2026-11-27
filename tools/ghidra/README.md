@@ -16,6 +16,7 @@ $GHIDRA/support/analyzeHeadless ~/ghidra-projects oncore-vp \
     -postScript OncoreSwitches.java \
     -postScript OncoreFloat.java \
     -postScript OncoreLibNames.java \
+    -postScript OncoreNames.java \
     -postScript OncoreStackParameters.java
 ```
 
@@ -37,6 +38,8 @@ Run from the repository root.  The project lives outside the repository.
 | `OncoreSwitches.java` | Recovers the compiler's switch tables and records jump-table overrides (from smartclock's SmartClockSetup.java) |
 | `OncoreFloat.java` | Names the soft double routines (add64, sub64, sub64r, mul64, div64, div64r, p/pp variants, add64z) and sets their register interfaces |
 | `OncoreLibNames.java` | Names the B3640 run-time library routines and data (table from `tools/libsig.py`) |
+| `OncoreNames.java` | Names functions and RAM variables identified in `docs/memory-map.md` (command handlers, RTC, QSPI, EEPROM, oscillator, time, status) |
+| `OncoreExportC.java` | Decompiles every function to one C file; prints named/unnamed counts |
 | `OncoreStackParameters.java` | Narrow stack parameters (from smartclock); run last |
 
 Report scripts on an existing project:
