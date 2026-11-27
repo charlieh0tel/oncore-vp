@@ -486,6 +486,28 @@ Commands in the firmware but not in the VP Oncore Command Reference
 @@Tq (factory loader, with @@Sa-@@Sg; `tq_match_cmd` $0A1E68).  The
 reference's @@Ea status and channel-flag bits match the firmware.
 
+Factory loader (@@Tq, $0A1E90): masks interrupts, saves all registers,
+replies `@@Tq`, then runs its own polled SCI loop (watchdog serviced,
+buffer 256 bytes below the stack) until @@Se.  Frames are `@@S?`,
+count byte, address, data, XOR checksum (seeded with the letters),
+CR LF; each is answered with its letters, a status byte (0 good,
+1 checksum, 2 no CR LF) and CR LF.
+
+| Cmd | Address bytes | Action |
+|---|---|---|
+| @@Sa | 2 | Write the data bytes to memory at the address |
+| @@Sb | 3 | Same |
+| @@Sc | 4 | Same |
+| @@Sd | 0 | Read and acknowledge; no action |
+| @@Se | 0 | Leave the loader; back to the firmware |
+| @@Sg | 2 | jsr to the address ($0000-$FFFF: RAM) |
+
+Writes are plain CPU stores, so they change RAM (and the EEPROM).  The
+firmware has no flash erase/program sequence, and the 28F010s ignore
+commands unless VPP is at 12 V; reprogramming flash would need a
+program loaded into RAM with @@Sa-@@Sc, started with @@Sg, and 12 V on
+VPP (whether the board can switch VPP is not traced).
+
 Configuration commands (consumers from the firmware):
 
 | Cmd | RAM (default) | Consumer | Effect |
