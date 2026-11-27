@@ -878,6 +878,22 @@ Z3805A's (SSG0163878) locked 84% of snapshots; the Z3801A's
 - 20 min with almanac, position and date set, antenna on SSG0163878
   (the better unit in service), SSG0178541 without: 8-9 visible, no
   channel tracked on either.
+- DC to ground, top side, powered from the jig's USB chain (photo
+  callouts in the bias worksheet; ends A/B as marked there):
+
+| Point | SSG0178541 | SSG0163878 |
+|---|---|---|
+| Supply | 4.75 | 4.80 |
+| Antenna center pin | 4.67 | 4.73 |
+| 2R2 by the 24M01, A / B | 4.73 / 4.69 | 4.80 / 4.75 |
+| 2R2 middle, A / B | 4.69 / 4.67 | 4.75 / 4.75 |
+| 2R2 bottom left, A / B | 0.765 / 0.766 | 0.765 / 0.767 |
+| R27, A / B | 2.36 / 2.36 | 2.22 / 2.23 |
+| R56, A / B | 2.36 / 2.36 | 2.23 / 2.23 |
+
+  The two boards agree at every node within supply differences, except
+  R27/R56 about 0.13 V lower on SSG0163878; no node is dead on either.
+  The antenna pin carries DC (feed circuit works).
 
 ## Host instruments
 
