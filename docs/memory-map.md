@@ -293,6 +293,10 @@ $015E, $5091.
   = 20507.0000 = $75C0 = the active EEPROM record.  With no fixes,
   $81D2 holds $75C0 / 5.2550354685707275, i.e. the same quantity in
   the other unit.  Unchanged over 8 minutes.
+- 2026-11-27, after tracking in position hold: `@@Ta` query reply
+  $75C0 = 20625, $75BC = $50, $75BE = 185 (was 20507 in the dump;
+  consistent with the coarse case after search stepping with
+  \|drift - 20625\| < 185, inferred).
 - Absolute TCXO offset: not established.  If 20625 is the zero point
   (Hz at L1), the stored value is -118 Hz (-0.075 ppm).
 
