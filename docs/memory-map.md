@@ -828,6 +828,20 @@ is not recorded.
 - After @@Cg 1: time runs from 12:00:00; status $09; six channels
   searching SVs 9, 22, 6, 24, 14, 1; signal bytes 49-54 (first) and
   63-75 (second) with no antenna.
+- @@Ta query (`FF FF FF FF FF`), same reply layout as the 8ch:
+
+| | Drift reference | Setting | Hz/LSB |
+|---|---|---|---|
+| First | 20549 | $5F | 351 |
+| Second | 20749 | $5C | 339 |
+| 8ch, for comparison | 20625 | $50 | 185 |
+| 8ch firmware default | 20625 | $67 | 350 |
+
+- With @@Ac/@@Aa: status $09, almanac still rejected.  Almanac loaded
+  with @@Cb (smartclock-oncore-emulator `bench/almanac.py`, u-blox
+  capture of 2026-10-28; all 34 pages echoed): status $08.  Position
+  from the 8ch (@@Ad/@@Ae/@@Af): 9 visible.  Antenna from a powered
+  distribution amplifier (no DC needed from the receiver).
 
 ## Host instruments
 
@@ -934,8 +948,7 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
 - Hardware behind CS0-CS3, CS5, CS6 (unused by this firmware, except
   one CS5 read).  CS7 chip not traced (XCT38140 likely).
 - Trace QSPI PCS1 to its part (24M0x hybrid or 58M01, inferred).
-- 6ch receivers: whether they acquire with an antenna after @@Cg 1 and
-  @@Ac/@@Aa; whether idle at power-up is a saved setting.  @@Ta not sent:
-  the 6ch firmware is not dumped, so its handling of the query is unknown.
+- 6ch receivers: whether they acquire with almanac, position and date
+  set; whether idle at power-up is a saved setting.
 - Whether CS9/CS10 have chips fitted (they read $FF; the firmware never
   accesses $100000-$1FFFFF).
