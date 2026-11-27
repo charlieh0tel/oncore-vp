@@ -911,7 +911,7 @@ Read from SSG0163878 (and the EEPROM of SSG0178541) over the host port with `too
 | `eeprom/B1121P1114-SSG0178541-eeprom.bin` ($020000) | 8 KB | `06a4f02fb5a53a434812c59430084c127f3f42ca59b71e61dda2b1d73f68382c` |
 
 - Flash trailer: even-byte sum $00E270E2, odd-byte sum $00FF0E12, both
-  match the image.  Reset vectors SSP $00020000, PC $0008797C.
+  match the image.  SSG0178541's flash, read the same way, is identical.  Reset vectors SSP $00020000, PC $0008797C.
 - ID strings at flash $2C74E: SFTW P/N 98-P39972M, VER 8, REV 4,
   13 JUL 1995.  EEPROM ID text at $087A, as on the 8ch: B1121P1114,
   SSG0163878, 6G09, options IB.
