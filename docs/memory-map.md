@@ -1079,7 +1079,10 @@ centered about 9.5 MHz, -93 dBm, about 3 MHz wide at -6 dB, 34 dB
 over the receiver-off level; none with the 8ch off.  Fits IF2 =
 47.76 MHz - 2 f = 9.568 MHz = f/2 + 20.625 kHz: LO2 = 2 f, then
 sampling at f/2 leaves the 20.625 kHz carrier (80 f + 2 f + f/2 =
-82.5 f; inferred).  Comb of whole multiples of f, even ones 10-15 dB
+82.5 f; inferred).  6ch SSG0178541, bottom can, same probe: 80 f line
+-100.4 dBm (8ch -99.5), so the same LO; IF2 band peak about -113 dBm
+(8ch -93), about 20 dB lower (antenna feeds differ; not yet compared on
+equal inputs).  Comb of whole multiples of f, even ones 10-15 dB
 stronger (strongest 22 f, -73 to -78 dBm).
 
 Tests: LO leakage near the open can (1565.85 vs 1527.66 MHz); clock and
