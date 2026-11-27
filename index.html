@@ -132,7 +132,7 @@ header a{color:var(--accent)}
   <h2>CPU clock chain</h2>
   <figure>
     <div class="scroll">
-    <svg class="chain" viewBox="0 0 1000 250" role="img" aria-label="CPU clock chain: 19.09575 MHz hybrid, divided by 656 to 29.110 kHz at EXTAL, multiplied by the 68331 PLL by 256 at reset and 576 running, giving 7.45 and 16.77 MHz; the SCI divides by 32 times 55 for 9525 baud. The 32.768 kHz crystal feeds only the MC68HC68T1 RTC.">
+    <svg class="chain" viewBox="0 0 1000 250" role="img" aria-label="CPU clock chain: 19.09575 MHz hybrid, divided by 656 in the XCT38140 ASIC to 29.110 kHz at EXTAL, multiplied by the 68331 PLL by 256 at reset and 576 running, giving 7.45 and 16.77 MHz; the SCI divides by 32 times 55 for 9525 baud. The 32.768 kHz crystal feeds only the MC68HC68T1 RTC.">
       <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="ah"/></marker></defs>
       <rect class="box" x="10" y="30" width="160" height="90" rx="4"/>
       <text class="t1" x="90" y="56" text-anchor="middle">Hybrid</text>
@@ -142,7 +142,7 @@ header a{color:var(--accent)}
 
       <rect class="box" x="210" y="30" width="140" height="90" rx="4"/>
       <text class="t1" x="280" y="62" text-anchor="middle">Divider &divide;656</text>
-      <text class="t3" x="280" y="84" text-anchor="middle">likely in the hybrid</text>
+      <text class="t3" x="280" y="84" text-anchor="middle">in the XCT38140 ASIC</text>
 
       <rect class="box hot" x="390" y="30" width="150" height="90" rx="4"/>
       <text class="t1" x="465" y="56" text-anchor="middle">EXTAL, pin 62</text>
@@ -385,7 +385,6 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
   <h2>Open</h2>
   <ul>
     <li>6-channel sensitivity loss: continuity of antenna &rarr; A06 &rarr; 95U01 SAW &rarr; 58M01, and the A06 bias on the bottom side, off the jig.</li>
-    <li>Confirm the &divide;656 is in the hybrid (29.110 kHz on a hybrid pin, traced to EXTAL).</li>
     <li>Hybrid (TCXO) frequency error and its sign (0.17 ppm from the drift).</li>
   </ul>
 </section>

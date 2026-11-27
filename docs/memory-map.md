@@ -187,8 +187,8 @@ RAM copies and the commands whose handlers write them:
   target.  So L1 is mixed down by a total of 82.5 x the reference,
   leaving a 20.625 kHz carrier for the correlator (frequency plan
   inferred; stage count and LO frequencies not traced).  19.09575 MHz / 656 = 29,109.4 Hz, matching
-  EXTAL.  Owner: the /656 is almost certainly inside the hybrid; not
-  yet verified.
+  EXTAL.  EXTAL (CPU pin 62) goes to the XCT38140 ASIC (its top-left
+  corner pin; continuity, 6ch), so the ASIC divides the TCXO by 656.
 - Nominal clocks from 19.09575 MHz: EXTAL 29,109.38 Hz; f_sys at reset
   (x256) 7.45200 MHz; f_sys running (x576) 16.76700 MHz.
 
@@ -1034,7 +1034,7 @@ No onboard LNA unless the passive-antenna option (23 dB) is fitted.
 feed -> A06 -> 95U01 SAW -> 58M01 ---------------------------> XCT38140 (CS7)
         LNA    L1 band-     LNA? mixer(s) IF/AGC quantizer      8 channels
                             ^ LO synthesizer (PLL)              ^ clock f/2
-24M0x hybrid: TCXO f = 19.09575 MHz, /656 -> EXTAL, PCS1 trim --+
+24M0x hybrid: TCXO f = 19.09575 MHz, PCS1 trim; ASIC: /656 -> EXTAL -+
 ```
 
 | Part | Basis |
@@ -1128,8 +1128,6 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
   (continuity, A06 bias on the bottom side), with the board off the jig.
 - Confirm the RF chain antenna -> A06 -> 95U01 SAW -> 58M01 by
   continuity.
-- Confirm the /656 is in the hybrid (29.110 kHz on a hybrid pin, traced
-  to EXTAL pin 62).
 - TCXO frequency error: 0.17 ppm from the drift (sign not determined);
   a counter on the hybrid would confirm.
 - Hardware behind CS0-CS3, CS5, CS6 (unused by this firmware, except
