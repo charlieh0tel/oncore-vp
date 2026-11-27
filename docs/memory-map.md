@@ -249,18 +249,40 @@ $015E, $5091.
 - $08C252 computes a drift as RAM $81D2 (double) x 5.2550354685707275
   (= 1575.42 MHz / c, L1 cycles per meter), rounded: Hz at L1 if $81D2
   is the clock drift in m/s (inferred).
-- After more than 10 qualifying fixes in a row: if the drift is within
-  $0C3B (3131) of $5091 (20625), $75C0 moves 20% of the way to it
-  (unless already within $97 = 151); otherwise $75BC is shifted by
-  (drift - 20625) / $75BE and $75C0 is reset to 20625.  Then the
-  record is saved ($09F876).
-- $097464 builds the frequency-search bin list around $75BC with step
-  derived from $75BE, limited to 0-$D6.
-- $75BC is also written to an 8-bit device on QSPI PCS1 ($09B31A; see
-  "QSPI devices"): at init ($09BD66), on each search step ($097464),
-  after the record is saved ($0A02C0), and in a self-test ($0A1696).
-  So $75BC is a setting sent to hardware, plausibly a tuning value for
-  the reference oscillator (inferred; the part is not identified).
+- $08C252 runs from task $08B248 when $81EE = 2, at most once per
+  power-up ($1143, cleared by $08B1A4).  Needs > 10 fixes in a row
+  ($1142), each drift within 20 of the previous ($980); modes 2/3 need
+  >= 4 SVs.
+
+| Case | Action |
+|---|---|
+| $26B6 = 0, \|drift - 20625\| < 3131, \|drift - $75C0\| < 151 | None |
+| $26B6 = 0, \|drift - 20625\| < 3131 | $75C0 += 20% of (drift - $75C0) |
+| Otherwise | $75BC -= (drift - 20625) / $75BE (no clamp); $75C0 = 20625 |
+
+  Then the record is saved ($09F876).  Not sent to PCS1 until the next
+  boot, @@Ta or search step.  20625 is the drift target; higher $75BC =
+  faster oscillator (inferred from the sign).
+- $75BE: L1 Hz per LSB of $75BC; written only by the EEPROM load and
+  @@Ta (default 350, this unit 185).
+- $08FC68 seeds $81D2 = $75C0 / 5.2550354685707275; $097A02 seeds the
+  channel search center from $75C0 (from $81D2 once $81EE != 0).
+- Oscillator search ($097464, from $0957BC at the end of each SV-list
+  pass with < 3 channels in state 3): n = 0 steps to the next list
+  entry, stores it in $75BC and sends it to PCS1, cyclic, with no limit
+  flag; n = 1-2 sets $26B6 = 2 and stops stepping ($095446 resets it;
+  callers $08A774, $0A03A4).
+- Doppler bins per setting: table $0AEEA2[$8EB8 x 6 + 1] = $0AEBCA,
+  31 signed bytes x 100 Hz: 0, +-5 ... +-75 (+-7.5 kHz, 500 Hz steps).
+- List: s1 = 7500 / $75BE; $75BC + k x 1.5 s1 for k = +1, -1, +2, ...,
+  kept in 0-$D6, then $75BC.  $50/185: 140, 20, 200, 80.  $67/350:
+  134, 72, 165, 41, 196, 10, 103.
+- Range 0-$D6: 39.8 kHz at L1 (25 ppm) at 185 Hz/LSB; 75 kHz (48 ppm)
+  at 350.
+- @@Ta ($0AD4F4): payload drift (word), $75BC (byte), $75BE (word);
+  applied only if word < $8000, byte < $D8, word < $8000, then sent and
+  saved by task $0A02C0 ($9D83, $8E9).  Reply ($0A2FBE): $75C0, $75BC,
+  $75BE.  Query without change: `@@Ta FF FF FF FF FF CA 0D 0A`.
 - Dump: active record 1 = $50, $00B9, $501B (20507, 118 below the
   default 20625); record 0 = $50, $00B9, $5055 (20565).
 - Record layout: byte +0, byte +1 (not read by the code above; $00 in
@@ -271,10 +293,8 @@ $015E, $5091.
   = 20507.0000 = $75C0 = the active EEPROM record.  With no fixes,
   $81D2 holds $75C0 / 5.2550354685707275, i.e. the same quantity in
   the other unit.  Unchanged over 8 minutes.
-- Meaning of 20625 and the absolute TCXO offset: not established.  If
-  20625 is the zero point (Hz at L1), the stored value is -118 Hz
-  (-0.075 ppm); if $75C0 is an absolute L1 offset, 20507 Hz is 13.0 ppm.
-  A live measurement needs the receiver tracking (antenna).
+- Absolute TCXO offset: not established.  If 20625 is the zero point
+  (Hz at L1), the stored value is -118 Hz (-0.075 ppm).
 
 ### CS7: the tracking channels
 
@@ -445,11 +465,46 @@ never enabled.
 | Device | Chip select | SPCR0 | Functions |
 |---|---|---|---|
 | MC68HC68T1 RTC | PCS0, active high | $A104 (8-bit, CPHA 1, ~2.1 MHz) | $09B4AC init and presence test (T1 RAM $00-$02), $09B5DE read time and date, $09B76C write date, $09B844 write time |
-| Unknown 8-bit device | PCS1, active low | $A008 (8-bit, CPHA 0, ~1 MHz) | $09B31A(value): sends $81; $00 (reads); $C0 + low nibble x 2 (reads); $01; $C1 + high nibble x 2; $01; ~5 ms between bytes; returns the previous value read back |
+| Oscillator tuning device (inferred) | PCS1, active low | $A008 (8-bit, CPOL 0, CPHA 0, 1.05 MHz) | $09B31A(v), below |
 
 RTC: control $B1 = $34 to stop, burst read $20-$26, then $B4 to
 start; interrupt control $B2 = $00 then $20.  Time and date in RAM
 $2755-$275A.
+
+QSM pins ($08A064): QPDR $F0, QPAR $7B, QDDR $FE; PCS0 idles low,
+PCS1-3 high.  Command RAM values in the image: $7C (PCS1), $FF/$7F
+(RTC); PCS2, PCS3 never asserted.
+
+PCS1 transfer, $09B31A(v): six single-byte queues, each SPCR0 $A008,
+SPCR2 $0000, CR $7C (CONT 0, BITSE, DT, DSCK), SPCR1 $CC01 (DSCKL 76
+clocks = 4.5 us, DTL 32 clocks = 1.9 us), SPIF polled with interrupts
+masked; dbf 15238 (~5.4 ms) after each.
+
+| # | MOSI | MISO |
+|---|---|---|
+| 1 | $81 | |
+| 2 | $00 | d1 |
+| 3 | $C0 \| (v & $0F) << 1 | d2 |
+| 4 | $01 | |
+| 5 | $C1 \| (v >> 4) << 1 | |
+| 6 | $01 | |
+
+Returns (d1 << 4) \| (d2 & $0F): the previous value.
+
+| Caller | When | Value |
+|---|---|---|
+| $09BD66 | Boot, after the EEPROM load $09C096 | $75BC |
+| $097464 | Oscillator search step | Next list entry (stored to $75BC) |
+| $0A02C0 | Task (flag $8E9) after @@Ta ($9D83) | $75BC |
+| $0A1696 | Self-test $0A1D8C(1) | $5A, then $75BC; readback not $5A sets result bit $1000 |
+
+Self-test result bits: $1000 PCS1 readback, $2000 RTC not advancing
+($0A1D24), $100/$80 flash even/odd sum ($0A1CD4), $400/$200 RAM
+($0A1C60), $C03F CS7 timing ($0A1A4E).
+
+Not a commodity serial DAC or pot (CS per byte, nibble data,
+readback).  Candidates: inside the 24M0x hybrid, or the 58M01
+(inferred).
 
 ## 6-channel board *7VGN4*, from the Z3801A (owner's photos)
 
@@ -593,6 +648,7 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
 - TCXO frequency error (needs a counter, or a long host-timed count).
 - Hardware behind CS0-CS3, CS5, CS6 (unused by this firmware, except
   one CS5 read).  CS7 chip not traced (XCT38140 likely).
-- The QSPI PCS1 device that receives $75BC.
+- Trace QSPI PCS1 to its part (24M0x hybrid or 58M01, inferred).
+- 6ch boards: @@Ta query and self-test bit $1000 over serial.
 - EEPROM field meanings for the "Unknown" blocks.
 - Whether CS9/CS10 have chips fitted.
