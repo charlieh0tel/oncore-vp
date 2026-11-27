@@ -25,6 +25,9 @@ main{max-width:1040px;margin:0 auto;padding-block:28px 56px;padding-left:max(16p
 header{display:grid;gap:6px}
 h1{font-size:1.6rem;margin:0;text-wrap:balance}
 h2{font-size:1.1rem;margin:0;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.toc{display:grid;gap:4px;font-size:14px;padding:12px 14px;background:var(--panel);border-radius:4px}
+.toc p{margin:0}
+.toc a{color:var(--accent)}
 h3{font-size:.95rem;margin:0;color:var(--muted);font-weight:600}
 section{display:grid;gap:12px;min-width:0}
 p,ul{margin:0}
@@ -65,11 +68,67 @@ header a{color:var(--accent)}
 <main>
 <header>
   <h1>Oncore VP Teardown</h1>
-  <p class="sub">Motorola Oncore VP 8-channel from an HP 58503A, read over BDM (mc683xx-bdm, bdm 0.4.0, pod firmware 0.5.0), 2026-11-24. Firmware SFTW P/N 98-P36830P, VER 8, REV 8, dated 06 Aug 1996. Model B4121P1115, serial SSG0220999. Also two 6-channel receivers (B1121P1114) from an HP Z3801A and Z3805A, read over their serial ports.</p>
+  <p class="sub">Three Motorola Oncore GPS receivers from HP timing instruments: boards, memory map, firmware and status.</p>
   <p class="sub">See also: <a href="oncore-vp-test-points.html">test points and BDM header</a> &middot; <a href="mc68331-clock-pins.html">MC68331 clock pins</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/docs/board.md">board notes</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/docs/memory-map.md">memory map and firmware notes</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/docs/firmware.md">firmware overview</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/third_party/moto/decompiled/B4121P1115.c">8ch decompiled C</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/third_party/moto/decompiled/B1121P1114.c">6ch decompiled C</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/docs/messages.md">binary messages</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp/tree/main/tools/ghidra">Ghidra scripts</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp">source</a></p>
 </header>
+<nav class="toc">
+  <p><b>Hardware</b> <a href="#receivers">Receivers</a> &middot; <a href="#boards">Boards</a> &middot; <a href="#antenna">Antenna gain</a> &middot; <a href="#clock">CPU clock chain</a> &middot; <a href="#pins">Pins</a></p>
+  <p><b>Memory</b> <a href="#memory-map">Memory map, running</a> &middot; <a href="#registers">On-chip registers, running</a> &middot; <a href="#flash-eeprom">Boot flash, EEPROM</a></p>
+  <p><b>Firmware</b> <a href="#firmware">Firmware</a> &middot; <a href="#cold-start">Cold start</a> &middot; <a href="#oscillator">Oscillator tuning (QSPI PCS1)</a> &middot; <a href="#six">6-channel sensitivity</a></p>
+  <p><b>Reference</b> <a href="#photos">Photos</a> &middot; <a href="#open">Open</a></p>
+</nav>
 
-<section>
+<section id="receivers">
+  <h2>Receivers</h2>
+  <div class="scroll"><table>
+    <tr><th class="t"></th><th>8-channel</th><th>6-channel</th><th>6-channel</th></tr>
+    <tr><td class="t">Model</td><td>B4121P1115</td><td>B1121P1114</td><td>B1121P1114</td></tr>
+    <tr><td class="t">Serial</td><td>SSG0220999</td><td>SSG0163878</td><td>SSG0178541</td></tr>
+    <tr><td class="t">Manufactured</td><td>7D01</td><td>6G09</td><td>6J25</td></tr>
+    <tr><td class="t">Board label</td><td>*3W1VE*</td><td>*7VENR*</td><td>*7VGN4*</td></tr>
+    <tr><td class="t">Instrument (CPU hand mark)</td><td>HP 58503A ('03A)</td><td>HP Z3805A, 3625A01487 ('05A)</td><td>HP Z3801A, 3542A01548 ('01A)</td></tr>
+    <tr><td class="t">Software</td><td>98-P36830P VER 8 REV 8, 06 Aug 1996</td><td colspan="2">98-P39972M VER 8 REV 4, 13 Jul 1995 (identical flashes)</td></tr>
+    <tr><td class="t">Read</td><td>BDM (mc683xx-bdm, bdm 0.4.0, pod firmware 0.5.0)</td><td colspan="2">Host port, factory loader (<code>tools/loader/dump.py</code>)</td></tr>
+    <tr><td class="t">Self-test</td><td>all pass</td><td>all pass</td><td>all pass</td></tr>
+    <tr><td class="t">Status</td><td>Works</td><td colspan="2">Track only with about 20 dB more antenna gain than the 8ch (see <a href="#six">6-channel sensitivity</a>)</td></tr>
+  </table></div>
+</section>
+
+
+<section id="boards">
+  <h2>Boards</h2>
+  <div class="scroll"><table>
+    <tr><th class="t">Part</th><th>8-channel *3W1VE* (jig)</th><th>6-channel *7VGN4*</th><th>6-channel *7VENR*</th></tr>
+    <tr><td class="t">From</td><td>HP 58503A</td><td>HP Z3801A</td><td>HP Z3805A</td></tr>
+    <tr><td class="t">PCB</td><td>TM-AA / BM-AA, 84D44800M01</td><td>TM-AB / BM-AB, 84D43579</td><td>TM-AB / BM-AB, 84D43579M03</td></tr>
+    <tr><td class="t">CPU</td><td>MC68331CFC16 0E93N DEUZ9702</td><td>MC68331CFC16 G91H DENU9621 ('01A)</td><td>MC68331CFC16 G91H DEVT9614 ('05A)</td></tr>
+    <tr><td class="t">SRAM 128K x 8</td><td>Toshiba TC551001BFI-85L 9706HAK</td><td>Hitachi HM628128BLFPI-8 9629</td><td>Hitachi HM628128LFPI-8 9621</td></tr>
+    <tr><td class="t">RTC</td><td>MC68HC68T1 CKAC9703</td><td>MC68HC68T1 CKBG9631</td><td>MC68HC68T1 CKAN9620</td></tr>
+    <tr><td class="t">Crystal</td><td>32.768 VT, MC 9710 <span class="tag">32.768 kHz</span></td><td>32.768 VT, MC 9634</td><td>32.768 VT, MC 9619</td></tr>
+    <tr><td class="t">Hybrid</td><td>24M02, 19.09Mhz, 9711</td><td>24M01, 19.09575M, 9630</td><td>24M01, 19.09 M, 9601</td></tr>
+    <tr><td class="t">Reset supervisor (MC33064, 4.6 V)</td><td>33064</td><td>33064</td><td>33064</td></tr>
+    <tr><td class="t">EEPROM 8K x 8</td><td>Atmel AT28C64B 20JI 9705</td><td>Atmel AT28C64B 20JI 9626</td><td>Atmel AT28C64B 20JI 9612</td></tr>
+    <tr><td class="t">Flash 2 x 128K x 8</td><td>TN28F010 120 U65109J2</td><td>TN28F010 120 U63135J3</td><td>TN28F010 -120 U54362J1</td></tr>
+    <tr><td class="t">ASIC</td><td>XCT38140FD04 AAYW9711</td><td>XCT38140FD04 AARX9552</td><td>XCT38140FD04 AASS9603</td></tr>
+    <tr><td class="t">RF front end (likely)</td><td>58M01 9706</td><td>58M01 9631</td><td>58M01 9623</td></tr>
+    <tr><td class="t">SOT-23 by SAW (LNA?)</td><td>A06</td><td>A06</td><td>A06</td></tr>
+    <tr><td class="t">SAW filter</td><td>95U01 / 711</td><td>95U01 / 627</td><td>95U01 / 624</td></tr>
+  </table></div>
+</section>
+
+<section id="antenna">
+  <h2>Antenna gain</h2>
+  <div class="scroll"><table>
+    <tr><th class="t"></th><th>VP Oncore (engineering notes, p. 5)</th><th>UT Oncore (engineering notes)</th></tr>
+    <tr><td class="t">Net gain at the receiver input</td><td>preamplifier 18 dB minimum, including 6 dB cable loss</td><td>10 to 33 dB; performance degrades outside</td></tr>
+    <tr><td class="t">Noise figure</td><td>2.5 dB maximum</td><td>2.2 dB maximum (system 4 dB)</td></tr>
+    <tr><td class="t">Antenna power</td><td>+5 V, 25 mA available</td><td>80 mA maximum, 45 mA short circuit</td></tr>
+    <tr><td class="t">Thresholds (0 dBic, no cable)</td><td>acquire &minus;137 dBm, track &minus;143 dBm</td><td></td></tr>
+  </table></div>
+  <p class="sub">No onboard LNA unless the passive-antenna option (23 dB) is fitted. Both notes are in third_party/moto.</p>
+</section>
+
+<section id="clock">
   <h2>CPU clock chain</h2>
   <figure>
     <div class="scroll">
@@ -124,7 +183,24 @@ header a{color:var(--accent)}
   </figure>
 </section>
 
-<section>
+<section id="pins">
+  <h2>Pins</h2>
+  <div class="grid2">
+    <div style="display:grid;gap:6px;min-width:0">
+      <h3>MC68331, 132-pin QFP, pins 51&ndash;83</h3>
+      <p class="mono">51 VSS &middot; 52 TXD &middot; 53 RXD &middot; 54 DSO &middot; 55 DSI &middot; 56 BKPT/DSCLK &middot; 57 TSC &middot; 58 FREEZE &middot; 59 VSS &middot; 60 XTAL &middot; 61 VDDSYN &middot; 62 EXTAL &middot; 63 VDD &middot; 64 XFC &middot; 65 VDD &middot; 66 CLKOUT &middot; 67 VSS &middot; 68 RESET &middot; 69 HALT &middot; 70 BERR &middot; 71&ndash;77 IRQ7&ndash;IRQ1 &middot; 78 MODCLK &middot; 79 R/W &middot; 80 SIZ1 &middot; 81 SIZ0 &middot; 82 AS &middot; 83 VSS</p>
+    </div>
+    <div style="display:grid;gap:6px;min-width:0">
+      <h3>Receiver 10-pin header</h3>
+      <p class="mono">1 BATT (backup power; not supplied by the jigs or the 58503A) &middot; 2 PWR (5 V) &middot; 3 GND &middot; 4 VPP (flash programming) &middot; 5 not used &middot; 6 1PPS &middot; 7 1PPS RTN &middot; 8 TTL TXD1 &middot; 9 TTL RXD1 &middot; 10 TTL RTN</p>
+      <h3>MC68HC68T1, 16-pin</h3>
+      <p class="mono">1 CLKOUT &middot; 2 CPUR &middot; 3 INT &middot; 4 SCK &middot; 5 MOSI &middot; 6 MISO &middot; 7 SS &middot; 8 VSS &middot; 9 PSE &middot; 10 POR &middot; 11 LINE &middot; 12 VSYS &middot; 13 VBATT &middot; 14 XTALin &middot; 15 XTALout &middot; 16 VDD</p>
+      <p class="sub">CLKOUT options: XTAL, /2, /4, /8, 1 Hz, 2 Hz, 64 Hz, low.</p>
+    </div>
+  </div>
+</section>
+
+<section id="memory-map">
   <h2>Memory map, running</h2>
   <div class="scroll"><table>
     <tr><th>Range</th><th>Size</th><th>CS</th><th>Width</th><th>Access</th><th class="t">Contents</th></tr>
@@ -150,8 +226,27 @@ CS3    $FFC8 $6C30   CS4 $0201 $78B0   CS5 $FFE0 $7C70   CS6 $FFD8 $7830
 CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
 </section>
 
+<section id="registers">
+  <h2>On-chip registers, running</h2>
+  <div class="scroll"><table>
+    <tr><th>Register</th><th>Address</th><th>Value</th><th class="t">Decoded</th></tr>
+    <tr><td>SIMCR</td><td>$FFFA00</td><td>$E041</td><td class="t">CLKOUT off, FRZSW, FRZBM, MM 1, IARB 1. Reset $60CF.</td></tr>
+    <tr><td>SYNCR</td><td>$FFFA04</td><td>$D10A</td><td class="t">W1 X1 Y17 = x576, locked. Reset $3F08 = x256.</td></tr>
+    <tr><td>SYPCR</td><td>$FFFA21</td><td>$00</td><td class="t">Watchdog, bus monitor, halt monitor off</td></tr>
+    <tr><td>PICR / PITR</td><td>$FFFA22</td><td>$000F / $0000</td><td class="t">PIT off</td></tr>
+    <tr><td>QSMCR</td><td>$FFFC00</td><td>$4002</td><td class="t">FRZ1, IARB 2</td></tr>
+    <tr><td>QILR / QIVR</td><td>$FFFC04</td><td>$06 / $41</td><td class="t">SCI level 6, vector $41</td></tr>
+    <tr><td>SCCR0</td><td>$FFFC08</td><td>$0037</td><td class="t">Baud divider 55</td></tr>
+    <tr><td>SCCR1</td><td>$FFFC0A</td><td>$002C</td><td class="t">TE, RE, RIE, 8N1</td></tr>
+    <tr><td>GPTMCR</td><td>$FFF900</td><td>$2000</td><td class="t"></td></tr>
+    <tr><td>TMSK2</td><td>$FFF921</td><td>$00</td><td class="t">GPT prescaler /4</td></tr>
+    <tr><td>DDRGP / PORTGP</td><td>$FFF906</td><td>$DF / $E1</td><td class="t"></td></tr>
+  </table></div>
+  <p class="sub">Host serial port is the SCI: 9600 baud 8N1, Motorola binary. A byte written to SCDR over BDM appeared on the host port.</p>
+</section>
+
 <div class="grid2">
-<section>
+<section id="flash-eeprom">
   <h2>Boot flash</h2>
   <ul>
     <li>256 KB, two 8-bit chips (one per byte lane).</li>
@@ -177,7 +272,7 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
 </section>
 </div>
 
-<section>
+<section id="firmware">
   <h2>Firmware</h2>
   <ul>
     <li>C, built with HP B3640 A.04.10 (68000-family cross compiler). The soft-float and libc routines match ABCPU32.LIB byte for byte (37 modules); startup code is Motorola's own.</li>
@@ -185,6 +280,7 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
     <li>Tasks: a 26-task pre-emptive scheduler; the CS7 correlator interrupt runs every 1 ms (channel states 0 search &hellip; 5 phase lock).</li>
     <li>Navigation: unweighted least squares (not a Kalman filter), Klobuchar, Sagnac, relativistic and DGPS corrections, no troposphere model; position hold is time-only; TRAIM excludes one SV. A floating-point error jumps to the reset entry.</li>
     <li>Host port: 87 binary commands, NMEA, a terse ASCII mode and a 7-bit framed mode; an RTCM SC-104 decoder feeds the DGPS table.</li>
+    <li>6-channel firmware: the same code, 6 channels, no @@E*/@@F*; identical search tables, @@Ta, boot trim, almanac week window and RTC fallback. Host output only when polled.</li>
   </ul>
   <h3>Satellite search by application type (<code>@@AB</code>, $8EB8)</h3>
   <div class="scroll"><table>
@@ -207,7 +303,8 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
   </table></div>
   <p class="sub">The @@Ea status and channel-flag bits in the reference match the firmware.</p>
 </section>
-<section>
+
+<section id="cold-start">
   <h2>Cold start</h2>
   <ul>
     <li>At power-up the date comes from the MC68HC68T1. If it lost power, the firmware falls back to 01/01/&lt;EEPROM year&gt; 12:00:00.</li>
@@ -217,7 +314,8 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
     <li>The 58503A host's power-up script sends no @@Ac or @@Aa, so in the instrument the boot date depends on the T1 keeping time.</li>
   </ul>
 </section>
-<section>
+
+<section id="oscillator">
   <h2>Oscillator tuning (QSPI PCS1)</h2>
   <ul>
     <li>An 8-bit setting ($75BC) goes to the DCXO control on QSPI PCS1 (HP's name: the 58503B sends <code>@@Ta</code> for <code>:DIAGnostic:GPSystem:DCXO</code>): six single-byte frames, nibble data, the previous value read back. Not a commodity DAC or pot. QSPI SCK, MOSI and MISO reach the 24M01 hybrid (continuity, 6ch *7VGN4*), so the control is in the hybrid.</li>
@@ -229,19 +327,9 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
   </ul>
 </section>
 
-<section>
-  <h2>6-channel receivers</h2>
-  <div class="scroll"><table>
-    <tr><th class="t"></th><th>SSG0163878</th><th>SSG0178541</th></tr>
-    <tr><td class="t">Instrument / board</td><td>Z3805A (3625A01487), *7VENR*</td><td>Z3801A (3542A01548), *7VGN4*</td></tr>
-    <tr><td class="t">Model / manufactured</td><td>B1121P1114, 6G09</td><td>B1121P1114, 6J25</td></tr>
-    <tr><td class="t">Software</td><td colspan="2">98-P39972M VER 8 REV 4, 13 Jul 1995; the two flashes are identical</td></tr>
-    <tr><td class="t">Self-test (@@Ca)</td><td>all pass</td><td>all pass</td></tr>
-  </table></div>
+<section id="six">
+  <h2>6-channel sensitivity</h2>
   <ul>
-    <li>Firmware and EEPROMs read over the host port through the factory loader with a 72-byte RAM stub (<code>tools/loader/dump.py</code>): 256 KB in 4.6 min; flash checksums match.</li>
-    <li>Same code as the 8ch, 6 channels, no @@E*/@@F*: identical search tables, @@Ta, boot trim, almanac week window and RTC fallback.</li>
-    <li>Output: none until polled. Application type: Land.</li>
     <li>Track only with about 20 dB more antenna gain than the 8ch needs. Top-side DC bias agrees between the boards at every node; the loss is in the RF path (A06, SAW filter, coupling or the 58M01 input; inferred).</li>
   </ul>
   <h3>Top-side DC bias, volts to ground (USB-fed jigs)</h3>
@@ -257,81 +345,7 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
   </table></div>
 </section>
 
-<section>
-  <h2>Antenna gain</h2>
-  <div class="scroll"><table>
-    <tr><th class="t"></th><th>VP Oncore (engineering notes, p. 5)</th><th>UT Oncore (engineering notes)</th></tr>
-    <tr><td class="t">Net gain at the receiver input</td><td>preamplifier 18 dB minimum, including 6 dB cable loss</td><td>10 to 33 dB; performance degrades outside</td></tr>
-    <tr><td class="t">Noise figure</td><td>2.5 dB maximum</td><td>2.2 dB maximum (system 4 dB)</td></tr>
-    <tr><td class="t">Antenna power</td><td>+5 V, 25 mA available</td><td>80 mA maximum, 45 mA short circuit</td></tr>
-    <tr><td class="t">Thresholds (0 dBic, no cable)</td><td>acquire &minus;137 dBm, track &minus;143 dBm</td><td></td></tr>
-  </table></div>
-  <p class="sub">No onboard LNA unless the passive-antenna option (23 dB) is fitted. Both notes are in third_party/moto.</p>
-</section>
-
-<section>
-  <h2>On-chip registers, running</h2>
-  <div class="scroll"><table>
-    <tr><th>Register</th><th>Address</th><th>Value</th><th class="t">Decoded</th></tr>
-    <tr><td>SIMCR</td><td>$FFFA00</td><td>$E041</td><td class="t">CLKOUT off, FRZSW, FRZBM, MM 1, IARB 1. Reset $60CF.</td></tr>
-    <tr><td>SYNCR</td><td>$FFFA04</td><td>$D10A</td><td class="t">W1 X1 Y17 = x576, locked. Reset $3F08 = x256.</td></tr>
-    <tr><td>SYPCR</td><td>$FFFA21</td><td>$00</td><td class="t">Watchdog, bus monitor, halt monitor off</td></tr>
-    <tr><td>PICR / PITR</td><td>$FFFA22</td><td>$000F / $0000</td><td class="t">PIT off</td></tr>
-    <tr><td>QSMCR</td><td>$FFFC00</td><td>$4002</td><td class="t">FRZ1, IARB 2</td></tr>
-    <tr><td>QILR / QIVR</td><td>$FFFC04</td><td>$06 / $41</td><td class="t">SCI level 6, vector $41</td></tr>
-    <tr><td>SCCR0</td><td>$FFFC08</td><td>$0037</td><td class="t">Baud divider 55</td></tr>
-    <tr><td>SCCR1</td><td>$FFFC0A</td><td>$002C</td><td class="t">TE, RE, RIE, 8N1</td></tr>
-    <tr><td>GPTMCR</td><td>$FFF900</td><td>$2000</td><td class="t"></td></tr>
-    <tr><td>TMSK2</td><td>$FFF921</td><td>$00</td><td class="t">GPT prescaler /4</td></tr>
-    <tr><td>DDRGP / PORTGP</td><td>$FFF906</td><td>$DF / $E1</td><td class="t"></td></tr>
-  </table></div>
-  <p class="sub">Host serial port is the SCI: 9600 baud 8N1, Motorola binary. A byte written to SCDR over BDM appeared on the host port.</p>
-</section>
-
-<section>
-  <h2>Boards</h2>
-  <div class="scroll"><table>
-    <tr><th class="t">Part</th><th>8-channel *3W1VE* (jig)</th><th>6-channel *7VGN4*</th><th>6-channel *7VENR*</th></tr>
-    <tr><td class="t">From</td><td>HP 58503A</td><td>HP Z3801A</td><td>HP Z3805A</td></tr>
-    <tr><td class="t">PCB</td><td>TM-AA / BM-AA, 84D44800M01</td><td>TM-AB / BM-AB, 84D43579</td><td>TM-AB / BM-AB, 84D43579M03</td></tr>
-    <tr><td class="t">CPU</td><td>MC68331CFC16 0E93N DEUZ9702</td><td>MC68331CFC16 G91H DENU9621 ('01A)</td><td>MC68331CFC16 G91H DEVT9614 ('05A)</td></tr>
-    <tr><td class="t">SRAM 128K x 8</td><td>Toshiba TC551001BFI-85L 9706HAK</td><td>Hitachi HM628128BLFPI-8 9629</td><td>Hitachi HM628128LFPI-8 9621</td></tr>
-    <tr><td class="t">RTC</td><td>MC68HC68T1 CKAC9703</td><td>MC68HC68T1 CKBG9631</td><td>MC68HC68T1 CKAN9620</td></tr>
-    <tr><td class="t">Crystal</td><td>32.768 VT, MC 9710 <span class="tag">32.768 kHz</span></td><td>32.768 VT, MC 9634</td><td>32.768 VT, MC 9619</td></tr>
-    <tr><td class="t">Hybrid</td><td>24M02, 19.09Mhz, 9711</td><td>24M01, 19.09575M, 9630</td><td>24M01, 19.09 M, 9601</td></tr>
-    <tr><td class="t">Reset supervisor (MC33064, 4.6 V)</td><td>33064</td><td>33064</td><td>33064</td></tr>
-    <tr><td class="t">EEPROM 8K x 8</td><td>Atmel AT28C64B 20JI 9705</td><td>Atmel AT28C64B 20JI 9626</td><td>Atmel AT28C64B 20JI 9612</td></tr>
-    <tr><td class="t">Flash 2 x 128K x 8</td><td>TN28F010 120 U65109J2</td><td>TN28F010 120 U63135J3</td><td>TN28F010 -120 U54362J1</td></tr>
-    <tr><td class="t">ASIC</td><td>XCT38140FD04 AAYW9711</td><td>XCT38140FD04 AARX9552</td><td>XCT38140FD04 AASS9603</td></tr>
-    <tr><td class="t">RF front end (likely)</td><td>58M01 9706</td><td>58M01 9631</td><td>58M01 9623</td></tr>
-    <tr><td class="t">SOT-23 by SAW (LNA?)</td><td>A06</td><td>A06</td><td>A06</td></tr>
-    <tr><td class="t">SAW filter</td><td>95U01 / 711</td><td>95U01 / 627</td><td>95U01 / 624</td></tr>
-  </table></div>
-</section>
-
-<section>
-  <h2>Host instrument</h2>
-  <p class="sub">CPU hand marks: '03A = 58503A, '01A = Z3801A, '05A = Z3805A.</p>
-</section>
-
-<section>
-  <h2>Pins</h2>
-  <div class="grid2">
-    <div style="display:grid;gap:6px;min-width:0">
-      <h3>MC68331, 132-pin QFP, pins 51&ndash;83</h3>
-      <p class="mono">51 VSS &middot; 52 TXD &middot; 53 RXD &middot; 54 DSO &middot; 55 DSI &middot; 56 BKPT/DSCLK &middot; 57 TSC &middot; 58 FREEZE &middot; 59 VSS &middot; 60 XTAL &middot; 61 VDDSYN &middot; 62 EXTAL &middot; 63 VDD &middot; 64 XFC &middot; 65 VDD &middot; 66 CLKOUT &middot; 67 VSS &middot; 68 RESET &middot; 69 HALT &middot; 70 BERR &middot; 71&ndash;77 IRQ7&ndash;IRQ1 &middot; 78 MODCLK &middot; 79 R/W &middot; 80 SIZ1 &middot; 81 SIZ0 &middot; 82 AS &middot; 83 VSS</p>
-    </div>
-    <div style="display:grid;gap:6px;min-width:0">
-      <h3>Receiver 10-pin header</h3>
-      <p class="mono">1 BATT (backup power; not supplied by the jigs or the 58503A) &middot; 2 PWR (5 V) &middot; 3 GND &middot; 4 VPP (flash programming) &middot; 5 not used &middot; 6 1PPS &middot; 7 1PPS RTN &middot; 8 TTL TXD1 &middot; 9 TTL RXD1 &middot; 10 TTL RTN</p>
-      <h3>MC68HC68T1, 16-pin</h3>
-      <p class="mono">1 CLKOUT &middot; 2 CPUR &middot; 3 INT &middot; 4 SCK &middot; 5 MOSI &middot; 6 MISO &middot; 7 SS &middot; 8 VSS &middot; 9 PSE &middot; 10 POR &middot; 11 LINE &middot; 12 VSYS &middot; 13 VBATT &middot; 14 XTALin &middot; 15 XTALout &middot; 16 VDD</p>
-      <p class="sub">CLKOUT options: XTAL, /2, /4, /8, 1 Hz, 2 Hz, 64 Hz, low.</p>
-    </div>
-  </div>
-</section>
-
-<section>
+<section id="photos">
   <h2>Photos</h2>
   <h3>8-channel *3W1VE* (58503A, on the jig)</h3>
   <div class="photos">
@@ -367,7 +381,7 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
   </div>
 </section>
 
-<section>
+<section id="open">
   <h2>Open</h2>
   <ul>
     <li>6-channel sensitivity loss: continuity of antenna &rarr; A06 &rarr; 95U01 SAW &rarr; 58M01, and the A06 bias on the bottom side, off the jig.</li>
