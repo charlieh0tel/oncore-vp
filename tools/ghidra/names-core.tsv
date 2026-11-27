@@ -178,3 +178,14 @@
 00A536	L	rx_rd	docs/memory-map.md
 00A53A	L	rx_count	docs/memory-map.md
 00C650	L	protocol_mode	docs/memory-map.md
+080400	F	bss_clear_low	zeroes RAM $0000 up to task_running
+08041A	F	bss_clear_tasks	zeroes task_running up to $095E
+088A1E	F	vec_default	rte; target of 250 unused vectors
+09C72E	F	cm_state_reset	clears the @@Cm state ($3605-$3642)
+0B162C	F	fdiv64_err_e2000	fdiv64 module: __fp_error($E2000)
+0B163C	F	fdiv64_err_e0400	fdiv64 module: __fp_error($E0400), sign from A0
+0B164C	F	fdiv64_core_a	fdiv64 module internal entry
+0B1658	F	fdiv64_core	fdiv64 module internal mantissa divide
+0B20C8	F	fmul64_err	fmul64 module: __fp_error stub
+0B27B2	F	dbl_to_str_helper	dbl_to_str module, before __dbl_to_str $0B2996
+0B30B2	F	doprnt_helper	doprnt module, before __doprnt $0B30E8

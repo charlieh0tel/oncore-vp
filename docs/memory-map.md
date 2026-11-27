@@ -431,8 +431,9 @@ pseudoranges) -> $095582 -> `nav_step` $08FD50 -> `rcvr_status_build`
 | Limits ($0920BE) | Height > 18288 m and speed > 514.4 m/s: both clamped; height < -1000 m clamped |
 | Other | Magnetic variation ($09D456, $09D7DA -> $81B2); 10 degree geoid grid ($09E310 -> $7574); position saved to RAM $2598 (checksum $25B0) and EEPROM ($09F94A) |
 
-Ghidra decompiles $097EE4 (parity) and the bit extraction in $098C68
-as empty or partial; the disassembly has the full code.
+$097EE4 (parity) returns its result in D0 under a void signature, so
+Ghidra decompiled it empty; `tools/ghidra/OncoreFixups.java` sets the
+return type.
 
 ## Host commands (from the firmware)
 

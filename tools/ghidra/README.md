@@ -18,10 +18,11 @@ $GHIDRA/support/analyzeHeadless ~/ghidra-projects oncore-vp \
     -postScript OncoreLibNames.java \
     -postScript OncoreTypes.java \
     -postScript OncoreNames.java \
-    -postScript OncoreStackParameters.java
+    -postScript OncoreStackParameters.java \
+    -postScript OncoreFixups.java
 ```
 
-Result: 64 switches recovered, 574 functions, 563 named (`OncoreExportC.java` reports the count), none failing to decompile.
+Result: 64 switches recovered, 574 functions, all named (`OncoreExportC.java` reports the count), none failing to decompile.
 
 Run from the repository root.  The project lives outside the repository.
 
@@ -40,6 +41,7 @@ Run from the repository root.  The project lives outside the repository.
 | `OncoreNames.java` | Applies the name tables `names-*.tsv` (address, kind F/L/S, name, note): `names-core.tsv` from `docs/memory-map.md`, then `names-io.tsv` (host I/O), `names-nav.tsv` (navigation, ephemeris, almanac, TRAIM, 1PPS), `names-tracking.tsv` (channels, search, nav-data decode); later files win; kind X removes a wrongly created function |
 | `OncoreTypes.java` | Data types: date record ($8EBA), per-channel record arrays ($CF6, $E36, $1106, $275C, $27BC, $6FBC, $7A3C), SV-indexed records, prediction banks, almanac buffers, navigation matrices, CS7 channel registers, typed globals; run before OncoreNames.java |
 | `OncoreExportC.java` | Decompiles every function to one C file; prints named/unnamed counts |
+| `OncoreFixups.java` | Return types (and one parameter) the decompiler misses, e.g. `gps_parity_check`, whose body otherwise decompiles empty; run after OncoreStackParameters.java |
 | `OncoreStackParameters.java` | Narrow stack parameters (from smartclock); run last |
 
 Report scripts on an existing project:
