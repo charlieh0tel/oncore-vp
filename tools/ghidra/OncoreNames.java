@@ -56,6 +56,16 @@ public class OncoreNames extends GhidraScript {
     private void apply(String addr, String kind, String name) throws Exception {
         if (kind.equals("S")) { field(addr, name); return; }
         Address a = toAddr(Long.parseLong(addr, 16));
+        if (kind.equals("X")) {
+            Function f = getFunctionAt(a);
+            if (f != null) {
+                removeFunction(f);
+                Function p = getFunctionBefore(a);
+                if (p != null) ghidra.app.cmd.function.CreateFunctionCmd.fixupFunctionBody(currentProgram, p, monitor);
+                println("removed function " + name + " at " + a + (p != null ? ", refit " + p.getName() : ""));
+            }
+            return;
+        }
         if (kind.equals("F")) {
             if (getInstructionAt(a) == null) disassemble(a);
             Function f = getFunctionAt(a);
@@ -67,6 +77,9 @@ public class OncoreNames extends GhidraScript {
         } else {
             Symbol s = getSymbolAt(a);
             if (s != null && s.getName().equals(name)) { lb++; return; }
+            for (Symbol o : currentProgram.getSymbolTable().getSymbols(a)) {
+                if (o.getName().equals(name)) { o.setPrimary(); lb++; return; }
+            }
             if (s == null || ours(s)) {
                 if (s != null && s.getSource() != SourceType.DEFAULT && getFunctionAt(a) == null) s.setName(name, SourceType.USER_DEFINED);
                 else createLabel(a, name, true, SourceType.USER_DEFINED);

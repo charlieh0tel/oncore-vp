@@ -14,14 +14,16 @@
 08C252	F	osc_offset_update	docs/memory-map.md
 08C67C	F	gps_time_to_rtc	docs/memory-map.md
 08C718	F	almanac_recheck_and_predict	docs/memory-map.md
-08FC68	F	nav_filter_init	docs/memory-map.md
+08FC68	X	nav_filter_init	not an entry (names-nav)
+08FC68	L	nav_seed_drift	inside nav_reset $08FB26 (names-nav)
 08FD50	F	nav_step	docs/memory-map.md
 093906	F	nav_solve_mode	docs/memory-map.md
 095446	F	osc_search_reset	docs/memory-map.md
 0957BC	F	sv_search_pass	docs/memory-map.md
 097464	F	osc_search_step	docs/memory-map.md
 097A02	F	chan_search_center	docs/memory-map.md
-09A816	F	subframe1_week	docs/memory-map.md
+09A816	X	subframe1_week	not an entry (names-nav)
+09A816	L	sf1_week_flag	inside $09A718 (names-nav)
 09B0F6	F	bcd_to_bin	docs/memory-map.md
 09B116	F	bin_to_bcd	docs/memory-map.md
 09B138	F	rtc_read_record	docs/memory-map.md
@@ -163,7 +165,7 @@
 0081AE	L	gps_week	docs/memory-map.md
 0081C4	L	year_hint	docs/memory-map.md
 0081D2	L	clock_drift	docs/memory-map.md
-0081EE	L	nav_hold_mode	docs/memory-map.md
+0081EE	L	nav_init_state	0 no fix, 1 three SVs, 2 navigating (names-nav)
 008EBA	L	date_time	docs/memory-map.md
 008F1E	L	rcvr_status	docs/memory-map.md
 009D82	L	save_year_flag	docs/memory-map.md

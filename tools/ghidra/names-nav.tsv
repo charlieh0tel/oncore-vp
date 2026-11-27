@@ -97,18 +97,6 @@
 09E310	F	geoid_height	Geoid separation: converts to WGS-84 (table $0AF84E) unless datum 49, 10 deg grid interpolation
 09E66A	F	geoid_grid_value	Grid value x 10 helper for geoid_height
 09E71C	F	geoid_grid_index	Lat row (0-17/18) and lon column (mod 36) of the 10 deg geoid grid
-09E88E	F	eeprom_blk_1026	EEPROM block $1026 load/default/save (masks $7A00/$7A08, $79F6, $8FAE)
-09EA04	F	eeprom_blk_1046	EEPROM block $1046: $633C, datum $7592, hold position $81F0, $8208, $8209
-09ECDE	F	eeprom_blk_1098	EEPROM block $1098 ($81C2, $8216, $8EB8...)
-09EE0E	F	eeprom_blk_10a2	EEPROM block $10A2 ($81DA, $9D0C, deselect list)
-09EF44	F	eeprom_blk_10d0	EEPROM block $10D0 ($9D0E, $9D11, $9D16, $81C8, $8210...)
-09F226	F	eeprom_blk_10fe	EEPROM block $10FE (datum doubles)
-09F3A8	F	eeprom_blk_112c	EEPROM block $112C (datum doubles); not in the docs' loader list
-09F52A	F	eeprom_blk_115a	EEPROM block $115A
-09F636	F	iono_eeprom	EEPROM block $1180 iono alpha/beta <-> $2428/$242C (arg 2 load, 3 default, 4 save)
-09F72A	F	utc_eeprom	EEPROM block $11CC UTC parameters <-> $2624
-09F94A	F	pos_save_eeprom	Writes $8ED6 (h, lat, lon) to the inactive record $1192/$11AE, checksum, flips $11CA
-09FB22	F	task_sv_predict	Task ($8CC): snapshots inputs to $C70, predicts into bank $37A2 + $B14 x $CC6 (or search list only), flips $37A0
 0A053A	F	traim	T-RAIM: residual spread vs alarm limit $9D16, isolates worst SV (disables $8FAF[SV], traim_time_fix); $9D28 alarm, $9D2A error, $9D2C status
 0A0BF2	F	traim_time_fix	Recomputes time with SV excluded (traim_rx_time), date, traim_pps_schedule
 0A0DBA	F	traim_rx_time	Mean receive time excluding one channel
@@ -223,126 +211,126 @@
 009D2A	L	traim_time_err	Time error estimate, $FFFF unknown
 009D2C	L	traim_status	0 none removed, 1 SV removed, 2 too few SVs
 011192	L	ee_pos_rec	EEPROM $1192/$11AE: two position records (h, lat, lon) + checksum; selector $11CA
-007A3C+000	S	eph.valid	eph[ch], stride $EC, ch 0-7
-007A3C+001	S	eph.iode	IODE copy from eph_store +$46
-007A3C+002	S	eph.new	Set at decode; forces phasor init
-007A3C+004	S	eph.toe	double
-007A3C+00C	S	eph.m0	2^-31 pi
-007A3C+014	S	eph.dn	2^-43 pi
-007A3C+01C	S	eph.e	2^-33
-007A3C+024	S	eph.sqrta	2^-19
-007A3C+02C	S	eph.omega0	2^-31 pi
-007A3C+034	S	eph.i0	2^-31 pi (phasor with IDOT)
-007A3C+03C	S	eph.w	2^-31 pi; sin/cos at +$CC/+$D4
-007A3C+044	S	eph.omegadot	2^-43 pi
-007A3C+04C	S	eph.idot	2^-43 pi
-007A3C+054	S	eph.cuc	2^-29
-007A3C+05C	S	eph.cus	2^-29
-007A3C+064	S	eph.crc	2^-5
-007A3C+06C	S	eph.crs	2^-5
-007A3C+074	S	eph.cic	2^-29
-007A3C+07C	S	eph.cis	2^-29
-007A3C+084	S	eph.tgd	2^-31
-007A3C+08C	S	eph.toc	x 16
-007A3C+094	S	eph.af2	2^-55
-007A3C+09C	S	eph.af1	2^-43
-007A3C+0A4	S	eph.af0	2^-31
-007A3C+0AC	S	eph.n	sqrt(mu)/A^1.5 + dn
-007A3C+0B4	S	eph.sqrt1e2	sqrt(1 - e^2)
-007A3C+0BC	S	eph.omegadot_we	Omegadot - We
-007A3C+0C4	S	eph.omega0_we	Omega0 - We x toe
-007A3C+0CC	S	eph.sinw	sin w
-007A3C+0D4	S	eph.cosw	cos w
-007A3C+0DC	S	eph.a	sqrtA^2
-007A3C+0E4	S	eph.esqrta	e x sqrtA (relativistic term with F)
-00641C+000	S	svst.omega_ph	svst[ch], stride $174; phasor: +0 t, +8 rate, +$10 rate dt, +$18/+$20 sin/cos step, +$28/+$30 sin/cos, +$38 angle
-00641C+040	S	svst.m_ph	Mean-anomaly phasor (same layout)
-00641C+080	S	svst.i_ph	Inclination phasor (same layout)
-00641C+0C0	S	svst.xyz	SV ECEF x, y, z
-00641C+0D8	S	svst.vxyz	SV ECEF velocity
-00641C+0F0	S	svst.range_rate	-LOS . Vsv
-00641C+0F8	S	svst.los	LOS unit vector x, y, z
-00641C+110	S	svst.range	Geometric range (m)
-00641C+118	S	svst.enu	N, E, U of SV - user
-00641C+130	S	svst.dt_toc	t - toc
-00641C+138	S	svst.sine	sin E
-00641C+140	S	svst.clk	SV clock correction (s)
-00641C+148	S	svst.clk_drift	SV clock drift
-00641C+150	S	svst.ltime	Range / c
-00641C+158	S	svst.ltime_prev	Previous range / c
-00641C+160	S	svst.rx_time	tx time + range / c
-00641C+168	S	svst.tx_time	Corrected transmit time
-00641C+170	S	svst.ltime_ok	Range valid flags (+$170, +$171)
-00641C+172	S	svst.pos_ok	SV position computed this epoch
-008FDA+000	S	eph_store.status	eph_store[SV], stride $58, SV 1-37; 2 = collected
-008FDA+001	S	eph_store.words	24 raw 24-bit words (sf1-3 words 3-10)
-008FDA+02E	S	eph_store.toe_raw	toe/16 (word)
-008FDA+04A	S	eph_store.rx_time	Receive time (double)
-008FDA+052	S	eph_store.rx_week	Receive week
-008FDA+054	S	eph_store.sum	~sum8 of 84 bytes
-0082D8+000	S	eph_collect.status	eph_collect[SV], stride $50; 2 when complete
-0082D8+001	S	eph_collect.words	24 x 3 bytes
-0082D8+04A	S	eph_collect.mask	Word bitmask, $FFFFFF = all
-0082D8+04E	S	eph_collect.ready	1 = ready to commit
-0058DE+000	S	alm.rec	Almanac buffer: record SV n at +$18 x n: +0 dataID/SVid, +1 e, +3 toa, +4 di, +6 Omegadot, +8 health, +9 sqrtA, +$C Omega0, +$F w, +$12 M0, +$15 af0/af1
-0058DE+318	S	alm.page25	Two 24-byte records: sf5 page 25 (+$319 toa, +$31A week), sf4 page 25
-0058DE+348	S	alm.healthy	1 = healthy, per SV (from page 25)
-0058DE+36E	S	alm.nhealthy	Healthy SV count
-0058DE+36F	S	alm.week	Almanac week (mod 256)
-0058DE+370	S	alm.toa	toa (s, long)
-00116A+000	S	alm_exp.e	alm_exp[SV], stride $88; 2^-21
-00116A+008	S	alm_exp.i	inclination
-00116A+010	S	alm_exp.omegadot	2^-38 pi
-00116A+018	S	alm_exp.sqrta	2^-11
-00116A+020	S	alm_exp.omega0	2^-23 pi
-00116A+028	S	alm_exp.w	2^-23 pi
-00116A+030	S	alm_exp.m0	2^-23 pi
-00116A+038	S	alm_exp.a	semi-major axis
-00116A+040	S	alm_exp.n	mean motion
-00116A+048	S	alm_exp.ea	e x A
-00116A+050	S	alm_exp.omega0_we	Omega0 - We x toa
-00116A+058	S	alm_exp.omegadot_we	Omegadot - We
-00116A+060	S	alm_exp.sqrt1e2	sqrt(1 - e^2)
-00116A+068	S	alm_exp.sini	sin i
-00116A+070	S	alm_exp.cosi	cos i
-00116A+078	S	alm_exp.af0	2^-20
-00116A+080	S	alm_exp.af1	2^-38
-0037A2+000	S	pred.nsets	Prediction buffer ($B14): number of SV sets
-0037A2+001	S	pred.nsearch	Search list length
-0037A2+002	S	pred.nvisible	Visible SV count
-0037A2+003	S	pred.nsorted	Sorted list length
-0037A2+004	S	pred.by_el	SVs sorted by elevation
-0037A2+029	S	pred.search	Search order list
-0037A2+04E	S	pred.visible	Per SV visible flag
-0037A2+074	S	pred.deselect	Per SV deselect (from $8F88)
-0037A2+09A	S	pred.enable	Per SV enable (from $8FAF)
-0037A2+0C0	S	pred.sv	SV n record at +$C0 + $24 x n: +0 valid, +2 az (deg, word), +4 el (deg, char), +6 range rate, +8 x, +$C y, +$10 z, +$14 N, +$18 E, +$1C U, +$20 range (longs, m)
-0037A2+618	S	pred.select_mode	From $81DA
-0037A2+619	S	pred.dop_kind	From $79F7
-0037A2+61A	S	pred.sets	10 bytes each: 8 SVs, DOP x 10 word at +8
-000E36+000	S	nav_decode.sv	nav_decode[ch], stride $5A
-000E36+030	S	nav_decode.toa_seen	Almanac toa tracking flag (+$30) and toa (+$32)
-000E36+036	S	nav_decode.shreg	32-bit bit shift register
-000E36+03A	S	nav_decode.nbits	Bits in register
-000E36+03B	S	nav_decode.subframe	Subframe id 1-5
-000E36+03C	S	nav_decode.word	Word 1-10
-000E36+03D	S	nav_decode.d29	D29*
-000E36+03E	S	nav_decode.d30	D30* (invert)
-000E36+03F	S	nav_decode.page_sv	sf4/5 SV id (word 3)
-000E36+043	S	nav_decode.frame_sync	Preamble found
-000E36+044	S	nav_decode.tow_ok	TOW verified
-000E36+045	S	nav_decode.how_seen	HOW decoded
-000E36+04A	S	nav_decode.tow	TOW (HOW)
-000E36+050	S	nav_decode.tow_prev	Previous TOW
-000E36+054	S	nav_decode.ms_week	ms of week (long)
-006FBC+000	S	chan_meas.sv	chan_meas[ch], stride $B6
-006FBC+001	S	chan_meas.state	Nav state 0-8 (8 = ephemeris)
-006FBC+002	S	chan_meas.flags	Bit 0 parity fail, 3 URA >= 6, 4 unhealthy, 5/6 HOW flags
-006FBC+004	S	chan_meas.ura	URA index
-006FBC+006	S	chan_meas.subframe	Current subframe buffer (10 words x 6)
-006FBC+044	S	chan_meas.subframe_done	Completed subframe copy
-006FBC+090	S	chan_meas.pr_raw	Raw pseudorange from code phase (m, mod 1 ms)
-006FBC+098	S	chan_meas.code_range	Smoothed code range (m)
-006FBC+0A2	S	chan_meas.zcount	TOW from HOW (6 s units)
-006FBC+0A6	S	chan_meas.tx_time	Transmit time (s, double)
-006FBC+0AE	S	chan_meas.range_rate	Carrier range rate (m/s, double)
+007A3C+000	S	valid	eph[ch], stride $EC, ch 0-7
+007A3C+001	S	iode	IODE copy from eph_store +$46
+007A3C+002	S	new	Set at decode; forces phasor init
+007A3C+004	S	toe	double
+007A3C+00C	S	m0	2^-31 pi
+007A3C+014	S	dn	2^-43 pi
+007A3C+01C	S	e	2^-33
+007A3C+024	S	sqrta	2^-19
+007A3C+02C	S	omega0	2^-31 pi
+007A3C+034	S	i0	2^-31 pi (phasor with IDOT)
+007A3C+03C	S	w	2^-31 pi; sin/cos at +$CC/+$D4
+007A3C+044	S	omegadot	2^-43 pi
+007A3C+04C	S	idot	2^-43 pi
+007A3C+054	S	cuc	2^-29
+007A3C+05C	S	cus	2^-29
+007A3C+064	S	crc	2^-5
+007A3C+06C	S	crs	2^-5
+007A3C+074	S	cic	2^-29
+007A3C+07C	S	cis	2^-29
+007A3C+084	S	tgd	2^-31
+007A3C+08C	S	toc	x 16
+007A3C+094	S	af2	2^-55
+007A3C+09C	S	af1	2^-43
+007A3C+0A4	S	af0	2^-31
+007A3C+0AC	S	n	sqrt(mu)/A^1.5 + dn
+007A3C+0B4	S	sqrt1e2	sqrt(1 - e^2)
+007A3C+0BC	S	omegadot_we	Omegadot - We
+007A3C+0C4	S	omega0_we	Omega0 - We x toe
+007A3C+0CC	S	sinw	sin w
+007A3C+0D4	S	cosw	cos w
+007A3C+0DC	S	a	sqrtA^2
+007A3C+0E4	S	esqrta	e x sqrtA (relativistic term with F)
+00641C+000	S	omega_ph	svst[ch], stride $174; phasor: +0 t, +8 rate, +$10 rate dt, +$18/+$20 sin/cos step, +$28/+$30 sin/cos, +$38 angle
+00641C+040	S	m_ph	Mean-anomaly phasor (same layout)
+00641C+080	S	i_ph	Inclination phasor (same layout)
+00641C+0C0	S	xyz	SV ECEF x, y, z
+00641C+0D8	S	vxyz	SV ECEF velocity
+00641C+0F0	S	range_rate	-LOS . Vsv
+00641C+0F8	S	los	LOS unit vector x, y, z
+00641C+110	S	range	Geometric range (m)
+00641C+118	S	enu	N, E, U of SV - user
+00641C+130	S	dt_toc	t - toc
+00641C+138	S	sine	sin E
+00641C+140	S	clk	SV clock correction (s)
+00641C+148	S	clk_drift	SV clock drift
+00641C+150	S	ltime	Range / c
+00641C+158	S	ltime_prev	Previous range / c
+00641C+160	S	rx_time	tx time + range / c
+00641C+168	S	tx_time	Corrected transmit time
+00641C+170	S	ltime_ok	Range valid flags (+$170, +$171)
+00641C+172	S	pos_ok	SV position computed this epoch
+008FDA+000	S	status	eph_store[SV], stride $58, SV 1-37; 2 = collected
+008FDA+001	S	words	24 raw 24-bit words (sf1-3 words 3-10)
+008FDA+02E	S	toe_raw	toe/16 (word)
+008FDA+04A	S	rx_time	Receive time (double)
+008FDA+052	S	rx_week	Receive week
+008FDA+054	S	sum	~sum8 of 84 bytes
+0082D8+000	S	status	eph_collect[SV], stride $50; 2 when complete
+0082D8+001	S	words	24 x 3 bytes
+0082D8+04A	S	mask	Word bitmask, $FFFFFF = all
+0082D8+04E	S	ready	1 = ready to commit
+0058DE+000	S	rec	Almanac buffer: record SV n at +$18 x n: +0 dataID/SVid, +1 e, +3 toa, +4 di, +6 Omegadot, +8 health, +9 sqrtA, +$C Omega0, +$F w, +$12 M0, +$15 af0/af1
+0058DE+318	S	page25	Two 24-byte records: sf5 page 25 (+$319 toa, +$31A week), sf4 page 25
+0058DE+348	S	healthy	1 = healthy, per SV (from page 25)
+0058DE+36E	S	nhealthy	Healthy SV count
+0058DE+36F	S	week	Almanac week (mod 256)
+0058DE+370	S	toa	toa (s, long)
+00116A+000	S	e	alm_exp[SV], stride $88; 2^-21
+00116A+008	S	i	inclination
+00116A+010	S	omegadot	2^-38 pi
+00116A+018	S	sqrta	2^-11
+00116A+020	S	omega0	2^-23 pi
+00116A+028	S	w	2^-23 pi
+00116A+030	S	m0	2^-23 pi
+00116A+038	S	a	semi-major axis
+00116A+040	S	n	mean motion
+00116A+048	S	ea	e x A
+00116A+050	S	omega0_we	Omega0 - We x toa
+00116A+058	S	omegadot_we	Omegadot - We
+00116A+060	S	sqrt1e2	sqrt(1 - e^2)
+00116A+068	S	sini	sin i
+00116A+070	S	cosi	cos i
+00116A+078	S	af0	2^-20
+00116A+080	S	af1	2^-38
+0037A2+000	S	nsets	Prediction buffer ($B14): number of SV sets
+0037A2+001	S	nsearch	Search list length
+0037A2+002	S	nvisible	Visible SV count
+0037A2+003	S	nsorted	Sorted list length
+0037A2+004	S	by_el	SVs sorted by elevation
+0037A2+029	S	search	Search order list
+0037A2+04E	S	visible	Per SV visible flag
+0037A2+074	S	deselect	Per SV deselect (from $8F88)
+0037A2+09A	S	enable	Per SV enable (from $8FAF)
+0037A2+0C0	S	sv	SV n record at +$C0 + $24 x n: +0 valid, +2 az (deg, word), +4 el (deg, char), +6 range rate, +8 x, +$C y, +$10 z, +$14 N, +$18 E, +$1C U, +$20 range (longs, m)
+0037A2+618	S	select_mode	From $81DA
+0037A2+619	S	dop_kind	From $79F7
+0037A2+61A	S	sets	10 bytes each: 8 SVs, DOP x 10 word at +8
+000E36+000	S	sv	nav_decode[ch], stride $5A
+000E36+030	S	toa_seen	Almanac toa tracking flag (+$30) and toa (+$32)
+000E36+036	S	shreg	32-bit bit shift register
+000E36+03A	S	nbits	Bits in register
+000E36+03B	S	subframe	Subframe id 1-5
+000E36+03C	S	word	Word 1-10
+000E36+03D	S	d29	D29*
+000E36+03E	S	d30	D30* (invert)
+000E36+03F	S	page_sv	sf4/5 SV id (word 3)
+000E36+043	S	frame_sync	Preamble found
+000E36+044	S	tow_ok	TOW verified
+000E36+045	S	how_seen	HOW decoded
+000E36+04A	S	tow	TOW (HOW)
+000E36+050	S	tow_prev	Previous TOW
+000E36+054	S	ms_week	ms of week (long)
+006FBC+000	S	sv	chan_meas[ch], stride $B6
+006FBC+001	S	state	Nav state 0-8 (8 = ephemeris)
+006FBC+002	S	flags	Bit 0 parity fail, 3 URA >= 6, 4 unhealthy, 5/6 HOW flags
+006FBC+004	S	ura	URA index
+006FBC+006	S	subframe	Current subframe buffer (10 words x 6)
+006FBC+044	S	subframe_done	Completed subframe copy
+006FBC+090	S	pr_raw	Raw pseudorange from code phase (m, mod 1 ms)
+006FBC+098	S	code_range	Smoothed code range (m)
+006FBC+0A2	S	zcount	TOW from HOW (6 s units)
+006FBC+0A6	S	tx_time	Transmit time (s, double)
+006FBC+0AE	S	range_rate	Carrier range rate (m/s, double)

@@ -98,6 +98,7 @@ all match the dump.
 | $1180 | 8 | $1188 | Ionosphere model, Klobuchar alpha0-3, beta0-3, one byte each (scales 2^-30, 2^-27, 2^-24, 2^-24; 2^11, 2^14, 2^16, 2^16, used in $08B5CE): 11 FE FE 02 3C F5 FE 0C |
 | $118C, $118E | 2 + 2 | | Year hint, two slots (word, binary); $1190 selects (0 = $118C, 1 = $118E).  Written only by @@Ac, alternating slots ($09FE2A).  Invalid selector or year outside 1980-2070: $118C = 1992, $1190 = 0 ($09C52C).  Dump: $07EA, $07EA (2026) |
 | $1190 | 1 | | Year slot selector; dump 0 |
+| $1192, $11AE | 28 + 28 | $11AA, $11C6 | Position records: height, lat, lon (doubles), saved by $09F94A, restored by $09C3E8; selector $11CA.  Dump: selector 1; record 0 h = 0; record 1 h = 12.65, lat/lon as block $1046; both checksums verify |
 | $11CC | 14 | $11DA | UTC parameters ($08BF50: 604800, 86400, 2^12, 2^-50 scales): bytes 0, 1 = delta-t LS and delta-t LSF = 18, 18; bytes 3, 4 handled as 8-bit week numbers; dump 12 12 24 8E 89 07 00 00 00 00 00 00 00 01 |
 
 Almanac bank ($09BEDE): 32 records of 24 bytes at bank + $18 x SV
@@ -275,7 +276,8 @@ $015E, $5091.
 
 - $08C252 computes a drift as RAM $81D2 (double) x 5.2550354685707275
   (= 1575.42 MHz / c, L1 cycles per meter), rounded: Hz at L1 if $81D2
-  is the clock drift in m/s (inferred).
+  is the clock drift in m/s (the 4th state of the velocity solution,
+  used x 1/c).
 - $08C252 runs from task $08B248 when $81EE = 2, at most once per
   power-up ($1143, cleared by $08B1A4).  Needs > 10 fixes in a row
   ($1142), each drift within 20 of the previous ($980); modes 2/3 need
@@ -403,6 +405,35 @@ Tracking loop ($0805B2), per channel:
 - Reset entry $089F5C also sets PEPAR $37, DDRE $C8, PORTE1 $08,
   PFPAR $FB, GPTMCR $2000, DDRGP $DF, PORTGP $C1, CFORC $03.
 
+## Navigation (from the firmware)
+
+1 Hz pipeline: `task_meas_1s` $08A7AE -> $097D2A (subframe decode,
+pseudoranges) -> $095582 -> `nav_step` $08FD50 -> `rcvr_status_build`
+-> TRAIM $0A053A.
+
+| Item | Detail |
+|---|---|
+| Pseudorange | code phase x lambda / 256 -> $704C ($09843C); Hatch carrier smoothing, N doubling to 128 -> $7054; range rate = carrier x lambda / 2^14 -> $706A ($098700); transmit time = ms of week x 0.001 - range/c -> $7062 ($098538) |
+| Ephemeris | Raw per SV $8FDA + $58 x SV (checksummed; accepted if \|t - toe\| < 4 h, $09A10C); decoded per channel $7A3C + $EC x ch ($098C68), with n, sqrt(1-e^2), Omegadot - omega_e, Omega0 - omega_e toe, sin/cos omega, A, e sqrtA precomputed |
+| SV position | Angles propagated by rotating precomputed sin/cos pairs ($094066 init, $094418 step); full reinit on new ephemeris or one channel every 10th epoch ($091A1C, counter $CF4); Kepler by series iteration and ICD-200 harmonic corrections ($094660) |
+| Solver | Unweighted least squares, not a Kalman filter: H rows [1, LOS.E, LOS.N, LOS.U] at $A04, normal matrix $984, inverse $369C ($0904A4); corrections applied to lat/lon/height and clock bias ($093362); velocity from Doppler residuals, then smoothing ($09528E, $092B56) and a position complementary filter ($0921EC) |
+| DOP | $7A10 GDOP, $7A18 PDOP, $7A20 HDOP, $7A28 VDOP, $7A30 TDOP |
+| Residuals | $8218 pseudorange, $8258 range rate, per channel ($091140; DGPS correction subtracted inside) |
+| Modes ($093906, table $093FF2) | 1 before first fix (set by `nav_step`); 2 3D (>= 4 SVs, PDOP <= $7A08, @@Al); 3 2D (HDOP <= $7A00, @@AC; 3 SVs or altitude hold $6344); 4 position hold ($8208); 5 < 3 SVs; 6 DOP over mask or singular.  Velocity zeroed after 6 epochs in mode 5/6 ($2596) |
+| Init state $81EE | 0 no fix, 1 three SVs, 2 navigating; first position = mean of SV positions projected to the ellipsoid ($090F80), up to 4 iterations ($0930D0) |
+| Position hold | Time only: clock correction = mean residual; residuals folded modulo 1 ms once $81EE = 2 ($091140) |
+| Corrections | Klobuchar per SV ($08B5CE -> $22F6 + 8 x SV) if $81C2 = 1 (@@Aq); Sagnac via LOS ($09175A -> $8F48); relativistic F e sqrtA sinE and TGD ($09150C); DGPS PRC/RRC with IODE match and age ($09BA1A, $09BB5E, $09B94C; sets $75C4 + $E x SV, previous $77D8).  No troposphere model |
+| Almanac | Three RAM buffers $58DE, $5C52, $5FC6 (active `almanac_ptr`, collecting $81CA, last saved $8FD6); new almanac needs >= 15 healthy SVs and a common toa ($08B062, $08B0E2); written to the inactive EEPROM bank by $08AE9E |
+| Visibility | Banks of $B14 at $37A2, $42B6 (selector $37A0), $4DCA; Kepler from the expanded almanac $116A + $88 x SV ($08E714, $08EA8E); SV sets ranked by DOP ($08E310, DOP $08C7DE); search order $08F55E |
+| GPS - UTC ($08BF50 -> $26AE) | Block $2624: +0 dtLS, +1 dtLSF, +2 tot / 4096, +3 WNt, +4 WNLSF, +5 DN, +6 A0 (long, 2^-30), +$A A1 (long, 2^-50); +-480 s window around the leap sets the direction in $81C6 |
+| TRAIM ($0A053A) | Residual spread tests with 32.9 / sqrt(n) and 98.7; worst SV excluded by clearing $8FAF[SV] (reset hourly by `nav_task`); time recomputed ($0A0BF2, $0A0DBA, $0A0F88); $9D28 alarm, $9D2A error estimate, $9D2C removed/insufficient; on/off $9D11 |
+| 1PPS ($091BFA) | ms and sub-ms counts $291C, $291E in ticks of 9.548 MHz (31.398 m); clock bias and drift, cable delay $820A (@@Az), offset $81C8 (@@Ax), hardware delay $81BA (set in `boot_time_set`, includes -113.5 ns); mode $9D0E: 0 off, 1 on, 2 only when tracking, 3 only when TRAIM ok ($095180) |
+| Limits ($0920BE) | Height > 18288 m and speed > 514.4 m/s: both clamped; height < -1000 m clamped |
+| Other | Magnetic variation ($09D456, $09D7DA -> $81B2); 10 degree geoid grid ($09E310 -> $7574); position saved to RAM $2598 (checksum $25B0) and EEPROM ($09F94A) |
+
+Ghidra decompiles $097EE4 (parity) and the bit extraction in $098C68
+as empty or partial; the disassembly has the full code.
+
 ## Host commands (from the firmware)
 
 Output payload layouts: [messages.md](messages.md).
@@ -509,7 +540,7 @@ Built by $0A9BEC (via $0AA772) from RAM $8F1E, which $08ABD4 assembles:
 | 6 | mode 6 | Navigation mode ($25F6, copy of $0B6C) |
 | 5 | mode 2 | 3D fix |
 | 4 | mode 3 | 2D fix |
-| 3 | mode 1 or 4 | Mode 4: position-hold solution ($093906; inferred) |
+| 3 | mode 1 or 4 | Mode 4: position hold ($8208 set; $093906) |
 | 2 | $75C2 != 1 | Replaces $8F1E bit 2 ($25F8) at output; $75C2 cleared while corrections are younger than $79F6 x 10 ($09BC0A) |
 | 1 | count = 0 | $37A2 (or $42B6) zero |
 | 0 | $25F4 = 1 | Almanac not usable |

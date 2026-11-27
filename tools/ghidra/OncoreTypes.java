@@ -75,6 +75,37 @@ public class OncoreTypes extends GhidraScript {
             apply(recs[k][0], recs[k][2] == 1 ? t : new ArrayDataType(t, (int) recs[k][2], t.getLength()), recl[k]);
         }
 
+        // Records found by the navigation pass.  SV-indexed arrays start at
+        // the address of element 0 (unused) so that x[sv] indexes directly.
+        long[][] nav = {{0x116AL, 0x88, 33}, {0x82D8L, 0x50, 33}, {0x8FDAL, 0x58, 38},
+            {0x641CL, 0x174, 8}};
+        String[] navn = {"alm_exp", "eph_collect", "eph_store", "svst"};
+        for (int k = 0; k < nav.length; k++) {
+            StructureDataType st = new StructureDataType(cat, navn[k] + "_rec", (int) nav[k][1]);
+            st.setPackingEnabled(false);
+            DataType t = add(st);
+            apply(nav[k][0], new ArrayDataType(t, (int) nav[k][2], t.getLength()), navn[k]);
+        }
+        // Visible-list / prediction banks ($B14) and almanac buffers ($374).
+        StructureDataType pb = new StructureDataType(cat, "pred_bank", 0xB14);
+        pb.setPackingEnabled(false);
+        DataType pbT = add(pb);
+        apply(0x37A2L, pbT, null);
+        apply(0x42B6L, pbT, null);
+        apply(0x4DCAL, pbT, null);
+        StructureDataType ab = new StructureDataType(cat, "alm_buf", 0x374);
+        ab.setPackingEnabled(false);
+        DataType abT = add(ab);
+        apply(0x58DEL, abT, null);
+        apply(0x5C52L, abT, null);
+        apply(0x5FC6L, abT, null);
+
+        // Navigation matrices (doubles): normal matrix, geometry rows, covariance.
+        DataType row4 = new ArrayDataType(dbl, 4, 8);
+        apply(0x0984L, new ArrayDataType(row4, 4, 32), null);
+        apply(0x0A04L, new ArrayDataType(row4, 8, 32), null);
+        apply(0x369CL, new ArrayDataType(row4, 4, 32), null);
+
         // CS7 correlator channel registers; read and write meanings differ.
         StructureDataType cs7 = new StructureDataType(cat, "cs7_chan", 0x10);
         cs7.setPackingEnabled(false);
