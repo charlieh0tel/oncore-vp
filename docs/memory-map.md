@@ -535,7 +535,7 @@ That script in firmware terms (values in the reference's units):
 | Command | Value | Effect in the firmware |
 |---|---|---|
 | @@Ah | 2 | Search in elevation order ($9D0C = 1) |
-| @@Aj | 0 | Rank SV sets by PDOP (stored code 0 = GDOP after the remap; the reference's 0 is PDOP) |
+| @@Aj | 0 | Rank SV sets by GDOP (reference: 0 GDOP, 1 PDOP, 2 HDOP, 3 VDOP, 4 TDOP; the firmware stores them as internal 0, 2, 1, 4, 3) |
 | @@Ak | 10 | Set-switch hysteresis 1.0 |
 | @@Al | 60 | 3D PDOP limit 6.0 |
 | @@AC | 120 | 2D HDOP limit 12.0 |
