@@ -905,6 +905,9 @@ Z3805A's (SSG0163878) locked 84% of snapshots; the Z3801A's
   (SVs 7, 8, 9, 16, 21; signal 35-92), at once after the power cycle.
   The 8ch, moved to another feed at the same time, tracked nothing in
   5 min.
+- Conclusion: none of the three receivers is faulty.  The bench
+  distribution-amplifier feed is short of gain: the 8ch also needs some
+  extra, the 6ch boards more (they needed about 20 dB in service too).
 
 ## 6-channel firmware and EEPROM (read 2026-11-27)
 
@@ -1048,13 +1051,9 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
 
 ## Open
 
-- Backlog: compare the deaf 6-channel boards (*7VGN4*, Z3801A;
-  *7VENR*, Z3805A) with the working 8-channel board.  Needs BDM wired to
-  a 6ch board's test points (docs/board.md; hand soldering).  Dump its
-  flash and EEPROM, find its oscillator record and the byte sent to the
-  QSPI PCS1 device, and compare with the 8ch's ($75BC = $50, $75C0 =
-  20572, live drift 20355 Hz; defaults $67, 20625).  Over serial alone:
-  `tools/oncore.py ta` and a drift reading.
+- 6ch firmware (`third_party/moto/B1121P1114-flash.bin`) in Ghidra:
+  search tables, application type, oscillator record, EEPROM layout;
+  compare with the 8ch.
 - T1 VBATT (pin 13) source on the 8ch board and jig; whether the RTC
   keeps time across a power cycle (poll @@Ac in binary mode after a
   power cycle).
