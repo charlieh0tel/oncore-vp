@@ -536,6 +536,14 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
 
 ## Open
 
+- Backlog: compare the deaf 6-channel boards (*7VGN4*, Z3801A;
+  *7VENR*, Z3805A) with the working 8-channel board.  Needs BDM wired to
+  a 6ch board's test points (docs/board.md; hand soldering).  Dump its
+  flash and EEPROM, find its oscillator record and the byte sent to the
+  QSPI PCS1 device, and compare with the 8ch's ($75BC = $50, $75C0 =
+  20507; defaults $67, 20625).
+- Live oscillator drift: rerun the BDM monitor with an antenna
+  connected (the receiver was not tracking on 2026-11-26).
 - Confirm the RF chain antenna -> A06 -> 95U01 SAW -> 58M01 by
   continuity.
 - Confirm the /656 is in the hybrid (29.110 kHz on a hybrid pin, traced
