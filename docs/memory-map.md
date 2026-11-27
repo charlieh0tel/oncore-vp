@@ -200,9 +200,14 @@ auto-analysis.
 
 ### Compiler
 
-Consistent with HP's B3640 Motorola 68000 Family C Cross Compiler
-(manual B3640-97001, Jan 1994), the same as smartclock's finding for
-the SmartClock firmware.  Not proven: no version string in the image.
+HP's B3640 Motorola 68000 Family C Cross Compiler (manual B3640-97001,
+Jan 1994), the same as smartclock's finding for the SmartClock firmware.
+No version string in the image.  The soft-double routines match the
+B3640 A.04.10 absolute-addressing run-time libraries (AB68000, AB68020,
+AB68030, ABCPU32.LIB) byte for byte up to each object-record break
+(sub64r: 93 bytes, div64r: 38); the library module `faddsub64` carries
+the names sub64r, sub64p, add64pp.  Not in the PC/PI (position-
+independent) or 6888X libraries.
 
 | Trait | Firmware | B3640 manual |
 |---|---|---|
