@@ -185,7 +185,6 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
     <li>Tasks: a 26-task pre-emptive scheduler; the CS7 correlator interrupt runs every 1 ms (channel states 0 search &hellip; 5 phase lock).</li>
     <li>Navigation: unweighted least squares (not a Kalman filter), Klobuchar, Sagnac, relativistic and DGPS corrections, no troposphere model; position hold is time-only; TRAIM excludes one SV. A floating-point error jumps to the reset entry.</li>
     <li>Host port: 87 binary commands, NMEA, a terse ASCII mode and a 7-bit framed mode; an RTCM SC-104 decoder feeds the DGPS table.</li>
-    <li>Fix/idle mode is saved in EEPROM ($091F; 6ch $0919) and restored at boot: 0 boots idle until <code>@@Cg 1</code>. The HP hosts send <code>@@Cg 1</code> at every power-up (smartclock).</li>
   </ul>
   <h3>Satellite search by application type (<code>@@AB</code>, $8EB8)</h3>
   <div class="scroll"><table>
