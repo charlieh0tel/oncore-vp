@@ -1096,15 +1096,9 @@ marks each item traced, buzzed or "to confirm".
 
 ## Pins
 
-MC68331, 132-pin QFP (Motorola technical data, Figure 2):
-
-51 VSS, 52 TXD, 53 RXD, 54 IPIPE/DSO, 55 IFETCH/DSI, 56 BKPT/DSCLK,
-57 TSC, 58 FREEZE/QUOT, 59 VSS, 60 XTAL, 61 VDDSYN, 62 EXTAL, 63 VDD,
-64 XFC, 65 VDD, 66 CLKOUT, 67 VSS, 68 RESET, 69 HALT, 70 BERR,
-71-77 IRQ7-IRQ1, 78 PF0/MODCLK, 79 R/W, 80 SIZ1, 81 SIZ0, 82 PE4/AS,
-83 VSS.  QSM: 43 PQS0/MISO, 44 PQS1/MOSI, 45 PQS2/SCK, 46 PQS3/PCS0/SS,
-47 PQS4/PCS1, 48 PQS5/PCS2, 49 PQS6/PCS3.  124 PC6/ADDR22/CS9,
-125 ADDR23/CS10 (MC68331 user's manual, Figure 3-2, 132-pin package).
+MC68331 pin numbers used in these notes (MC68331 user's manual, Figure
+3-2, 132-pin package): 43 MISO, 44 MOSI, 45 SCK, 46 PCS0, 47 PCS1,
+62 EXTAL, 124 CS9, 125 CS10.  Test-point pins: docs/board.md.
 
 Receiver 10-pin power/I/O header (2 x 5, beside the CPU; Oncore
 user's guide pinout, supplied by the owner):
