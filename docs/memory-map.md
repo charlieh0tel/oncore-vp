@@ -46,7 +46,10 @@ Single-stepping (BDM, gdb `stepi`) with interrupts unmasked enters
 `chan_isr` $0805B2, whose `move.w #0,($E8F2).w` write to CS7 never
 ends its bus cycle while stepping (FREEZE low); only `bdm reset`
 recovers (2026-11-27, pod 0.5.0).  Mask interrupts first
-(`set $ps = 0x2700` in gdb).
+(`set $ps = 0x2700` in gdb).  After a power cycle without BKPT held at reset, `bdm halt`
+reports "target not in background mode"; `bdm reset` then `bdm go`
+re-enables BDM.  A halt of a few ms drops tracked channels to mode 5
+briefly; they recover.
 
 ## Boot flash
 
@@ -1080,7 +1083,13 @@ centered about 9.5 MHz, -93 dBm, about 3 MHz wide at -6 dB, 34 dB
 over the receiver-off level; none with the 8ch off.  Fits IF2 =
 47.76 MHz - 2 f = 9.568 MHz = f/2 + 20.625 kHz: LO2 = 2 f, then
 sampling at f/2 leaves the 20.625 kHz carrier (80 f + 2 f + f/2 =
-82.5 f; inferred).  6ch SSG0178541, bottom can: the same 80 f LO
+82.5 f).  Carrier NCO (CS7 +0, RAM $662): LSB = 3.3111572265625 / 256
+= 217000 / 2^24 Hz ($08A8A2), and 217000 x 44 = 9,548,000, the
+firmware's f/2 constant: the carrier NCO runs at f/2 / 44 (inferred).
+Live over BDM, 8ch tracking 8 SVs: NCO rates 17.06-22.24 kHz, mean
+19.48 kHz, i.e. the 20.625 kHz nominal carrier plus clock offset and
+Doppler.  So IF2 reaches the correlators as the ~20.6 kHz carrier after
+sampling at f/2.  6ch SSG0178541, bottom can: the same 80 f LO
 (-100.4 dBm).  IF levels with a hand-held loop depend on position (8ch
 IF2 peak -93 dBm at one spot, -112 dBm at another, 6ch about -113):
 not usable to measure the 6ch gain loss.  Comb of whole multiples of f, even ones 10-15 dB
