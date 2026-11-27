@@ -1,6 +1,6 @@
 // Set up the Oncore VP's running memory map, vectors and on-chip register
-// labels after importing third_party/moto/B4121P1115-flash.bin at $080000
-// with the 68000:BE:32:CPU32 language.  Arguments: path to the EEPROM dump.
+// labels after importing a flash image (B4121P1115 8ch or B1121P1114 6ch)
+// at $080000 with the 68000:BE:32:CPU32 language.  Arguments: path to the EEPROM dump.
 // Map: docs/memory-map.md ("Memory map running").
 //@category Oncore
 
@@ -186,7 +186,7 @@ public class OncoreSetup extends GhidraScript {
                 }
             }
         }
-        addEntryPoint(a(0x89F5C));
+        addEntryPoint(a(m.getInt(a(0x80004)) & 0xffffffffL));  // reset PC
         println("Oncore setup done");
     }
 }

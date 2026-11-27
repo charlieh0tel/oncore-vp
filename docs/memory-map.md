@@ -905,6 +905,8 @@ Z3805A's (SSG0163878) locked 84% of snapshots; the Z3801A's
   (SVs 7, 8, 9, 16, 21; signal 35-92), at once after the power cycle.
   The 8ch, moved to another feed at the same time, tracked nothing in
   5 min.
+- SSG0163878 on the same higher-gain feed (18:41): 4 tracked in 17 s,
+  6 in 31 s, first fix (2D, 3 used) in 46.5 s.
 - Conclusion: both 6ch boards have lost sensitivity.  They track, but
   only with gain well beyond normal (about 20 dB extra in service, on
   the instruments' own antenna systems).  The bench feed is also weak
