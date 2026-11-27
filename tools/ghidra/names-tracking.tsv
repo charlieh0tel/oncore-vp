@@ -1,0 +1,237 @@
+# address	kind	name	note
+0805B2	F	chan_isr	Level-5 autovector (vector 29); reads 8 CS7 channel blocks, 1 ms tick ($2D6 x50, $100 x20); OncoreNames.java has sci_tx here (wrong; SCI is $08048E)
+088F8A	F	cs7_ctl_bit0_set	Sets bit 0 of CS7 control shadow $2D8 -> $FFE8F4; called only from task $08A6F0 (pending $8EC, set by @@F)
+088F98	F	chan_start_all	Clears bit 1 of $2D8 -> $FFE8F4 (set by chan_stop_all) and PPS enable $103; after channel restarts in $08A692
+088FAA	F	cs7_ctl_bit0_clr	Clears bit 0 of $2D8 -> $FFE8F4; start of $08A692
+088FB8	F	cs7_init	$FFE8E0 = 0, $FFE8F4 = $86 then $87, all channel +$A = $800F (shadow $194); from boot, task $08A656, self-test
+08904E	F	chan_code_slew	(ch, steps): CS7 +6 = steps<<8 | table $089E68[steps]; code NCO slew
+08907C	F	chan_carrier_write	(ch): CS7 +0 = $662[ch] (carrier NCO rate)
+0890A4	F	sched_start	Saves all registers at $1FFBE, return PC $08A76E, jumps to scheduler $08A13A; from boot_init
+0890C0	F	chan_code_disc	(ch): $1D4[ch] = E-L $322 x 392 / ((power $842 x 28 + |E-L| x 7) >> 10), clamp +-$3000; step $2D4 = /$800 clamp +-2
+08916C	F	task_chan_1s	Task, pending $8DE (set by chan_isr at second 0); restart/reload channels, 1 Hz code loop (code phase += step x 55 L1 cycles), reports
+0895D2	F	chan_code_dither	(ch): toggles $08[ch] between +1 and -1, $2DA = same; added to the code step each second in state 5
+08960C	F	chan_cmd_load	Copies command block $275C (stride $C) to ISR arrays: SV -> $E0 (old -> $E8), Doppler -> $1C4, code start -> $342, width -> $362
+089670	F	chan_report_build	(ch): fills report $27BC + $2C x ch from ISR arrays (state, amplitude, code phase, carrier, data bits $562)
+089828	F	chan_doppler_set	(ch): $662 = $1C4 << 8 (search Doppler command), writes CS7 +0; state 0 in task_chan_1s
+08985C	F	chan_freq_pullin	(ch): ISR state 3: lock -> state 4; else Doppler +$12E02 at count 2, -$25C04 at 4, give up (state 0, noise floor $3FFFF) at 6
+089A70	F	chan_fll_check	(ch): state 4: lock lost ($00[ch] = 0) -> state 2
+089AC4	F	chan_pll_check	(ch): state 5: $90[ch] = 0 -> loss count $A8 += 2, >= 6 (90 if $369A) -> state 2; else $A0 += 1, $A8 -= 1
+089BA0	F	task_chan_50ms	Task, pending $8DD (chan_isr each 50 ms once all channels flagged $70+n); per-channel state machine 1->2->3->4->5
+089DC0	F	chan_lock_detect	(ch): ratios of $4C2/$482/$402 accumulators within 14-95 -> $00[ch] = 1 and lock count $28[ch]++
+08A11A	F	sched_isr_exit	Interrupt tail: if interrupted PC in $080434-$088A0A returns, else runs scheduler $08A13A
+08A13A	F	sched_dispatch	Priority scheduler: pending flags $8DC-$8F5, running flags $8C2-$8CF, task entries by lea
+08A656	F	task_cs7_reinit	Task, pending $8DC (set in cmd_C and at $0A6896): cs7_init, EEPROM checksums $09AEA8, $0A29BC
+08A692	F	task_chan_init	Task, pending $8DF: rcvr_init(0), clear ctl bit 0, chan_cmd_load, chan_restart x 8, chan_start_all
+08A6F0	F	task_cs7_bit0	Task, pending $8EC (set in cmd_F): cs7_ctl_bit0_set, $C666 = 1
+08A7AE	F	task_meas_1s	Task, pending $8E0 (chan_isr at second 0): meas_process, srch_task, nav_step, rcvr_status_build, $08A8A2
+08A8A2	F	srch_status_snapshot	Packs search state per channel (SV $CF6, state $CF7, strategy $CF9, Doppler bin x 100 Hz, Doppler x 3.3112) into $6347-$63FF
+08AC74	F	task_timing_probe	When $2621 = 1: records ms-of-second ($2D6 + $100 x 50)/10 at up to 8 checkpoints into $7042 + $B6 x n (overwrites signal)
+08F55E	F	vis_list_default	(mode, list): builds SV search list from almanac health table (almanac_ptr + $348) without position/time prediction
+095180	F	pps_enable_update	$9D10 = PPS enable from $9D0E mode, copied to $2920 (-> $103 in chan_isr each second)
+095582	F	srch_task	Channel management per second (skipped when $37A0 = 2): search center, assignment, commands, nav SV selection
+095624	F	svset_select	Position hold: compares current vs best SV set ($271A table), switches if better by $79F8 x 10, assigns list
+095C06	F	chan_cmd_update	Per channel by search state $CF7: 0 clear command, 1 chan_cmd_full, 2 chan_cmd_reacq, 3 chan_cmd_narrow; writes $275C
+095D72	F	chan_cmd_reacq	(ch): reacquisition command: Doppler from prediction ($650C x 5.255), code window from range prediction or widened $D06/$2764
+0962DE	F	chan_cmd_full	(ch): command SV, Doppler x 0.302 -> NCO units, code start 0, width $1809FC (full 1 ms)
+0963B0	F	chan_cmd_narrow	(ch): command SV, width $133B3 (1/20 ms) centered on expected code phase $D02 + report code phase
+096474	F	sv_select_nav	Chooses SVs used in the fix: $1146 + 4n, $81DB[n], $6FBE bit 7 (used) from status $6FBD = 8, DGPS check $09B94C
+096956	F	sv_eligible_mask	(kind, mask[33]): SV 1-32 eligible if $8FAF[sv] = 1 (healthy), not ignored ($8F88, @@Am), kind 2: not failed ($25FB), kind 3: visible
+096A02	F	chan_doppler_user	(ch): predicted Doppler from receiver velocity ($111A/$1122/$1112) along line of sight x 5.2550 cycles/m
+096BFE	F	chan_assign_sv	(ch, sv): initializes search record $CF6 + $28 x ch; state 1 (or 0 if sv = 0), picks strategy $CF9 and Doppler bin table $CFA
+096CE8	F	sv_search_select	Chooses SV list mode: forced list ($9CEA), position hold sets (svset_select / mode 1-2) or sv_search_pass(0)
+096E28	F	srch_bin_next_reacq	(ch): reacquire stepping: strategy 4 waits $D16/1000 > width x 10 / $1809FC; advances Doppler bin $D00
+096EC0	F	srch_bin_next	(ch): after table+$64 dwells advance bin $D00 mod table+$65; after table+$66 passes: strategy 0 -> 1, strategy 4 -> SV failed $25FB
+096F94	F	srch_state_update	Search state machine from report state: 1 -> 3 when ISR state 4-5; 3 -> 2 when lost; computes measured SV Doppler $D0E
+09733C	F	srch_ref_chan	Position hold: picks tracked reference channel ($1148 used, report state >3, $658D) -> $272A/$272C/$272E code phase
+097404	F	srch_settle_count	While $1144 = 1: counts $271E+8 down from 4 and zeroes report states $27BD
+0976C2	F	chan_assign_list	(list[8]): keeps channels already on a listed SV, assigns the remaining SVs to free channels via chan_assign_sv
+097786	F	srch_center_update	(ch): search center $113C (= $271E+$36) from tracked channel's measured Doppler, step limited to +-3130
+097868	F	svset_find	(mode, mask): index of SV set in $271A table matching channels (1), used SVs (0) or all eligible (2); $FF if none
+097AEA	F	srch_hold_flags	Tracks nav_hold_mode transitions into $271E+$34/$3A, $2734-$2737; sets pending $8E6 (visibility task)
+097BDE	F	nav_decode_reset_all	Clears almanac page flags $CC8, ephemeris word masks $8322, decoder records $E36, channel records $6FBC; from boot_search_reset, nav_mode_drop
+097D2A	F	meas_process	Per-second measurement chain: decoder reset on SV change, nav_data_decode, eph accept, code range, smoothing, tx time, status, copy
+097E90	F	bit_wrap_dir	(ms, ch): +1 if ms-in-bit wrapped 19->0 vs report $27D5, -1 if 0->19, else 0
+097EE4	F	gps_parity_check	(ch): tests word $E36+$36 (inverted if D30* $E74) bit by bit; Ghidra decompiles it as empty
+09843C	F	chan_code_range	Raw code range $704C + $B6 x n = code phase x 0.000743 (L1 wavelength / 256 m); code-disc noise $E3A, weight $E38 = $2000000/$E3A
+098538	F	chan_tx_time	Transmit time $7062 (s of week) from HOW TOW $705E x 6 s, ms count $E8A (mod 604800000) and range/-c
+098700	F	chan_range_smooth	Carrier-smoothed (Hatch) range $7054: weight 1/N in $E48, N doubling to 128 ($E52), reset on slip; wraps 299792.458 m
+098C68	F	eph_unpack	(sv, ch): scales raw ephemeris $8FDA + $58 x sv into doubles $7A40.. (ch record $7A3C + $EC x ch); semicircle, 2^-n scales
+0993F6	F	alm_word_store	(word, ch, data): subframe 4/5 almanac page words into almanac buffer (almanac_ptr-like $81CA), masks $CC8/$CE9/$CEA; complete -> pending $8E3
+0995EC	F	sf4_special_msg	Page id 55 (subframe 4 page 17): 22 characters, complete -> $757C
+0996B6	F	eph_word_store	(ch, data): subframes 1-3 words into $82D9 + $50 x sv, mask $8322; all 24 words with matching IODC/IODE -> $8326 = 1
+099838	F	sf4_iono_word	Page id 56 words 3-5 -> $243A + 8 x ch, complete -> $2439/$2438
+099902	F	sf45_word	Dispatch subframe 4/5 words by page id $E75: 1-32/51/63 almanac, 56 iono/UTC, 55 special message
+0999C4	F	sf4_utc_word	Page id 56 words 6-10 -> $263C + $E x ch, complete -> $263B/$263A
+099B34	F	how_decode	(ch, word2): subframe id -> $E71, A-S/alert -> $6FBE bits 5/6, TOW -> $705E; TOW vs time within +-2 -> verified $E7A
+099C86	F	chan_status_update	$6FBD = @@Ea mode 0-8: ISR state 0-4, 5 PLL, 6 preamble sync, 7 TOW verified, 8 ephemeris ready (eph_check/eph_unpack)
+099DCC	F	alm_toa_check	(ch, word): checks almanac reference time (x 4096 s) agrees across channels, $E66/$E68
+09A044	F	chan_bit_count	(ch): number of new data bits this second from ms adjust $2922, ms-in-bit $274C and report $27D5
+09A10C	F	eph_check	(sv, ch): ephemeris checksum $902E ok and age (toe vs week/seconds) within limits
+09A268	F	sf_buf_clear	(p): clears subframe buffer (id, 10 x (data long, flag)) at $6FC2/$7000 + $B6 x ch
+09A296	F	chan_decode_reset	(full, ch): resets decoder record $E36 + $5A x ch; full also clears channel record $6FBC and buffers
+09A3FC	F	nav_bits_shift	(ch): shifts new data bits from report bytes $27D6 into 32-bit register $E6C, count $E70
+09A550	F	eph_accept	(sv): copies collected subframes $82D8 to $8FDA + $58 x sv with week/seconds and checksum; eph_unpack on its channels
+09A640	F	preamble_search	(ch): searches $E6C for preamble $8B with D29*D30* 00 ($22C00000) or inverted 11 ($DD000000) -> polarity $E73/$E74
+09A718	F	subframe_word	(ch, data): word 2 -> how_decode; subframe 1 word 3 -> gps_week, week_from_sf1, health $8FAF, URA $6FC0; subframes 1-3 -> eph_word_store
+09A86A	F	nav_data_decode	Per channel (report state 5): bit unpack, preamble sync, parity, word/subframe counting $E72/$E71, subframe buffers $6FC2 -> $7000
+09AC7A	F	chan_meas_copy	Report $27BC -> channel record $6FBC: SV, code disc $7040, amplitude $7042 (unless $2621), code phase $7044, carrier $7048 (+$8000 if inverted)
+09AD3A	F	tow_cross_check	Channels with preamble sync but unverified TOW checked against a verified channel's TOW/word position; else decoder reset
+09FF9E	F	chan_test_hook	(1|2, x): calls chan_test_override; from task_chan_1s and task_meas_1s
+0A000E	F	chan_test_override	Factory test ($35F3): per-channel decimal digits of $8210 (999999285 when $C659 = 1) force report states or disable channels
+0A1268	F	selftest_chan	Self-test of CS7 channels: SYNCR $D100, loads +0..+A with fixed values, reads back; from selftest
+000000	L	chan_lock	[8] bytes; lock indicator from chan_lock_detect; state 4->5 needs $00 and $18 set
+000008	L	chan_dither	[8] bytes; code dither sign +1/-1 (chan_code_dither); report +$2B
+000018	L	chan_bitsync	[8] bytes; bit sync found (cleared at state 4 entry); state 4->5 needs it
+000028	L	chan_lock_count	[8] bytes; lock count per second (chan_lock_detect), report +$16 (max 20)
+000040	L	chan_pullin_count	[8] bytes; freq pull-in confirmations (chan_freq_pullin, 2 -> state 4)
+000068	L	chan_bit_edge	[8] bytes; set when code phase crosses the data-bit edge (ms 19->0 or 9->10)
+000070	L	chan_done_50ms	[8] bytes; channel processed this 50 ms; all set -> pending $8DD
+000078	L	chan_bit_ms	[8] bytes; 0-19 ms position in the 20 ms data bit
+000080	L	chan_bit_ms_epoch	[8] bytes; ms-in-bit at the second epoch, report +$19
+000088	L	chan_bit_ms_prev	[8] bytes; previous chan_bit_ms
+000090	L	chan_pll_lock	[8] bytes; PLL lock indicator (chan_pll_check)
+0000A0	L	chan_pll_count	[8] bytes; PLL lock count, report +$17 (max 20)
+0000A8	L	chan_pll_loss	[8] bytes; PLL loss count, report +$18; >= 20 -> $6FBF = 1
+0000B0	L	chan_state	[8] bytes; ISR state 0 search, 1 code acquire, 2 settle, 3 freq pull-in, 4 FLL/bit sync, 5 PLL
+0000C0	L	chan_pll_new	[8] bytes; set on entering state 5; report +$2A = 0 once
+0000D8	L	chan_bit_edge_back	[8] bytes; code phase crossed a bit edge backwards
+0000E0	L	chan_sv	[8] bytes; commanded SV (from $275C), PRN taps table $088E20
+0000E8	L	chan_sv_prev	[8] bytes; previous chan_sv; chan_restart restarts when different
+000100	L	isr_50ms	Byte 0-19, 50 ms count within the second (chan_isr)
+000101	L	isr_50ms_done	Last isr_50ms for which task_chan_50ms was triggered
+000102	L	isr_seconds	Byte, incremented each second
+000103	L	pps_enable	From $2920 each second; enables the PPS write to $FFE8F0
+000144	L	chan_disc_raw	[8] words; CS7 +$A read (code discriminator)
+000194	L	chan_ctl_shadow	[8] words; shadow of CS7 +$A write ($800F reset)
+0001C4	L	chan_doppler_cmd	[8] words; commanded Doppler (NCO units, Hz x 0.302) from $275C+2
+0001D4	L	chan_code_err	[8] words; normalized code discriminator (chan_code_disc), report +$14, $7040
+0001E4	L	chan_state_count	[8] words; dwell count in the current ISR state
+000214	L	chan_i	[8] words; prompt I (CS7 +6 read)
+000274	L	chan_q	[8] words; prompt Q (CS7 +8 read)
+0002D4	L	code_step	Word; code slew steps (+-2, +-1 dither) for the current channel
+0002D6	L	isr_ms	Word 0-49, 1 ms tick count within 50 ms; minus $2E0 adjust each second
+0002D8	L	cs7_ctl	Shadow of $FFE8F4 control ($87 after init; bit 1 stop, bit 2 cleared at PPS)
+0002DA	L	code_dither	Word +1/-1 (chan_code_dither)
+0002DC	L	pps_ms	Word; ms of second at which $2DE goes to $FFE8F0 (from $291C)
+0002DE	L	pps_fine	Word written to $FFE8F0 at pps_ms (from $291E)
+0002E0	L	isr_ms_adjust	Word subtracted from isr_ms at the second (from $2924)
+000322	L	chan_el_sum	[8] longs; early-late sum over the last second
+000342	L	chan_srch_start	[8] longs; code search window start, L1 cycles (from $275C+4)
+000362	L	chan_srch_width	[8] longs; code search window width, L1 cycles (from $275C+8)
+000382	L	chan_code_phase	[8] longs; code phase, L1 cycles mod $1809FC; report +4
+000562	L	chan_bits	[8] x 16 bytes; data bits at the second epoch; report +$1A
+000662	L	chan_carrier_nco	[8] longs; carrier NCO rate written to CS7 +0, max $26A7EF
+000682	L	chan_carrier_nco_epoch	[8] longs; chan_carrier_nco at the epoch; report +8
+000702	L	chan_carrier_phase	[8] longs; CS7 +0 read (accumulated carrier phase)
+000742	L	chan_carrier_epoch	[8] longs; carrier phase at the second epoch; report +$C
+000762	L	chan_carrier_800ms	[8] longs; carrier phase at isr_50ms = 16; report +$10
+0007E2	L	chan_amp	[8] longs; search: noise floor (init $3FFFF); tracking: filtered |I,Q| amplitude
+000802	L	chan_amp_epoch	[8] longs; chan_amp at the epoch; report +2 (clipped $FFFF) -> $7042 signal
+000842	L	chan_power_sum	[8] longs; power sum over the last second (chan_code_disc)
+0008A2	L	chan_detect	[8] longs; search detection accumulator; > 0 -> detection
+0008C2	L	task_running	Bytes $8C2-$8CF: running flags per task (sched_dispatch)
+0008DC	L	task_pending	Bytes $8DC-$8F5: pending flags per task (sched_dispatch)
+000CC6	L	vis_buf	Visible-list buffer select (0: $42B6, 1: $37A2)
+000CC7	L	vis_busy	1 while task_vis runs
+000CF6	L	srch_chan	[8] x $28 search records (fields S 000CF6+)
+000E36	L	chan_decode	[8] x $5A nav-data decoder records (fields S 000E36+)
+00113C	L	srch_center	Word; search center drift (units of osc_drift_ref, 20625 nominal); = $271E+$36
+00271E	L	srch_ctl	Pointer to search control block ($1106)
+002716	L	vis_list	Pointer to visible-SV list ($37A2 or $42B6 per vis_buf)
+00271A	L	svset_table	Pointer to SV set table ($3DBA or $48CE); entries 10 bytes: SVs at +2..+9, metric word at +10
+002722	L	chan_hold_used	[8] bytes; copy of $CF8 per channel
+002732	L	srch_hold_limit	Word from table $0AEF1A[$8EB8]
+002738	L	bits_carry	Bit unpack state $2738-$273B (nav_bits_shift)
+00275C	L	chan_cmd	[8] x $C channel commands: +0 SV, +2 Doppler word, +4 code start, +8 code width
+0027BC	L	chan_report	[8] x $2C channel reports built each second (fields S 0027BC+)
+0025FB	L	sv_srch_failed	[sv] bytes; SV search exhausted (srch_bin_next); cleared each full pass
+0037A0	L	vis_state	0/1 list valid, 2 reset, 3 no prediction (cold search)
+0037A2	L	vis_list_a	Visible list buffer 1 ($B14 bytes; +0 set count, +1 count of list at +$29, +3 count of list at +4, +$4E + sv visible)
+0042B6	L	vis_list_b	Visible list buffer 0
+008F88	L	sv_ignore	[sv] bytes; @@Am ignore list ($0ACE8E)
+008FAF	L	sv_usable	[sv] bytes; 1 = healthy from subframe 1 (subframe_word); TRAIM clears it for a removed SV (names-io)
+002621	L	timing_probe_on	1 = task_timing_probe overwrites $7042
+006FBC+00	S	sv	Channel record (stride $B6): SV id (chan_meas_copy); @@Ea SV
+006FBC+01	S	mode	@@Ea channel mode 0-8 (chan_status_update)
+006FBC+02	S	flags	@@Ea flags: b7 used in fix, b6 HOW alert, b5 HOW A-S, b4 unhealthy, b3 URA >= 6, b0 parity error
+006FBC+03	S	pll_unstable	1 when report state 5 and PLL loss count >= 20 (meas_process); task_meas_1s then sets mode 5
+006FBC+04	S	ura	Subframe 1 URA index (init $3F)
+006FBC+06	S	sf_buf	Subframe being assembled: +0 id, +1 SV, 10 x (data long, flag) (nav_data_decode)
+006FBC+44	S	sf_last	Last complete subframe ($7000 + $B6 x n), copy of chrec_sf_buf
+006FBC+84	S	code_err	Word, code discriminator ($7040)
+006FBC+86	S	signal	Word, amplitude ($7042); @@Ea signal = high byte; timing probe when $2621 = 1
+006FBC+88	S	code_phase	Long, code phase in L1 cycles ($7044)
+006FBC+8C	S	carrier	Long, carrier phase at epoch, +$8000 if data inverted ($7048)
+006FBC+90	S	range_raw	Double, raw code range m mod 1 ms ($704C)
+006FBC+98	S	range_smooth	Double, carrier-smoothed range m ($7054)
+006FBC+A0	S	smooth_count	Word, smoothing count ($705C)
+006FBC+A2	S	tow	Long, HOW TOW count (x 6 s) ($705E)
+006FBC+A6	S	tx_time	Double, signal transmit time s of week ($7062)
+0027BC+00	S	sv	Report (stride $2C): SV ($E0)
+0027BC+01	S	state	ISR state ($B0); forced to 4 when chrec_pll_unstable
+0027BC+02	S	amp	Word, chan_amp_epoch clipped to $FFFF
+0027BC+04	S	code_phase	Long, chan_code_phase (L1 cycles)
+0027BC+08	S	carrier_nco	Long, carrier NCO at epoch (x 0.012934 = Hz)
+0027BC+0C	S	carrier_phase	Long, carrier phase at epoch
+0027BC+10	S	carrier_800ms	Long, carrier phase at ms 800
+0027BC+14	S	code_err	Word, chan_code_err
+0027BC+16	S	lock_count	Lock count, max 20
+0027BC+17	S	pll_count	PLL lock count, max 20 (= +$16 below state 5)
+0027BC+18	S	pll_loss	PLL loss count
+0027BC+19	S	bit_ms	ms-in-bit at epoch
+0027BC+1A	S	bits	16 bytes data bits
+0027BC+2A	S	bits_ok	Bit data usable ($60); 0 on the first second of state 5
+0027BC+2B	S	dither	Code dither sign
+000CF6+00	S	sv	Search record (stride $28): SV
+000CF6+01	S	state	0 idle, 1 searching, 2 reacquire, 3 tracking (ISR state >= 4)
+000CF6+02	S	hold_used	Used channel in position hold ($CF8)
+000CF6+03	S	strategy	0-5; selects Doppler bin table $0AEEA2 + $8EB8 x 24 + 4 x strategy
+000CF6+04	S	bins	Pointer to Doppler bin table: signed bytes x 100 Hz; +$64 dwells, +$65 bins, +$66 passes
+000CF6+08	S	passes	Completed passes over the bin table
+000CF6+09	S	step_on	1 = stepping allowed (cleared for forced channels $9CEB)
+000CF6+0A	S	bin	Current Doppler bin index
+000CF6+0B	S	dwell	Dwell count: report code phase moved > $C04FE from srch_code_last
+000CF6+0C	S	doppler	Long, total Doppler offset -(center + user + SV)
+000CF6+10	S	code_expect	Long, expected code phase (L1 cycles)
+000CF6+14	S	code_last	Long, last code phase (init $C04FE)
+000CF6+18	S	doppler_sv	Long, SV Doppler from measured carrier (srch_state_update)
+000CF6+1C	S	doppler_user	Long, user-motion Doppler (chan_doppler_user)
+000CF6+20	S	timer	Long, ms since loss (+1000 + adjust per second)
+000E36+00	S	sv	Decoder record (stride $5A): SV
+000E36+02	S	code_weight	Word, $2000000 / dec_code_noise
+000E36+04	S	code_noise	Long, filtered |delta code err| (init $8000)
+000E36+08	S	smooth_base	Double, Hatch filter base range
+000E36+12	S	smooth_w	Double, Hatch weight 1/N
+000E36+1C	S	smooth_n	Word, N (1..128)
+000E36+1E	S	smooth_corr	Double, carrier correction
+000E36+36	S	shift	Long, data-bit shift register
+000E36+3A	S	shift_n	Bits in dec_shift (32 = full)
+000E36+3B	S	subframe	Subframe id 1-5
+000E36+3C	S	word	Word number 1-10
+000E36+3D	S	d29	Previous D29*
+000E36+3E	S	d30	Previous D30* (invert next word)
+000E36+3F	S	page_id	Subframe 4/5 SV/page id
+000E36+40	S	invert	D30* at word 2: data polarity, adds $8000 to carrier
+000E36+42	S	eph_ok	Ephemeris loaded (chan_status_update mode 8)
+000E36+43	S	sync	Preamble found
+000E36+44	S	tow_ok	TOW verified (how_decode or tow_cross_check)
+000E36+45	S	how_seen	HOW decoded this sync
+000E36+46	S	smooth_count	Word, seconds of smoothing (to $705C)
+000E36+48	S	tow_bad	TOW mismatch flag
+000E36+4A	S	tow	Long, last TOW
+000E36+54	S	ms_week	Long, ms of week at epoch (mod 604800000)
+007A3C+00	S	valid	Per-channel ephemeris record (stride $EC): valid (eph_unpack)
+007A3C+01	S	iode	IODE copy
+007A3C+02	S	new	New ephemeris flag
+00275C+00	S	sv	Channel command (stride $C): SV
+00275C+02	S	doppler	Word, Doppler in NCO units (Hz x 0.30201)
+00275C+04	S	code_start	Long, code window start (L1 cycles)
+00275C+08	S	code_width	Long, code window width ($1809FC full, $133B3 narrow, min $26766)
+001106+00	S	changed	Search control block (= *$271E): [8] channel reassigned flags
+001106+08	S	settle	Settle countdown (srch_settle_count)
+001106+0A	S	drift_ref	Word, osc_drift_ref copy
+001106+34	S	hold_prev	Previous nav_hold_mode
+001106+36	S	center	Word, search center ($113C)
+001106+38	S	center_set	Center updated this pass
+001106+39	S	cold	Cold strategy exhausted -> strategy 1
+001106+3A	S	hold_ready	Position-hold SV-set mode enabled

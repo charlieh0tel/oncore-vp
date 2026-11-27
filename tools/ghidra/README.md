@@ -16,8 +16,8 @@ $GHIDRA/support/analyzeHeadless ~/ghidra-projects oncore-vp \
     -postScript OncoreSwitches.java \
     -postScript OncoreFloat.java \
     -postScript OncoreLibNames.java \
-    -postScript OncoreNames.java \
     -postScript OncoreTypes.java \
+    -postScript OncoreNames.java \
     -postScript OncoreStackParameters.java
 ```
 
@@ -39,8 +39,8 @@ Run from the repository root.  The project lives outside the repository.
 | `OncoreSwitches.java` | Recovers the compiler's switch tables and records jump-table overrides (from smartclock's SmartClockSetup.java) |
 | `OncoreFloat.java` | Register interfaces of the soft-float routines: double add/sub/mul/div (p/pp/z variants), cmp64, single add/sub/mul/div, conversions |
 | `OncoreLibNames.java` | Names the B3640 run-time library routines and data (table from `tools/libsig.py`) |
-| `OncoreNames.java` | Names functions and RAM variables identified in `docs/memory-map.md` (command handlers, RTC, QSPI, EEPROM, oscillator, time, status) |
-| `OncoreTypes.java` | Data types: date record ($8EBA), channel records ($6FBC), CS7 channel registers, typed globals |
+| `OncoreNames.java` | Applies the name tables `names-*.tsv` (address, kind F/L/S, name, note): `names-core.tsv` from `docs/memory-map.md`, then `names-io.tsv` (host I/O), `names-tracking.tsv` (channels, search, nav-data decode) |
+| `OncoreTypes.java` | Data types: date record ($8EBA), per-channel record arrays ($CF6, $E36, $1106, $275C, $27BC, $6FBC, $7A3C), CS7 channel registers, typed globals; run before OncoreNames.java |
 | `OncoreExportC.java` | Decompiles every function to one C file; prints named/unnamed counts |
 | `OncoreStackParameters.java` | Narrow stack parameters (from smartclock); run last |
 

@@ -1,0 +1,348 @@
+# address	kind	name	note
+08A7AE	F	task_meas_epoch	1 Hz task: diff_age_check, nav_data_task $097D2A, channel mgmt $095582, nav_step, rcvr_status_build, traim $0A053A; nav_mode_drop if $9D11 = 0
+08A8A2	F	chan_status_snapshot	Copies per-channel SV/mode/C-N ($CF6 + $28n) and $2760/$2764 into output staging $6347-$63FF; x 3.3111572265625 scale
+08AC74	F	epoch_timing_probe	Only when $2621 = 1: stamps level-5 epoch counters $2D6/$100 into $7042 + $B6n (up to 8 per epoch)
+08AD46	F	pred_alt_init	Boot: snapshots el mask $8FAE, $81DA, $79F7, datum $7592, local offset, position $8ED6, date $8EBA, deselect list $8F89 into $3724-$379F
+08ADCA	F	task_pred_alt	Task ($8C7): copies $3724 snapshot into $C70 inputs, runs almanac_recheck_and_predict into third bank $4DCA (cleared on failure)
+08AE9E	F	task_almanac_save	Task ($8C8): writes almanac_ptr (0x348 + 0x2C bytes) to the inactive EEPROM bank ($0934 + $378 x bank), checksum at bank + $374, flips $1024
+08B062	F	alm_health_count	Decodes page-25 health into buffer+$348 (alm_health_decode), counts healthy SVs into +$36E; needs >= 15; fails if a healthy-flagged SV has record health byte != 0
+08B0E2	F	alm_new_validate	Validates collected almanac ($81CA): SV id match, common toa, alm_unpack ok for each; sets +$36F week, +$370 toa<<12; rejects if identical to active
+08B3D2	F	pos_get_llh	Atomic copy of datum $7592 and position $8ED6 (h, lat, lon); optional ECEF distance to a reference LLH via llh_to_ecef
+08B5CE	F	iono_delay_update	Klobuchar model per SV 1-32 (0.0137/(el+0.11)-0.022, 50400, 1.617, 0.064, 5 ns night); alpha/beta from $2428/$242C; az/el from pred bank $37A0; out $22F6 + 8 x SV (s)
+08BD04	F	magvar_update	Recomputes magnetic variation $81B2 via magvar_model(h km, lat deg, lon deg, decimal year) when position moved vs $968
+08BEE0	F	geoid_sep_update	geoid_height(position, datum) -> $7574 (double); used for MSL height hold ($8209, $6345)
+08BF50	F	utc_offset_update	GPS-UTC from UTC block $2624: dtLS/dtLSF, tot x 4096, WNt, WNLSF, DN, A0 2^-30, A1 2^-50, +-480 s leap window; out $26AE, $26AC, leap pending $81C6
+08C4FA	F	pos_save_check	When $81EE = 2: if > 3 SVs, all PR residuals small, and moved inside a distance window from the EEPROM record, saves position (pos_save_eeprom)
+08C7DE	F	dop_compute	DOP x 10 (word, $FFFF singular) from a 4x4 (or 3x3 2D) normal matrix; DOP kind from pred +$619
+08CF02	F	sets_3sv	SV-set selection, 3 SVs: one set into pred +$61A, DOP at +$622
+08D09E	F	sets_4ofn	All 4-SV combinations of the candidates, DOP each, then sets_sort_by_dop
+08D3CE	F	sets_5sv	SV-set selection for exactly 5 candidates
+08D640	F	sets_6ofn	SV-set selection for 6 candidates (combinations, sorted by DOP)
+08DA7C	F	sets_7sv	SV-set selection for exactly 7 candidates
+08DDC2	F	sets_8ofn	SV-set selection for 8 or more candidates (combinations, sorted by DOP)
+08E310	F	sv_sets_select	Builds per-SV unit-vector outer products from pred records, top 9 by elevation, dispatches to sets_* by count and pred +$618
+08E714	F	alm_expand	Expands each healthy almanac record into doubles at $116A + $88 x SV (e 2^-21, i, Omegadot, sqrtA 2^-11, A, n = sqrt(mu)/A^1.5, Omega0 - We*toa, ...)
+08E9E2	F	pred_sort_by_el	Lists visible, enabled, not-deselected SVs into pred +$4, sorted by elevation; count to +$3
+08EA8E	F	alm_sv_predict	Almanac Kepler solve (fmod 2pi, <= 25 iterations) per SV: ECEF, ENU, range, az, el, range rate into pred +$C0 + $24 x SV
+08F55E	F	search_list_build	Builds SV search order at pred +$29 (count +$1): mode 0 default table $0AE958, 1 table order filtered by health, 2 best sets then visible then rest
+08F78E	F	pred_visible_flags	pred +$4E + SV = healthy and el >= mask $CB4; count to pred +$2
+08F7EC	F	alm_unpack	Unpacks 24-byte almanac record SV n into ints (e, toa, di, Omegadot, sqrtA, Omega0, w, M0, af0, af1); fails if sqrtA < $4E2000 (2500 m^1/2)
+08FA14	F	sets_sort_by_dop	Sorts pred sets (+$61A, 10 bytes each) by DOP word at +8
+08FB26	F	nav_reset	Clears nav state, residuals, SV positions, DOPs, velocities, covariance $369C; clock_drift $81D2 = $75C0 x 0.19029; sol LLH $8F06 = $8ED6; callers boot_search_reset, nav_mode_drop
+0904A4	F	mat_invert	n x n (3 or 4) symmetric inverse of normal matrix $984 into $369C; returns 2 if singular
+090DC2	F	rx_time_from_svs	Mean receive time over channels with a transmit time ($1148 + 4n), $657C each, week-wrap handling
+090F80	F	nav_init_pos	First-fix seed: mean of SV ECEF positions projected to the ellipsoid (ecef_to_llh), height kept from $8F06, into $B9C
+091140	F	pr_residuals	Per channel: PR residual $8218 + 8n = range - c x (t_rx - t_tx) - DGPS PRC (1 ms fold when $81EE = 2); range-rate residual $8258 + 8n incl. DGPS RRC
+09150c	F	sv_clock_update	SV clock: af0 + af1 dt + af2 dt^2 + F e sqrtA sinE - TGD (+ iono if $81C2 = 1) -> svst +$140; drift +$148; corrected tx time +$168
+09175A	F	sv_range_update	Geometric range +$110, light time +$150, LOS unit vector +$F8, Sagnac term $8F48 + 8n, predicted PR $8298 + 8n, range rate +$F0, rx time +$160
+091A1C	F	sv_pos_update_all	Per channel: full phasor init (new eph, every 10th epoch round robin $CF4) or incremental step, then sv_pos_eph
+091BFA	F	pps_schedule	1PPS timing: ms count $291C, sub-ms $291E, $9D29 from clock bias/drift, hw delay $81BA, cable delay $820A, offset $81C8; ticks of 9.548 MHz (31.398 m)
+091F62	F	latlon_wrap	Wraps lon to +-pi and folds lat past the pole (flips lon by pi and negates $8F28/$8F30)
+0920BE	F	pos_cocom_limit	If height > 18288 m and speed > 514.4 m/s: clamp height 18288 m, scale velocity; height < -1000 m -> -1000 m
+0921EC	F	pos_smooth	Position complementary filter $C06 (propagate by velocity, blend LS fix with gain 1/100 or 1/500, DGPS-dependent); resets on mode, hold or $8216 = 0
+092B56	F	vel_smooth	Velocity smoothing with HDOP/VDOP-dependent gain (tables $0AE9E2/$0AEA0A by $8EB8); speed $8F40
+0930D0	F	nav_cold_fix	Initial fix: up to 4 LS iterations from nav_init_pos seed; accepts when all PR residuals small; sets $81EE path in nav_step
+093362	F	nav_ls_update	Applies dx = P H^T r: lat/lon via radii factors ($B5C/$B64), height, clock bias (s) -> $756C, $81A6; velocity via vel_update; mode 2 4x4, mode 3 3x3, hold time-only
+094066	F	sv_phasor_init	Per channel: sin/cos phasors for M (n, M0), Omega (Omegadot - We, Omega0 - We toe) and i (IDOT, i0) at tx time
+094418	F	sv_phasor_step	Advances the three phasors by rotation (sin/cos of rate x dt) instead of new sin/cos calls
+094660	F	sv_pos_eph	ICD-200 SV position: Kepler series iteration, harmonic corrections, ECEF +$C0..+$D0, velocity +$D8..+$E8, ENU +$118..+$128, sinE out
+09528E	F	vel_update	Velocity N/E/U $8F28/$8F30/$8F20 smoothed with gain $0AE97A[$8EB8]; speed $8F40, heading $8F38 (deg)
+0951BA	F	pos_save_ram	If residuals small and > 3 SVs: copy $8ED6 (h, lat, lon) to $2598, checksum $25B0
+095180	F	pps_enable_update	$9D10/$2920 = PPS on per $9D0E (0 off; 2 needs a time SV $B91; 3 needs TRAIM $9D2C = 0)
+097D2A	F	nav_data_task	Per epoch: channel decode resets, bit/frame/word decode, DGPS IODE check, eph commit, PR from code, carrier smoothing, tx time, frame sync, channel nav states
+097E90	F	bit_edge_adjust	+1/-1 ms correction when the data-bit edge wraps (19 <-> 0)
+097EE4	F	gps_parity	ICD-200 parity check of word $E6C + $5An with D30* ($E74); bit-by-bit XOR (decompiles empty)
+09843C	F	pr_from_code	Raw pseudorange $704C + $B6n = code phase x 0.00074333 (L1 wavelength / 256); C/N filter $E38/$E3A
+098538	F	sv_tx_time_update	Transmit time $7062 + $B6n = ms of week $E8A x 0.001 - code range / c; wraps 604800000 ms
+098700	F	pr_carrier_smooth	Hatch filter on $704C with carrier (weight 1/N, N doubling to 128), range rate $706A = carrier x 1.4518e-5 (lambda / 2^14)
+098C68	F	eph_decode	Raw ephemeris -> eph[ch] ($7A3C + $EC ch) doubles with ICD scales; derived n, sqrt(1-e^2), Omegadot - We, Omega0 - We toe, sin/cos w, A, e sqrtA
+0993F6	F	alm_page_store	Stores subframe 4/5 words into the collect buffer $81CA (SV pages 1-32, page 25 SV 51/63 at +$318); word masks $CC8, $CE9/$CEA; sets $8E3 when complete
+0995EC	F	special_msg_collect	Page 17 (SV id 55): 22 characters per channel at $247C + $18n; complete -> $757C
+0996B6	F	eph_word_collect	Subframes 1-3 words 3-10 into per-SV $82D8 + $50 x SV; mask +$4A = $FFFFFF and IODC/IODE match -> +$4E ready
+099838	F	iono_page_collect	Page 18 (SV id 56) words 3-5: alpha/beta into $243A + 8 x ch; done -> $2439 = 1, $2438 = ch
+099902	F	sf45_page_dispatch	Subframe 4/5 by SV id ($E75): 1-32, 51, 63 -> alm_page_store; 56 -> iono/UTC collect; 55 -> special message
+0999C4	F	utc_page_collect	Page 18 words 6-10: A1, A0, tot, WNt, dtLS, WNLSF, DN, dtLSF into $263C + 14 x ch; done -> $263B = 1, $263A = ch
+099B34	F	how_decode	HOW: subframe id 1-5 -> $E71, alert/AS bits to $6FBE, TOW -> $705E; consistency +-2 sets $E7A (TOW verified)
+099C86	F	chan_nav_state_update	Channel nav state $6FBD + $B6n: 1-4 track, 5 bit sync, 6 frame sync, 7 TOW, 8 ephemeris; loads stored eph (one per pass)
+099DCC	F	alm_toa_track	Tracks almanac toa from pages (x 4096); toa change restarts collection ($81CE = 1)
+099ED6	F	alm_health_decode	Page 25 6-bit health (table $0AEF4C maps SV to word/byte) -> flags 1 = healthy for SV 1-32
+09A044	F	nav_bits_new	Number of new 20 ms data bits since last epoch (ms counter $2922, phase $274C)
+09A10C	F	eph_store_ok	Stored eph $8FDA + $58 x SV: checksum ok and |t - toe| < 4 h (week-aware)
+09A268	F	subframe_buf_clear	Clears a 10-word subframe buffer (6 bytes per word)
+09A296	F	nav_decode_reset	Resets channel data-decode struct $E36 + $5An; full reset (arg 1) also clears eph valid, collect mask, subframe buffers
+09A3FC	F	nav_bits_shift	Shifts new bits from $27D6 + $2Cn into the 32-bit register $E6C + $5An
+09A550	F	eph_commit	Copies collected 24 words to per-SV store $8FDA + $58 x SV, stamps week/time, checksum; eph_decode for each channel on that SV
+09A640	F	preamble_sync	Scans for preamble $8B (normal $22C/inverted $DD0 in top 10 bits) plus parity; sets word 1, D29*/D30*
+09A718	F	word_dispatch	Word 2 -> how_decode; sf1 word 3 -> week $81AE, $22F2 = 1, health -> $8FAF[SV], URA; sf1-3 -> eph_word_collect; sf4/5 -> sf45_page_dispatch
+09A86A	F	nav_bits_frame	Per channel: 30-bit word assembly, parity, data inversion, word/subframe counters $E72/$E71, completed subframe copy $6FC2 -> $7000
+09AC7A	F	chan_meas_copy	Copies tracking measurements $27BC + $2Cn into $6FBC + $B6n (SV, C/N, phase, carrier with half-cycle fix)
+09AD3A	F	frame_sync_check	Cross-checks TOW/word position between channels; resets channels that disagree
+09AEA8	F	eeprom_invalidate_all	Writes checksum + $11111111 (invalid) for all EEPROM blocks, almanac banks, position records, UTC, iono; then rcvr_init(1)
+09B058	F	eph_store_invalidate	Breaks checksum ($11111111 added) of stored eph for one SV or all
+09B91C	F	dgps_age	Correction age in 0.1 s: t x 10 - tcorr, wrap 6048000
+09B94C	F	dgps_iode_ok	DGPS correction IODE matches channel IODE (current $75C4 + $E x SV or previous $77D8 set)
+09B9DE	F	dgps_clear	Sets diff_stale, invalidates both correction sets
+09BA1A	F	dgps_prc	Pseudorange correction (m) = (PRC + RRC x age) x 0.0001 for SV/IODE
+09BB5E	F	dgps_rrc	Range-rate correction (m/s) x 0.001 for SV/IODE
+09BD22	F	task_eph_commit	Task ($8CB): eph_commit for every SV with collection ready (+$4E)
+09BE6C	F	chan_tables_reset	Clears $275C/$2760/$2764/$27BC channel tables and PPS counters $291C-$2924
+09C3E8	F	pos_restore	Boot: position from RAM $2598 if checksum ok, else EEPROM record $1192/$11AE (selector $11CA), else zero and save
+09C7CC	F	sum8	Byte sum of a RAM block (RAM checksums are ~sum)
+09C92A	F	ecef_to_llh	(xyz, datum, llh out); 1.0/2.0 e^2 iteration
+09CC26	F	llh_to_ecef	(llh, datum, xyz out, aux out): aux holds sin/cos lat/lon and radii factors at +$58/+$60
+09D3A0	F	dot3	3-vector dot product of doubles
+09D446	F	delay_8000	Busy loop 8000 iterations
+09D456	F	magvar_init	Geomagnetic model coefficient tables (11 x 11, from $0AF036/$0AF2DA) into $2926-$3376
+09D7DA	F	magvar_model	Magnetic variation from (h km, lat deg, lon deg, decimal year)
+09E310	F	geoid_height	Geoid separation: converts to WGS-84 (table $0AF84E) unless datum 49, 10 deg grid interpolation
+09E66A	F	geoid_grid_value	Grid value x 10 helper for geoid_height
+09E71C	F	geoid_grid_index	Lat row (0-17/18) and lon column (mod 36) of the 10 deg geoid grid
+09E88E	F	eeprom_blk_1026	EEPROM block $1026 load/default/save (masks $7A00/$7A08, $79F6, $8FAE)
+09EA04	F	eeprom_blk_1046	EEPROM block $1046: $633C, datum $7592, hold position $81F0, $8208, $8209
+09ECDE	F	eeprom_blk_1098	EEPROM block $1098 ($81C2, $8216, $8EB8...)
+09EE0E	F	eeprom_blk_10a2	EEPROM block $10A2 ($81DA, $9D0C, deselect list)
+09EF44	F	eeprom_blk_10d0	EEPROM block $10D0 ($9D0E, $9D11, $9D16, $81C8, $8210...)
+09F226	F	eeprom_blk_10fe	EEPROM block $10FE (datum doubles)
+09F3A8	F	eeprom_blk_112c	EEPROM block $112C (datum doubles); not in the docs' loader list
+09F52A	F	eeprom_blk_115a	EEPROM block $115A
+09F636	F	iono_eeprom	EEPROM block $1180 iono alpha/beta <-> $2428/$242C (arg 2 load, 3 default, 4 save)
+09F72A	F	utc_eeprom	EEPROM block $11CC UTC parameters <-> $2624
+09F94A	F	pos_save_eeprom	Writes $8ED6 (h, lat, lon) to the inactive record $1192/$11AE, checksum, flips $11CA
+09FB22	F	task_sv_predict	Task ($8CC): snapshots inputs to $C70, predicts into bank $37A2 + $B14 x $CC6 (or search list only), flips $37A0
+0A053A	F	traim	T-RAIM: residual spread vs alarm limit $9D16, isolates worst SV (disables $8FAF[SV], traim_time_fix); $9D28 alarm, $9D2A error, $9D2C status
+0A0BF2	F	traim_time_fix	Recomputes time with SV excluded (traim_rx_time), date, traim_pps_schedule
+0A0DBA	F	traim_rx_time	Mean receive time excluding one channel
+0A0F88	F	traim_pps_schedule	pps_schedule variant using a supplied date record
+00116A	L	alm_exp	Expanded almanac doubles, SV n at $116A + $88 x n (n 1-32)
+001146	L	chan_use	Per channel 4 bytes: +0 use for position, +1 use for PR/velocity, +2 has transmit time
+001168	L	fix_valid	1 after a 2D/3D/hold solution (nav_solve_mode)
+0022F6	L	iono_delay	Klobuchar delay (s) per SV, double at $22F6 + 8 x SV
+002426	L	iono_valid	Iono parameters present
+002428	L	iono_alpha	alpha0-3 bytes (2^-30, 2^-27, 2^-24, 2^-24)
+00242C	L	iono_beta	beta0-3 bytes (2^11, 2^14, 2^16, 2^16)
+002430	L	iono_page_state	Per-channel collect state for page 18 iono words
+002438	L	iono_page_ch	Channel that completed the iono page
+002439	L	iono_page_ready	Iono page complete; nav_task copies and saves
+00243A	L	iono_page_buf	8 bytes per channel
+00247C	L	special_msg_buf	Page 17 collect, $18 per channel
+002596	L	nofix_count	Epochs in mode 5/6 (max 6)
+002598	L	pos_saved	RAM copy of position (h, lat, lon), checksum $25B0
+0025B0	L	pos_saved_sum	~sum8 of $2598 (24 bytes)
+0025B4	L	traim_resid	Copy of PR residuals per channel for TRAIM
+002622	L	utc_valid	UTC parameters present
+002624	L	utc_params	14 bytes: dtLS, dtLSF, tot, WNt, WNLSF, DN, A0 (long), A1 (long)
+002632	L	utc_page_state	Per-channel collect state for page 18 UTC words
+00263A	L	utc_page_ch	Channel that completed the UTC page
+00263B	L	utc_page_ready	UTC page complete
+00263C	L	utc_page_buf	14 bytes per channel
+0026AC	L	utc_offset_valid	GPS-UTC offset applied
+0026AE	L	utc_offset	GPS-UTC (s, double), used by gps_to_date when $9D86 = 1
+00291C	L	pps_ms	1PPS ms count
+00291E	L	pps_frac	1PPS sub-ms count
+002920	L	pps_on	Copy of $9D10
+002922	L	ms_count	Epoch ms counter
+002924	L	ms_adjust	ms correction from pps_schedule
+00369C	L	nav_cov	4 x 4 covariance (H^T H)^-1, doubles
+0037A0	L	pred_bank	Valid prediction bank: 0 = $37A2, 1 = $42B6, 2/3 none
+0037A2	L	pred_bank0	SV prediction buffer ($B14 bytes)
+0042B6	L	pred_bank1	SV prediction buffer ($B14 bytes)
+004DCA	L	pred_alt	Third prediction buffer (task_pred_alt)
+0058DE	L	alm_buf0	Almanac buffer ($374 bytes)
+005C52	L	alm_buf1	Almanac buffer
+005FC6	L	alm_buf2	Almanac buffer
+00641C	L	svst	Per-channel SV state, $174 each
+006344	L	alt_hold_on	2D altitude hold enable
+006345	L	alt_hold_msl	Altitude hold height is MSL (add geoid $7574)
+00633C	L	alt_hold_height	Altitude hold height (double)
+006FBC	L	chan_meas	Per-channel measurement/subframe record, $B6 each
+00756C	L	clock_bias_corr	Last clock-bias correction (s)
+007574	L	geoid_sep	Geoid separation (m, double)
+00757C	L	special_msg	Page 17 text, 22 bytes
+007592	L	datum	dx, dy, dz, 1/f, a (doubles), datum number at +40
+0075C4	L	dgps_corr	Per-SV DGPS correction, $E each (+4 valid, +8 IODE, +$E PRC)
+0077D8	L	dgps_corr_prev	Previous DGPS correction set
+007A00	L	hdop_mask	HDOP limit for 2D (written by @@AC)
+007A08	L	pdop_mask	PDOP limit for 3D (written by @@Al)
+007A10	L	gdop	GDOP
+007A18	L	pdop	PDOP
+007A20	L	hdop	HDOP
+007A28	L	vdop	VDOP
+007A30	L	tdop	TDOP
+007A3C	L	eph	Per-channel decoded ephemeris, $EC each
+0081A6	L	meas_seconds	Measurement time (GPS s, double)
+0081B0	L	meas_week	Measurement week
+0081B2	L	mag_var	Magnetic variation (double)
+0081BA	L	pps_hw_delay	1PPS fixed delay (s, double), set by boot_time_set
+0081C2	L	iono_on	1 = apply iono delay (written by @@Aq)
+0081C6	L	leap_pending	0 none, 1 positive, 2 negative (from dtLSF - dtLS)
+0081C8	L	pps_offset	1PPS ms offset (written by @@Ax)
+0081CA	L	alm_collect_ptr	Almanac buffer being collected
+0081CE	L	alm_collect_restart	Clear word masks on next page
+0081CF	L	alm_new_ready	New almanac collected; almanac_switch validates
+0081E4	L	dop_used	DOP of the current solution (HDOP 2D, PDOP 3D)
+0081EC	L	dop_used_kind	1 = HDOP, 2 = PDOP
+0081F0	L	hold_llh	Position-hold position: h, lat, lon (doubles)
+008208	L	pos_hold_on	Position hold (@@At)
+008209	L	pos_hold_msl	Hold height is MSL (add geoid)
+00820A	L	cable_delay	Antenna cable delay (@@Az), used by pps_schedule
+008216	L	pos_filter_on	0 disables pos_smooth
+008218	L	pr_resid	PR residual per channel (m, double)
+008258	L	rr_resid	Range-rate residual per channel (m/s, double)
+008298	L	pr_pred	Range - c x SV clock per channel
+0082D8	L	eph_collect	Per-SV ephemeris word collection, $50 each
+008ED6	L	pos_llh	Output position: height, lat, lon (doubles, rad)
+008EEE	L	pos_ecef	Solution ECEF x, y, z
+008F06	L	sol_llh	Solution at measurement time: height, lat, lon
+008F20	L	vel_up	Up velocity (m/s)
+008F28	L	vel_north	North velocity (m/s)
+008F30	L	vel_east	East velocity (m/s)
+008F38	L	heading	Heading (deg)
+008F40	L	speed	3D speed (m/s)
+008F48	L	sagnac	Earth-rotation term per channel
+008F88	L	sv_deselect	User deselect flag per SV (index SV)
+008FAE	L	el_mask	Elevation mask (deg)
+008FAF	L	sv_enable	Per SV: 0 after unhealthy sf1 or TRAIM exclusion; all set to 1 hourly by nav_task
+008FD6	L	alm_save_ptr	Almanac buffer saved to EEPROM
+008FDA	L	eph_store	Per-SV stored raw ephemeris, $58 each
+000984	L	nav_normal	4 x 4 normal matrix H^T H
+000A04	L	nav_h	Geometry rows, $20 per channel: 1, LOS.E, LOS.N, LOS.U
+000B04	L	pos_aux	llh_to_ecef aux for the solution (radii factors $B5C, $B64)
+000B8E	L	sol_code	nav_solve_mode internal: 0 < 3 SVs, 2 DOP fail, 3 2D, 4 3D, 5 hold
+000B8F	L	nsv_pos	Channels usable for position
+000B91	L	nsv_time	Channels with transmit time
+000C06	L	pos_filt	Smoothed position (h, lat, lon)
+000C70	L	pred_in	Prediction inputs: datum, local offset $C9A, position $C9C, mask $CB4, date $CB6
+000CC4	L	pos_known	Position valid (restored or solved)
+000CC6	L	pred_work_bank	Bank being filled by task_sv_predict
+000E36	L	nav_decode	Per-channel data-decode struct, $5A each
+009D0E	L	pps_mode	1PPS control mode (0 off, 1 on, 2 tracking, 3 TRAIM ok)
+009D10	L	pps_enable	1PPS output enable
+009D11	L	traim_on	TRAIM enabled
+009D16	L	traim_alarm_limit	TRAIM alarm limit (thresholds 500/700/1000)
+009D28	L	traim_alarm	0 ok, 1 alarm, 2 unknown
+009D2A	L	traim_time_err	Time error estimate, $FFFF unknown
+009D2C	L	traim_status	0 none removed, 1 SV removed, 2 too few SVs
+011192	L	ee_pos_rec	EEPROM $1192/$11AE: two position records (h, lat, lon) + checksum; selector $11CA
+007A3C+000	S	eph.valid	eph[ch], stride $EC, ch 0-7
+007A3C+001	S	eph.iode	IODE copy from eph_store +$46
+007A3C+002	S	eph.new	Set at decode; forces phasor init
+007A3C+004	S	eph.toe	double
+007A3C+00C	S	eph.m0	2^-31 pi
+007A3C+014	S	eph.dn	2^-43 pi
+007A3C+01C	S	eph.e	2^-33
+007A3C+024	S	eph.sqrta	2^-19
+007A3C+02C	S	eph.omega0	2^-31 pi
+007A3C+034	S	eph.i0	2^-31 pi (phasor with IDOT)
+007A3C+03C	S	eph.w	2^-31 pi; sin/cos at +$CC/+$D4
+007A3C+044	S	eph.omegadot	2^-43 pi
+007A3C+04C	S	eph.idot	2^-43 pi
+007A3C+054	S	eph.cuc	2^-29
+007A3C+05C	S	eph.cus	2^-29
+007A3C+064	S	eph.crc	2^-5
+007A3C+06C	S	eph.crs	2^-5
+007A3C+074	S	eph.cic	2^-29
+007A3C+07C	S	eph.cis	2^-29
+007A3C+084	S	eph.tgd	2^-31
+007A3C+08C	S	eph.toc	x 16
+007A3C+094	S	eph.af2	2^-55
+007A3C+09C	S	eph.af1	2^-43
+007A3C+0A4	S	eph.af0	2^-31
+007A3C+0AC	S	eph.n	sqrt(mu)/A^1.5 + dn
+007A3C+0B4	S	eph.sqrt1e2	sqrt(1 - e^2)
+007A3C+0BC	S	eph.omegadot_we	Omegadot - We
+007A3C+0C4	S	eph.omega0_we	Omega0 - We x toe
+007A3C+0CC	S	eph.sinw	sin w
+007A3C+0D4	S	eph.cosw	cos w
+007A3C+0DC	S	eph.a	sqrtA^2
+007A3C+0E4	S	eph.esqrta	e x sqrtA (relativistic term with F)
+00641C+000	S	svst.omega_ph	svst[ch], stride $174; phasor: +0 t, +8 rate, +$10 rate dt, +$18/+$20 sin/cos step, +$28/+$30 sin/cos, +$38 angle
+00641C+040	S	svst.m_ph	Mean-anomaly phasor (same layout)
+00641C+080	S	svst.i_ph	Inclination phasor (same layout)
+00641C+0C0	S	svst.xyz	SV ECEF x, y, z
+00641C+0D8	S	svst.vxyz	SV ECEF velocity
+00641C+0F0	S	svst.range_rate	-LOS . Vsv
+00641C+0F8	S	svst.los	LOS unit vector x, y, z
+00641C+110	S	svst.range	Geometric range (m)
+00641C+118	S	svst.enu	N, E, U of SV - user
+00641C+130	S	svst.dt_toc	t - toc
+00641C+138	S	svst.sine	sin E
+00641C+140	S	svst.clk	SV clock correction (s)
+00641C+148	S	svst.clk_drift	SV clock drift
+00641C+150	S	svst.ltime	Range / c
+00641C+158	S	svst.ltime_prev	Previous range / c
+00641C+160	S	svst.rx_time	tx time + range / c
+00641C+168	S	svst.tx_time	Corrected transmit time
+00641C+170	S	svst.ltime_ok	Range valid flags (+$170, +$171)
+00641C+172	S	svst.pos_ok	SV position computed this epoch
+008FDA+000	S	eph_store.status	eph_store[SV], stride $58, SV 1-37; 2 = collected
+008FDA+001	S	eph_store.words	24 raw 24-bit words (sf1-3 words 3-10)
+008FDA+02E	S	eph_store.toe_raw	toe/16 (word)
+008FDA+04A	S	eph_store.rx_time	Receive time (double)
+008FDA+052	S	eph_store.rx_week	Receive week
+008FDA+054	S	eph_store.sum	~sum8 of 84 bytes
+0082D8+000	S	eph_collect.status	eph_collect[SV], stride $50; 2 when complete
+0082D8+001	S	eph_collect.words	24 x 3 bytes
+0082D8+04A	S	eph_collect.mask	Word bitmask, $FFFFFF = all
+0082D8+04E	S	eph_collect.ready	1 = ready to commit
+0058DE+000	S	alm.rec	Almanac buffer: record SV n at +$18 x n: +0 dataID/SVid, +1 e, +3 toa, +4 di, +6 Omegadot, +8 health, +9 sqrtA, +$C Omega0, +$F w, +$12 M0, +$15 af0/af1
+0058DE+318	S	alm.page25	Two 24-byte records: sf5 page 25 (+$319 toa, +$31A week), sf4 page 25
+0058DE+348	S	alm.healthy	1 = healthy, per SV (from page 25)
+0058DE+36E	S	alm.nhealthy	Healthy SV count
+0058DE+36F	S	alm.week	Almanac week (mod 256)
+0058DE+370	S	alm.toa	toa (s, long)
+00116A+000	S	alm_exp.e	alm_exp[SV], stride $88; 2^-21
+00116A+008	S	alm_exp.i	inclination
+00116A+010	S	alm_exp.omegadot	2^-38 pi
+00116A+018	S	alm_exp.sqrta	2^-11
+00116A+020	S	alm_exp.omega0	2^-23 pi
+00116A+028	S	alm_exp.w	2^-23 pi
+00116A+030	S	alm_exp.m0	2^-23 pi
+00116A+038	S	alm_exp.a	semi-major axis
+00116A+040	S	alm_exp.n	mean motion
+00116A+048	S	alm_exp.ea	e x A
+00116A+050	S	alm_exp.omega0_we	Omega0 - We x toa
+00116A+058	S	alm_exp.omegadot_we	Omegadot - We
+00116A+060	S	alm_exp.sqrt1e2	sqrt(1 - e^2)
+00116A+068	S	alm_exp.sini	sin i
+00116A+070	S	alm_exp.cosi	cos i
+00116A+078	S	alm_exp.af0	2^-20
+00116A+080	S	alm_exp.af1	2^-38
+0037A2+000	S	pred.nsets	Prediction buffer ($B14): number of SV sets
+0037A2+001	S	pred.nsearch	Search list length
+0037A2+002	S	pred.nvisible	Visible SV count
+0037A2+003	S	pred.nsorted	Sorted list length
+0037A2+004	S	pred.by_el	SVs sorted by elevation
+0037A2+029	S	pred.search	Search order list
+0037A2+04E	S	pred.visible	Per SV visible flag
+0037A2+074	S	pred.deselect	Per SV deselect (from $8F88)
+0037A2+09A	S	pred.enable	Per SV enable (from $8FAF)
+0037A2+0C0	S	pred.sv	SV n record at +$C0 + $24 x n: +0 valid, +2 az (deg, word), +4 el (deg, char), +6 range rate, +8 x, +$C y, +$10 z, +$14 N, +$18 E, +$1C U, +$20 range (longs, m)
+0037A2+618	S	pred.select_mode	From $81DA
+0037A2+619	S	pred.dop_kind	From $79F7
+0037A2+61A	S	pred.sets	10 bytes each: 8 SVs, DOP x 10 word at +8
+000E36+000	S	nav_decode.sv	nav_decode[ch], stride $5A
+000E36+030	S	nav_decode.toa_seen	Almanac toa tracking flag (+$30) and toa (+$32)
+000E36+036	S	nav_decode.shreg	32-bit bit shift register
+000E36+03A	S	nav_decode.nbits	Bits in register
+000E36+03B	S	nav_decode.subframe	Subframe id 1-5
+000E36+03C	S	nav_decode.word	Word 1-10
+000E36+03D	S	nav_decode.d29	D29*
+000E36+03E	S	nav_decode.d30	D30* (invert)
+000E36+03F	S	nav_decode.page_sv	sf4/5 SV id (word 3)
+000E36+043	S	nav_decode.frame_sync	Preamble found
+000E36+044	S	nav_decode.tow_ok	TOW verified
+000E36+045	S	nav_decode.how_seen	HOW decoded
+000E36+04A	S	nav_decode.tow	TOW (HOW)
+000E36+050	S	nav_decode.tow_prev	Previous TOW
+000E36+054	S	nav_decode.ms_week	ms of week (long)
+006FBC+000	S	chan_meas.sv	chan_meas[ch], stride $B6
+006FBC+001	S	chan_meas.state	Nav state 0-8 (8 = ephemeris)
+006FBC+002	S	chan_meas.flags	Bit 0 parity fail, 3 URA >= 6, 4 unhealthy, 5/6 HOW flags
+006FBC+004	S	chan_meas.ura	URA index
+006FBC+006	S	chan_meas.subframe	Current subframe buffer (10 words x 6)
+006FBC+044	S	chan_meas.subframe_done	Completed subframe copy
+006FBC+090	S	chan_meas.pr_raw	Raw pseudorange from code phase (m, mod 1 ms)
+006FBC+098	S	chan_meas.code_range	Smoothed code range (m)
+006FBC+0A2	S	chan_meas.zcount	TOW from HOW (6 s units)
+006FBC+0A6	S	chan_meas.tx_time	Transmit time (s, double)
+006FBC+0AE	S	chan_meas.range_rate	Carrier range rate (m/s, double)

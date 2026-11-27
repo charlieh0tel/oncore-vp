@@ -60,6 +60,21 @@ public class OncoreTypes extends GhidraScript {
         DataType chT = add(ch);
         apply(0x6FBCL, new ArrayDataType(chT, 8, chT.getLength()), "chan");
 
+        // Per-channel records found by the tracking pass (fields from
+        // names-tracking.tsv via OncoreNames.java).  The arrays tile RAM
+        // exactly: $CF6-$E35, $E36-$1105, $275C-$27BB, $27BC-$2A1B,
+        // $7A3C-$819B.
+        long[][] recs = {{0xCF6L, 0x28, 8}, {0xE36L, 0x5A, 8}, {0x1106L, 0x3C, 1},
+            {0x275CL, 0x0C, 8}, {0x27BCL, 0x2C, 8}, {0x7A3CL, 0xEC, 8}};
+        String[] recn = {"search_rec", "navdata_rec", "search_ctl", "chan_cmd", "chan_report", "eph_rec"};
+        String[] recl = {"search", "navdata", "search_ctl", "chan_cmd", "chan_report", "eph"};
+        for (int k = 0; k < recs.length; k++) {
+            StructureDataType st = new StructureDataType(cat, recn[k], (int) recs[k][1]);
+            st.setPackingEnabled(false);
+            DataType t = add(st);
+            apply(recs[k][0], recs[k][2] == 1 ? t : new ArrayDataType(t, (int) recs[k][2], t.getLength()), recl[k]);
+        }
+
         // CS7 correlator channel registers; read and write meanings differ.
         StructureDataType cs7 = new StructureDataType(cat, "cs7_chan", 0x10);
         cs7.setPackingEnabled(false);

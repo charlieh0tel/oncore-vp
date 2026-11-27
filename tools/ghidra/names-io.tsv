@@ -1,0 +1,411 @@
+# address	kind	name	note
+0008E9	L	settings_dirty	set by A-command handlers on a valid change (e.g. cmd_Ay, cmd_Az, cmd_AJ)
+0008ED	L	rx_event	set by sci_isr on each received byte before waking task $08A11A
+002428	L	iono_params	8 bytes Klobuchar, EEPROM $1180
+002624	L	utc_params	14 bytes, EEPROM $11CC
+0035F3	L	ay_test_on	set when $8210 == $3DACE8
+003624	L	cfg_AF	@@AF word (< 900)
+003626	L	cfg_AG	@@AG 0/1
+003627	L	cfg_AH	@@AH 0-2
+003628	L	cfg_AI	@@AI double
+003630	L	cfg_Cm_1	@@Cm word -> double
+003638	L	cfg_Cm_flag	@@Cm byte 0/1
+00363A	L	cfg_Cm_2	@@Cm word -> double
+00369A	L	cfg_Ar_b6n	@@Ar !(bit 6)
+003724	L	cd_mask	@@Cd mask angle (< 90)
+0037A4	L	vis_count	visible SV count (+ $B14 x bank)
+00633A	L	cfg_An	@@An 0/1
+00633C	L	alt_hold_height	@@Au double, m
+006344	L	cfg_Av	@@Av 0/1
+006345	L	alt_hold_ref	@@Au byte 4 (0/1)
+006347	L	test_hdr	12 bytes, head of @@Tc and @@Td
+006353	L	test_rec	6 x 7 bytes in @@Tc
+00638B	L	test_chan_rec	8 x 18 bytes; @@Td sends two selected by $C61C/$C61D
+007574	L	geoid_sep	subtracted from pos_height for the MSL field
+007592	L	datum_dx	double, datum offset 1, EEPROM $1050
+00759A	L	datum_dy	double, EEPROM $1058
+0075A2	L	datum_dz	double, EEPROM $1060
+0075AA	L	datum_inv_f	double, default 298.257223563, EEPROM $1068
+0075B2	L	datum_a	double, default 6378137.0, EEPROM $1070
+0075BA	L	datum_num	default 49, EEPROM $1078
+0075C3	L	dgps_reset	1 forces correction table reset on next Z-count
+0075C4	L	dgps_time	Z-count time (0.1 s of hour sequence) of current corrections
+0075C8	L	dgps_corr	14 bytes per SV: +0 valid, +2 PRC word, +4 IODE, +6 RRC long, +10 time; written by @@Ce and RTCM
+0079F6	L	dgps_max_age	@@AJ 5-180; age limit x 10 (diff_age_check)
+0079F7	L	cfg_Aj	@@Aj 0-4
+0079F8	L	cfg_Ak	@@Ak double (< 1000)
+007A00	L	cfg_AC	@@AC double (10-999)
+007A08	L	cfg_Al	@@Al double (10-999)
+007A38	L	eeprom_error	bit 1 set by eeprom_write on readback mismatch
+007A3A	L	cfg_AD	@@AD byte 0 (< $80)
+00819D	L	local_offset_min	minutes byte after local_offset, EEPROM $10D3
+0081A6	L	meas_time	double s; Bg/Eg time field
+0081C2	L	cfg_Aq	@@Aq 0/1; EEPROM block $1098
+0081C6	L	leap_pending	@@Bj byte
+0081C8	L	cfg_Ax	@@Ax word (< 1000)
+0081D0	L	sats_tracked	Ea byte
+0081DA	L	cfg_Ar_b0	@@Ar bit 0; also set by RTCM/@@Ce
+0081DB	L	corr_valid	[8] 1 = channel has correction (Bh, Bg)
+0081E4	L	dop	double; Ea x10
+0081EC	L	dop_type	Ea byte = ($81EC != 2)
+0081F0	L	hold_height	@@As height (double, m)
+0081F8	L	hold_lat	@@As lat (rad)
+008200	L	hold_lon	@@As lon (rad)
+008208	L	pos_hold_enable	@@At 0/1
+008209	L	hold_height_type	@@As byte 12 (0/1)
+00820A	L	pps_cable_delay_ns	@@Az long (< 1e9)
+00820E	L	opt_timing	set 1 by id_options_decode; gates pps offset math in $0A0F88
+008210	L	pps_offset_ns	@@Ay long (< 1e9)
+008216	L	cfg_Ar_b7n	@@Ar !(bit 7)
+008218	L	corr_prc	[8] double m; Bh PRC x100 (3 bytes)
+008258	L	corr_rrc	[8] double; Bh RRC = this - clock_drift x1000 (2 bytes)
+0082D8	L	eph_raw	per SV $50 bytes: +0 flag, +1 72 bytes subframes 1-3 (@@Bf input), +$4E flag
+008EB8	L	doppler_bin_sel	@@AB 0-4; default 2, EEPROM $109C; index into $0AEEA2
+008ED6	L	pos_height	double m; Ea height x100; MSL = this - $7574
+008EDE	L	pos_lat	double rad; @@Ad
+008EE6	L	pos_lon	double rad; @@Ae
+008F38	L	heading	double deg; Ea x10
+008F40	L	speed	double m/s; Ea x100
+008FAE	L	mask_angle	@@Ag (< 90), @@Cd copy $3724; EEPROM block $10A2
+009CEA	L	sv_manual	@@Ah 1 = manual SV selection (enables @@Ai)
+009CF2	L	sv_manual_list	[1-8] @@Ai SV per channel (< 38)
+009D0C	L	cfg_Ah	@@Ah 2 -> 1
+009D0E	L	traim_mode	@@Bn/@@En byte 4 (< 4); default 1, EEPROM $10E0
+009D0F	L	cfg_Aw_9D0F	@@Aw, EEPROM $10E1
+009D11	L	traim_enable	@@Bn/@@En byte 1 (< 2)
+009D12	L	cfg_9D12	long default 1, EEPROM $10E4
+009D16	L	traim_alarm	@@Bn/@@En word x 100
+009D28	L	traim_alarm_flag	traim_step result
+009D2A	L	traim_sigma	word, $FFFF = invalid
+009D2C	L	traim_removed	1 = an SV was removed
+009D2E	L	user_datum1	3 doubles, 1/f, a, number (default 50), EEPROM $10FE
+009D58	L	user_datum2	same, number default 51, EEPROM $112C
+009D83	L	osc_save_req	settings task saves osc record and sends PCS1
+009D84	L	pos_changed	set by @@Ad/@@Ae/@@Af; triggers position save
+009D9C	L	selftest_active	set during selftest; sci_isr skips task wake
+009D9E	L	selftest_irq_count	incremented by selftest_l5_isr
+009DA0	L	selftest_buf_lo	save buffer start ($CC22)
+009DA4	L	selftest_buf_hi	save buffer end
+009DA8	L	selftest_chunk	chunk size ($800, then buffer size)
+009DAC	L	selftest_cs7_result	selftest: = selftest_cs7() and ORed into the result word ($0A1D8C); cleared by $0A184A, $0A19F8
+009DAE	L	rx_ring	RX ring start (1920 B)
+00A52E	L	rx_ring_end	pointer to RX ring end
+00A53C	L	tx_ring	TX ring start; end pointer $A9A4
+00A9A4	L	tx_ring_end	pointer to TX ring end
+00A9A8	L	tx_wr	TX ring write pointer
+00A9AC	L	tx_rd	TX ring read pointer (sci_isr)
+00A9B0	L	tx_count	bytes in TX ring
+00A9B2	L	line_buf	assembled input line, 160 bytes
+00A9B6	L	rx_payload	payload of the accepted frame; command handlers read from here
+00AA52	L	line_len	bytes in line_buf
+00AA54	L	rx_hist	copy of received bytes (1920), trimmed by accepted frame length in rx_task; read by the RTCM decoder (rtcm_byte_get)
+00B1D4	L	rtcm_rd	index into rtcm_buf
+00B1D6	L	rx_hist_len	bytes in rx_hist; RTCM read index $B1D4 runs up to it
+00B295	L	out_buf_Be	slot 8
+00B6F7	L	out_buf_Bd	slot 6
+00B70E	L	out_buf_Bc	slot 5
+00B760	L	out_buf_Ez	slot 11
+00B8C9	L	out_buf_Bf	slot 7 (ephemeris output)
+00BB49	L	out_buf_Bk	slot 1
+00BB8E	L	out_buf_Bl	slot 15
+00BCD6	L	out_buf_Bj	slot 12
+00BCDE	L	out_buf_Ba	slot 0 buffer; bin_output_sched sends only when out_ptr[0] == this
+00BD22	L	out_buf_Bh	slot 3
+00BD56	L	out_buf_Bg	slot 2
+00BDD0	L	out_buf_Bn	slot 18
+00BE0B	L	out_buf_Bb	slot 4
+00BE67	L	out_buf_Tc	slot 13
+00BEA4	L	out_buf_Td	slot 14
+00BEDB	L	out_buf_Bm	slot 17
+00BF1C	L	out_buf_Ec	slot 23
+00BF80	L	out_buf_Ek	slot 20
+00BFC7	L	out_buf_Ea	slot 19
+00C013	L	out_buf_Bh2	slot 22
+00C047	L	out_buf_Eg	slot 21
+00C0E5	L	out_buf_En	slot 24
+00C12A	L	reply_ring	slot 10 (command replies) ring $C12A-$C511
+00C512	L	reply_ring_end	slot 10 ring end; out_ring_wrap
+00C516	L	reply_ring_count	bytes in slot-10 ring; replies dropped if count + length >= 1000
+00C518	L	out_ptr	array of 25 longs: write pointer per output slot n; equals slot buffer start when idle
+00C540	L	reply_ring_wr	out_ptr[10]
+00C57C	L	out_rd	array of 25 longs: flush read pointer per output slot
+00C5A4	L	reply_ring_rd	read pointer of slot-10 ring
+00C5E0	L	out_pending	bytes queued
+00C5E2	L	out_letter1	first letter of current frame (set by bin_frame_rx for input; by builders for output)
+00C5E3	L	out_letter2	second letter (in and out)
+00C5E4	L	tx_busy	TX interrupt enabled
+00C5E5	L	be_last_alm_week	almanac_ptr+$36F when @@Be last sent
+00C5E6	L	be_last_alm_time	almanac_ptr+$370 (long) when @@Be last sent
+00C5EA	L	bd_last_alm_week	RAM almanac id when @@Bd last sent
+00C5EC	L	bd_last_alm_time	long
+00C5F0	L	bd_last_ee_week	EEPROM bank almanac id ($20CA3 + $378 x bank) when @@Bd last sent
+00C5F2	L	bd_last_ee_time	long ($20CA4 + $378 x bank)
+00C5F6	L	bb_last_bank	$37A0 when @@Bb last sent; Bb sent when $37A0 changes; init 2
+00C5F7	L	bc_last_bank	same for @@Bc
+00C5F8	L	ec_last_bank	same for @@Ec
+00C5F9	L	bf_last_iode	[8] channel IODE ($7A3D + $EC x ch) when ephemeris last sent
+00C601	L	bf_last_sv	[8] channel SV when ephemeris last sent
+00C609	L	bg_flag80	[8] 0 -> bit 7 in next Bg/Eg state byte, then set to 1
+00C611	L	bg_flag40	[8] 0 -> bit 6 in next Bg/Eg state byte, then set to 1
+00C619	L	tc_enable	@@Tc mode byte 0/1; continuous output when 1
+00C61A	L	td_enable	@@Td mode byte 0/1
+00C61B	L	ez_enable	@@Bz/@@Ez mode byte 0/1
+00C61C	L	td_chan_a	@@Td byte 1 (< 8), selects $638B + 18n
+00C61D	L	td_chan_b	@@Td byte 2 (< 8)
+00C61E	L	out_rate	rate byte per slot n at $C61E+2n, countdown at $C61F+2n
+00C63C	L	bl_mode	@@Bl: 1 continuous, 2 once (cleared after one pass)
+00C651	L	fix_mode	1 = position-fix mode, 0 = idle; EEPROM $091F copy; set by fix_mode_enter ($0AB430, sends @@Cg), cleared by @@Cg 0, @@Ca, @@Cf (chan_stop_all); 0 lets sci_isr wake the rx task
+00C652	L	bh_min	EEPROM $087A copy (@@AD byte 1, default $20, forced to $20 if >= $80); msg_Bh sends a channel only if chan+$A0 word > this
+00C653	L	out_sync_min	EEPROM $0921 copy (@@AE); 1 = out_rate_sync aligns rates dividing 60 to the minute
+00C654	L	opt_A	EEPROM $08FB == 'A'; gates cmd_As
+00C655	L	opt_B	EEPROM $08FC == 'B'; gates @@Bh, @@Ce, cmd_As
+00C656	L	opt_C	EEPROM $08FD == 'C'; gates @@Bg/@@Eg; adds carrier phase field
+00C657	L	opt_D	EEPROM $08FD == 'D'; gates @@Bg/@@Eg
+00C658	L	opt_E	EEPROM $08FD == 'E'; gates @@Bg/@@Eg
+00C659	L	opt_F	EEPROM $08FE == 'F'
+00C65A	L	opt_G	EEPROM $08FF == 'G'; gates @@Bm, @@Cl, @@Cm
+00C65C	L	opt_I	EEPROM $08FB == 'I'; gates @@Bn/@@En TRAIM, cmd_As
+00C667	L	cb_buf	@@Cb almanac input staging (34 pages)
+00CACA	L	cb_ptr	write/read pointer into cb_buf
+00CAF0	L	cb_active	@@Cb sequence active (started by page 5/1)
+00CAF2	L	in_cmd	parsed text-protocol command index (terse/NMEA)
+00CAF4	L	in_value	parsed numeric argument
+00CAF8	L	nmea_rate	8 x {word rate, word countdown} at $CAF8+4n: n 0-6 GGA, GLL, GSA, GSV, RMC, VTG, ZDA; EEPROM $0922+2n
+00CB14	L	terse_rate	= nmea_rate[7], EEPROM $0930
+00CB16	L	terse_count	terse countdown
+00CB18	L	rmc_last_time	last-fix time string for $GPRMC
+00CB22	L	rmc_last_date	last-fix date string for $GPRMC
+00CB29	L	terse_fix_pending	send a report on first fix
+00CB2A	L	terse_nofix_pending	send a report on fix regained after loss
+00CB2C	L	rtcm_resume	set by rtcm_poll
+00CB2E	L	rtcm_resume_step	char index where a word read ran out of input
+00CB34	L	rtcm_words	30-bit words (header 0, 1, data from +8)
+00CBBC	L	rtcm_last_d29d30	previous word's D29/D30 bits
+00CBBD	L	rtcm_char	current 6-bit char
+00CBC0	L	rtcm_bits	bits left in rtcm_char
+00CBC3	L	rtcm_type	message type (header word 1)
+00CBC4	L	rtcm_station	station id, 10 bits
+00CBC6	L	rtcm_zcount	modified Z-count, 13 bits (0.6 s)
+00CBC8	L	rtcm_seq	sequence number, 3 bits
+00CBC9	L	rtcm_nwords	frame length N, 5 bits
+00CBCA	L	rtcm_health	station health, 3 bits
+00CBCC	L	rtcm_corr	type-1 records, 6 bytes each (72 bytes)
+02087B	L	ee_id_text	ID text, 138 B; fields model +$0B, hdwr +$27, serial +$43, date +$64, options +$80; XOR at $0905
+020905	L	ee_id_xor	XOR of $087B-$0904
+021192	L	ee_pos_rec0	position record slot 0 (24 B + cksum $11AA); slot 1 at $11AE (cksum $11C6)
+0211CA	L	ee_pos_sel	active position slot
+09E88E	F	ee_blk_1026	EEPROM block $1026 (28 B, cksum $1042): arg 0 load, 1 defaults+save, 2 save changed; RAM $633A,$79F7,$79F8,$7A00,$7A08,$8FAE
+09EA04	F	ee_blk_1046	EEPROM block $1046 (78 B, cksum $1094): $633C/$6344/$6345, datum $7592-$75BA, hold position $81F0-$8209; defaults 1/f 298.257223563, a 6378137, datum 49
+09ECDE	F	ee_blk_1098	EEPROM block $1098 (6 B, cksum $109E): $369A, utc_mode, $81C2, $8216, $8EB8; defaults 1,1,1,1,2
+09EE0E	F	ee_blk_10a2	EEPROM block $10A2 (42 B, cksum $10CC): $81DA, per-SV $8F89-$8FAD from $10A4-$10C8, $9D0C, $7A3A
+09EF44	F	ee_blk_10d0	EEPROM block $10D0 (42 B, cksum $10FA): $79F6, local_offset $819C/$819D, $81C8, $820A, $8210, $9D0E-$9D24; defaults $79F6=90, $9D12=1, $9D16=1000
+09F226	F	ee_blk_10fe	EEPROM block $10FE (42 B, cksum $1128): user datum slot 1 -> RAM $9D2E (3 doubles, 1/f, a, datum number default 50)
+09F3A8	F	ee_blk_112c	EEPROM block $112C (42 B, cksum $1156): user datum slot 2 -> RAM $9D58 (same layout, datum number default 51); not in the doc's loader list
+09F52A	F	ee_blk_115a	EEPROM block $115A (12 B, cksum $1166): $3624 word (def 7), $3626 (def 1), $3627 (def 0), $3628 double (def 3576.0)
+09F636	F	ee_blk_iono	EEPROM $1180 ionosphere bytes <-> RAM $2428-$242F; arg 0 load, else write if any byte differs + checksum $1188
+09F72A	F	ee_blk_utc	EEPROM $11CC UTC parameters <-> RAM $2624-$2631 (14 B); arg 0 load, else write if changed + checksum $11DA
+09F94A	F	ee_position_save	copies $8ED6-$8EEA (3 doubles, consistent read loop) to inactive EEPROM slot $1192/$11AE (24 B + cksum), flips selector $11CA; RAM copy $2598, cksum $25B0 (+$11111111); called from settings task when $9D84
+09FA84	F	pos_time_snapshot	boot ($09BD66): copies position $8ED6-$8EEA, date_time, $8FAE, local_offset into $3644-$3684 (+3576.0 at $366C)
+09FB0A	F	vis_predict_init	boot ($09BD66): $CC6 = 0, $37A0 = 2 (no bank), $CC7 = 0
+09FB22	F	task_vis_predict	consistent copy of position/date/datum/$81DA/$79F7/per-SV flags into bank $CC6 of $37A2 (stride $B14), runs almanac_recheck_and_predict, flips bank, sets $37A0 (read by msg_Bb/Ea scheduling)
+09FF94	F	ay_test_init_wrap	calls $09FFC8 (from boot_search_reset)
+09FFC8	F	ay_test_init	if @@Ay value $8210 == $3DACE8 (4041960): enable $35F3 and clear per-channel save $35F4[8]
+0A02B0	F	settings_flags_init	boot: clears $9D83 (osc save request), $9D84 (position save request)
+0A035C	F	pos_time_snapshot2	boot_search_reset: copies position, gps_seconds/$81A2, gps_week, year_hint into $26EE-$2714
+0A053A	F	traim_step	TRAIM: if $9D11 = 1, SV count threshold from alarm $9D16 (<500/700/1000 -> 8/4/3/2), residuals $25B4[ch]/32.9, removes worst SV ($8FAF+SV = 0, $0A0BF2); outputs $9D28 alarm, $9D2A sigma ($FFFF invalid), $9D2C removed flag
+0A0BF2	F	traim_remove_sv	(ch) recomputes time solution excluding ch ($0A0DBA), restores gps_week/seconds/clock_drift from $9D88-$9D9A, rebuilds date_time via gps_to_date
+0A0DBA	F	traim_time_excl	(ch) mean of $657C+$174*ch over used channels ($1148[4*ch]=1) excluding ch, week rollover +-604800
+0A0F88	F	pps_offset_update	(timing; other agent may override) from clock_drift, $81BA x 1e9, when $820E = 1: sets $291C, $291E, $9D29; else $291C = 1999; calls $095180
+0A16CE	F	selftest_eeprom	no callers: saves 2 x $9DA8 bytes of EEPROM to $9DA0, writes $55/$AA/counter skipping $0932/$0933, verifies, restores; error -> $800
+0A184A	F	selftest_ram_full	selftest(1): march test RAM $CC22-$1FFFF in chunks ($0A1958), sets $9DA0/$9DA4 buffer bounds
+0A1958	F	ram_test_block	asm: saves block A4 -> A6, writes $5555/$AAAA, verifies, restores
+0A19F8	F	ram_test_exit	asm epilogue: $9DAC = D6 result, restore SR/regs
+0A1A0E	F	mem_copy_thunk	bra $0A1A22
+0A1A22	F	mem_copy	(src, dst, n) byte copy
+0A1A30	F	selftest_l5_isr	level-5 handler during self-test: $9D9E++, writes 0 to $FFE8F2, rte
+0A1B08	F	selftest_eeprom_spare	no callers: $55/$AA write tests at EEPROM $11E0/$11E1 ...; returns $800 when all pass (as decoded)
+0A1CCC	F	peek16	return *(short *)p
+0A1E4C	F	selftest_wait_irq	spins until $9D9E changes (next level-5 interrupt)
+0A1E5E	F	poke16	*(short *)p = v
+0A1E68	F	tq_match_cmd	looks up received 4 bytes in table $0A1FF2 ("@@Sa".."@@Sg","@@Tq")
+0A1E82	F	tq_nop	rts
+0A1F10	F	tq_getc	polled SCI receive (RDRF), services watchdog
+0A1F26	F	tq_getc2	wrapper of tq_getc
+0A1F2C	F	tq_getc3	wrapper of tq_getc2
+0A1F36	F	tq_getc4	wrapper of tq_getc2
+0A1F42	F	tq_read_n	reads n bytes via tq_getc
+0A1F50	F	tq_copy	copies received payload bytes
+0A1F6C	F	tq_nop2	rts
+0A1F7A	F	wdog_service	writes $55, $AA to SWSR ($FFFA27)
+0A1F88	F	tq_read_frame	reads payload + checksum, expects CR LF ($0D0A)
+0A1FBA	F	tq_putc	polled SCI transmit (TDRE), services watchdog
+0A1FCC	F	tq_send_reply	sends 8-byte frame: 4 letters from $0A1FF2[n], byte, checksum, CR LF
+0A2022	F	sci_tx_start	if TX idle ($C5E4 = 0) and $A9B0 > 0: writes first byte to SCDR, sets SCCR1 TIE
+0A2072	F	rx_drop	advances rx_rd (wraps at $A52E) and decrements rx_count if nonzero
+0A20F0	F	out_rate_sync	(n) rates dividing 60: sets countdown $C61F+2n to 1 or 2 to align with the minute
+0A28D4	F	out_periodic	by protocol_mode: bin_output_sched / $0A80A6 / $0A6322 / $0ADA36; called from rx_task $0A65D6
+0A2910	F	datum_load	(dst $7592, n) copies datum n (26-byte entries $0AFDAA) and its ellipsoid a, 1/f (18-byte entries $0AFC7A); callers cmd_Ao, mode_enter_unused
+0A29BC	F	out_state_defaults	clears Bb/Bc/Bd/Be/Bf change trackers, Tc/Td/Ez enables, rates ($0ADDDA); $C652 = $20 and $C653 = 0 written to EEPROM $087A/$0921
+0A2A9A	F	reply_An	only caller cmd_An
+0A2B1A	F	reply_Au	only caller cmd_Au
+0A2BBC	F	reply_AB	only caller cmd_AB
+0A2C64	F	reply_AD	only caller cmd_AD
+0A2DFA	F	reply_Ao	only caller cmd_Ao; sets letters A p: datum reply in @@Ap format
+0A3054	F	reply_AJ	only caller cmd_AJ
+0A30C6	F	reply_Ak	only caller cmd_Ak
+0A3142	F	reply_AC	only caller cmd_AC
+0A31CE	F	reply_Al	only caller cmd_Al
+0A325A	F	reply_Aj	only caller cmd_Aj
+0A3302	F	reply_Av	only caller cmd_Av
+0A3382	F	reply_AA	only caller cmd_AA
+0A3402	F	reply_Aq	only caller cmd_Aq
+0A3482	F	reply_At	only caller cmd_At
+0A3502	F	reply_Ab	only caller cmd_Ab
+0A35B4	F	reply_Af	only caller cmd_Af
+0A3660	F	reply_Ch	letters C h, length table C; caller cmd_Cb (almanac input acknowledge)
+0A36F8	F	reply_Cc	letters C c; caller $0A937E (@@Bf ephemeris input)
+0A37C4	F	reply_Ad	only caller cmd_Ad; lat via rad_to_mas
+0A3840	F	reply_Ae	only caller cmd_Ae; lon via rad_to_mas
+0A38BC	F	reply_Ai	only caller cmd_Ai
+0A394E	F	reply_Ax	only caller cmd_Ax
+0A39BC	F	reply_Az	only caller cmd_Az
+0A3A2A	F	reply_Ay	only caller cmd_Ay
+0A3A98	F	reply_AE	only caller cmd_AE
+0A3B0A	F	reply_Ar	only caller cmd_Ar
+0A3BB6	F	reply_As	only caller cmd_As ($0ACC96)
+0A3C9A	F	reply_AI	only caller cmd_AI
+0A3D16	F	reply_Cm	only caller cmd_Cm
+0A3DDE	F	reply_AH	only caller cmd_AH
+0A3E7A	F	reply_AG	only caller cmd_AG
+0A3EFA	F	reply_AF	only caller cmd_AF
+0A3F68	F	reply_Tb	only caller cmd_Tb; length table T
+0A4010	F	reply_Am	only caller cmd_Am
+0A40D4	F	reply_Ag	only caller cmd_Ag ($0ACE6C)
+0A4146	F	reply_Ah	only caller cmd_Ah
+0A4304	F	reply_Ap	only caller cmd_Ap
+0A458E	F	reply_Aw	only caller cmd_Aw
+0A46DC	F	rx_dispatch	by protocol_mode: bin_dispatch / $0A7BCC / $0A6006 / $0AD9FE
+0A5664	F	out_len_T	table $0B03C4 (a-d)
+0A5696	F	out_len_B	table $0B033A
+0A56C8	F	out_len_E	table $0B0388
+0A56FA	F	out_len_A	output frame length for @@A<x>, table $0B02F2 (a-z, A-J)
+0A5748	F	out_len_C	output frame length for @@C<x>, table $0B036E (a-m)
+0A577A	F	out_len_F	output frame length for @@F<x>, table $0B03BC (a-d)
+0A57AC	F	out_len	output frame length for letters $C5E2/$C5E3 (per-letter tables)
+0A5836	F	in_len_T	command payload length (frame-6) for T, table $0B044F
+0A5866	F	in_len_B	command payload length for B, table $0B040A
+0A5896	F	in_len_E	command payload length for E, table $0B0431
+0A58C6	F	in_len_A	command payload length for A, table $0B03E6 (a-z, A-J)
+0A5912	F	in_len_C	command payload length for C, table $0B0424
+0A5942	F	in_len_F	command payload length for F, table $0B044B
+0A5972	F	in_len	command payload length for letters $C5E2/$C5E3 by first letter; used by rx_task to trim rx history
+0A5A22	F	io_init	resets rx ring, tx ring, all 25 output slot pointers ($C518/$C57C), checks ID-block XOR ($0905), loads rates (ade98), protocol mode from EEPROM $0920 and sets baud; mode 3 SCCR0 $DA/SCCR1 $62C
+0A5E9A	F	terse_report	mode-2 report "%s%03d%03d%d\r\n": position, speed mph ($8F40 clamped 514.0 m/s x 2.236936292), heading $8F38, fix flag (rcvr_status & $30)
+0A5FB0	F	terse_echo_rate	sprintf "T%04d\r\n" into tx ring
+0A6006	F	terse_dispatch	mode-2 dispatch on $CAF2: 0 BIN -> mode_enter_binary, 1 NMEA -> mode_enter_nmea, 2 T<n> -> eeprom_save_rate(7) + echo + report, 3 Z -> report
+0A6072	F	terse_lookup	strcmp token against name table $0B0460 (BIN, NMEA, T, Z); returns index or $FF
+0A60CE	F	terse_deg_min	radians -> degrees, minutes, hundredths of minute (rounded, carries), hemisphere index 0-3
+0A627E	F	terse_fmt_pos	sprintf "%02d%02d%02d%c%03d%02d%02d%c" lat/lon from terse_deg_min
+0A6322	F	terse_periodic	mode-2 periodic: rate $CB14, countdown $CB16; one report on fix gain ($CB29) and fix loss ($CB2A)
+0A643C	F	terse_rx_validate	scans line buffer $A9B2 for BIN/NMEA/T<n>/Z + CR LF; sets $CAF2 command index, $CAF4 value (T alone = 10000)
+0A65D6	F	rx_task	serial task: drains rx ring into line buffer $A9B2 (len $AA52, shift by 80 at 160) and history $AA54; on CR LF (or $DA in mode 3) rx_validate then rx_dispatch; pending @@Cd/@@Fd replies, @@Bd, self-test reply ($C65E/$C666 -> selftest(1), $0AAE96); then out flush ($0AE6AE)
+0A69E2	F	rx_validate	by protocol_mode: bin_frame_rx / $0A839A / $0A643C / $0ADC86
+0A6A18	F	xor_sum	XOR of n bytes
+0A6A40	F	fmt_scaled	double*scale -> int, n low bytes to buffer
+0A6AA2	F	fmt_long_bytes	long -> n low bytes to buffer
+0A6AD6	F	mas_to_rad	int * 4.848e-9 -> radians
+0A6B08	F	rad_to_mas	radians*57.2957795*3600000 rounded (milliarcseconds)
+0A6B90	F	get_be32	big-endian long
+0A6BC8	F	get_be24	big-endian 24-bit
+0A6BF2	F	get_be24s	signed 24-bit
+0A6C20	F	get_be16	big-endian word from bytes
+0A6DD6	F	parse_uint	all-digit string -> atoi, else $FFFF
+0A6E26	F	hex2_to_byte	1-2 hex chars -> byte (NMEA checksum field)
+0A720E	F	nmea_GPGSA	"$GPGSA,%c,%d,..." mode 1/2/3 from rcvr_status bits 4,5; SVs from channel flag $6FBE bit 7
+0A739C	F	nmea_GPGSV	"$GPGSV,%d,%d,%02d,..." (empty form "$GPGSV,1,1,00,...")
+0A76E2	F	nmea_GPRMC	"$GPRMC,%s,%c,%s,%s,%s,%1.1f,%c"; speed sqrt($8F28^2+$8F30^2) x 1.943844492 kn; keeps last-fix time $CB18 and date $CB22
+0A78E0	F	nmea_GPVTG	"$GPVTG,%.1f,T,%.1f,M,%.1f,N,%.1f,K" (empty form when no fix)
+0A7ACA	F	nmea_GPZDA	"$GPZDA,%s,%02d,%02d,%04d,%s%02d,%s%02d" with local offset $819C/$819D
+0A7BCC	F	nmea_dispatch	switch on $CAF2 (1-7 GGA..ZDA: eeprom_save_rate(n-1,$CAF4) + send once; 8 FOR: 0 binary, else terse)
+0A7CC4	F	nmea_token	copy field up to , * CR (max 5 chars) to buffer; returns length (0 if 6)
+0A7D16	F	nmea_lookup	strcmp token against table $0B04AC (PMOTG, GGA, GLL, GSA, GSV, RMC, VTG, ZDA, FOR)
+0A7D72	F	nmea_cksum_ok	XOR of bytes between $ and * equals given value
+0A7DAA	F	nmea_cksum	XOR of string after first char (for "*%02X")
+0A7DC2	F	nmea_deg_min	radians -> degrees, minutes, 1/10000 minute (rounded, carries), hemisphere index
+0A7F5A	F	nmea_fmt_pos	sprintf "%02d%02d.%04d,%c,%03d%02d.%04d,%c"
+0A7FFE	F	nmea_fmt_time	sprintf "%02d%02d%02d.%02d" from date_time ($8EBC.., seconds $8EC0)
+0A80A6	F	nmea_periodic	mode-1 periodic: 7 word rate/countdown pairs $CAF8+4n/$CAFA+4n; send when tx count < 376
+0A8272	F	mode_enter_terse	protocol_mode = 2, EEPROM $0920, baud_select(3) 1200, $CB29 = 1 (from NMEA FOR,n != 0)
+0A82E2	F	nmea_parse_for	FOR,<0|2>[*hh] CR LF; value to $CAF4
+0A839A	F	nmea_rx_validate	finds "$PMOTG,<id>," then nmea_parse_rate (GGA-ZDA) or nmea_parse_for; sets $CAF2
+0A84A2	F	nmea_parse_rate	<n> 1-4 digits <= 9999 [*hh] CR LF; value to $CAF4
+0A88BA	F	msg_Bl	(ch) slot 15, out_len_B('l'); ch+1, SV, 10 x 3-byte words from channel record; sent for ch 0-7 by bin_output_sched when $6346 = 1
+0A8C76	F	reply_Cf	letters C f, empty payload, slot 10; no direct callers
+0A8CFC	F	msg_Ec	slot 23, out_len_E; body $0A966A(23, 8); bin_output_sched and cmd_E 'c'
+0A8F82	F	msg_Ek	slot 20, out_len_E; body $0A9866(20, 8); bin_output_sched and cmd_E 'k'
+0A8FA8	F	out_vis_list	(bank, slot) visible-SV count then 12 x (SV, Doppler word, elevation, azimuth word, health); from msg_Bb (bank $37A0) and reply_Cd (bank 2)
+0A93B0	F	reply_Ck	letters C k, empty payload, slot 10; after accepted @@Ce (cmd_C) and RTCM corrections ($0ABD9E, binary mode)
+0A945E	F	reply_Cd	(6 or 8) slot 9, out_len of current letters; prediction date ($58D0), out_vis_list(2), per-SV records like msg_Bc; caller rx_task (Cd/Fd)
+0A966A	F	msg_Bc_Ec_body	(slot, nch) mode, count (max 9), 4/8, then per SV word + nch bytes from $3DBC/$3DC4 (bank $37A0 x $B14); zero fill to 9
+0A9866	F	msg_Bk_Ek_body	(slot, nch) nine x10 words ($7A10-$7A30, $81B2, $8F20-$8F30), correction age, three x100 longs ($8EEE-$8EFE), per-ch byte (chan +4), ten x10 words ($369C-$3714), clock bias x c, clock_drift
+0AA02C	F	reply_Cl	slot 16, out_len_C('l'); echoes @@Cl inputs $364C lat, $3654 lon, $3644 height, $365C date/time, $3674 offset, $366A mask, $366C, $3676-$3680; no direct callers
+0AA21A	F	msg_Bg_Eg_body	(slot, nch) measurement time $81A6 (s 3 bytes + ns 4), per ch SV, state|flags, transmit time (s + ns) from ($8298-$8218)/-c, carrier $7048 (option C), $7044 (3), $7040 (2)
+0AA4CE	F	msg_Bn_En_body	(slot, nch) rate byte, TRAIM settings $9D0E-$9D2C (alarm $9D16/100), then per ch SV + 4-byte value
+0AA796	F	reply_Cg	letters C g, payload $C651 != 0; callers cmd_C ('g'), fix_mode_enter
+0AA9A0	F	msg_Bh_ch67	slot 22, letters B h, Ce-format; second corrections frame for channels 6-7 ($8248, $81E1, $7400, $7FC5) plus 4 empty entries; rate set by @@Bh
+0AAB44	F	msg_Bd_eeprom	second half of @@Bd: almanac status of EEPROM bank $21024 ($20CA2/$20CA3, page flags $20C7C); caller msg_Bd
+0AAE72	F	msg_Eg	slot 21, out_len_E; body $0AA21A(21, 8)
+0AAE96	F	reply_selftest	(word) slot 10, 2-byte result: C letters -> & $3FFF, else bits rearranged; callers cmd_C 'a' (Ca), cmd_F (Fa), rx_task with selftest(1)
+0AAF50	F	msg_En	slot 24, out_len_E; body $0AA4CE(24, 8)
+0AB032	F	out_ring_wrap	slot 10 pointer $C540 wraps $C512 -> $C12A
+0AB04E	F	out_int	(slot, value, n=1|2) big-endian into out_ptr[slot]
+0AB0D2	F	out_end	(slot, start) XOR checksum over len-5 bytes, CR LF
+0AB166	F	out_double	(slot, double, scale double, n) value*scale rounded via fmt_scaled ($0A6A40), n low bytes
+0AB1CC	F	out_long	(slot, long, n) n low bytes big-endian
+0AB224	F	out_begin	writes "@@" + letters $C5E2/$C5E3 into slot buffer via out_ptr[slot]; returns pointer to letters (checksum start)
+0AB430	F	fix_mode_enter	EEPROM $091F = 1, $C651 = 1, sends @@Cg; called from $08A11A/$08A13A
+0AB484	F	rtcm_init	clears RTCM decoder state $CB2E, $CB34, $CBBC-$CBC0; caller io_init $0A5A22
+0AB4A8	F	rtcm_poll	$CB2C = 1 then rtcm_sync until -1; called each pass by rx_task
+0AB4C4	F	rtcm_getc	next byte $40-$7F from $AA54 via rtcm_byte_get, 6-bit bit-reversed through table $0B0936; $FF if none
+0AB524	F	rtcm_sync	word sync: preamble $66 (or inverted) + parity on two 30-bit words; header type $CBC3, station $CBC4, Z-count $CBC6, seq $CBC8, length $CBC9, health $CBCA
+0AB762	F	rtcm_get_word	assembles a 30-bit word from five 6-bit chars, D30* inversion, parity check; resumable via $CB2E
+0AB92C	F	rtcm_frame	reads $CBC9 data words; type 1 -> rtcm_type1_unpack + rtcm_apply_corr
+0ABA78	F	rtcm_parity	GPS/RTCM parity: masks $EC7CD200, $763E6900, $BB1F3400, $5D8F9A00, $AEC7CD00, $2DEA2700 -> 6 parity bits
+0ABB94	F	rtcm_hdr_parity	parity check of word with D29*/D30* = 0 then 2
+0ABBDE	F	rtcm_type1_unpack	type 1: (nwords x 3)/5 SV records (scale/UDRE, SV, PRC, RRC, IODE) -> 6-byte records at $CBCC
+0ABD9E	F	rtcm_apply_corr	Z-count x 0.6 s against gps_seconds; writes dgps_corr[$75C8 + 14 x SV] (valid, PRC, RRC, IODE, time); type 9 checks channel IODE; reply_Ck in binary mode; $81DA = 1
+0ABFD4	F	rtcm_apply_alt	no callers; same Z-count handling, writes 14-byte table at $77E2 + 14 x SV ($77DC, $77DE) (type 2 delta corrections, inferred)
+0AC126	F	rtcm_byte_get	reads $AA54[$B1D4] until $B1D6; resets both when empty
+0AC160	F	cb_almanac_store	@@Cb: copies 34 pages (type 4/5 page id via table $0B0976) of 8 x 3 bytes from $C667 into the almanac at ($81CA)
+0AC994	F	bf_ephem_store	@@Bf: 24 x 3 bytes of payload into $82D9 + SV x $50; flags $82D8, $8326
+0ACC96	F	cmd_As	cmd_A case 's' (gated by options A, B or I): lat/lon (mas, +-90/180 deg), height cm (-1000..18000 m), type 0/1 -> $81F8, $8200, $81F0, $8209
+0ACE6C	F	cmd_Ag	cmd_A case 'g': mask angle < 90 -> $8FAE
+0AD356	F	cd_parse_date	@@Cd/@@Cl helper: month 1-12, day 1-31, year < 3000 -> $377A, $377B, $377E
+0AD3AE	F	cd_parse_offset	sign 0/$FF, hours < 13, minutes < 60 -> $3778, $3779
+0AD40E	F	cd_parse_pos	lat +-324e6 mas, lon +-648e6 mas, height -1000..18000 -> $3790, $3798, $3788
+0AD4B6	F	cd_parse_time	hour < 24, minute < 60 -> $377C, $377D, seconds $3780 = 0
+0AD56A	F	cl_parse_date	@@Cl: month, day, year 1980-2079 -> $365C, $365D, $3660
+0AD5C8	F	cl_parse_offset	sign 0/$FF, hours < 24, min < 60 -> $3674, $3675
+0AD628	F	cl_parse_mask	word < 900 -> $366A
+0AD654	F	cl_parse_time	h < 24, m < 60, s < 60 -> $365E, $365F
+0AD6A4	F	cl_parse_pos	lat, lon (mas), height cm -> $364C, $3654, $3644
+0AD7B6	F	m3_cksum	XOR of payload bytes (bit 7 clear) after the start byte, ^ $DA if terminator is $DA, else 0
+0AD7E8	F	m3_out_C6	builds the 23-byte $C6 frame into tx ring (see part-B.md)
+0AD9FE	F	m3_dispatch	mode-3 dispatch on line buffer first byte: $C6 -> mode3_rx_C6
+0ADA36	F	m3_periodic	m3_out_C6 when tx count < 188
+0ADC86	F	m3_rx_validate	mode-3 frame scan: $C6 with $DA at +20 and checksum at +21; $CD "OTOROLA" $DA $9E poll
+0ADDDA	F	out_rates_clear	set_output_rate(n,0) for all 25 slots and eeprom_save_rate(n,0) for 8 (on ID-block checksum mismatch)
+0ADE98	F	out_rates_load	out_rate/countdown[n] = EEPROM $0906+n (25); $CAF8/$CAFA[n] = EEPROM word $0922+2n (8)
+0ADEF6	F	bin_out_flush	copies each slot buffer (out_rd $C57C+4n .. out_ptr) to tx ring while count < 750, fixed priority (Ez, Ba, Bk, Ea, ...), resets pointers; slot 10 via $0AE6C4
+0AE6AE	F	out_flush	mode 0: $0ADEF6 (slots -> TX ring), then tx_kick; called from $0A65D6
+0AE6C4	F	out_flush_reply_ring	moves whole frames from slot-10 ring $C12A-$C512 (rd $C5A4, bytes $C516) into TX ring while $A9B0 < 750; length from out_len
+0AE782	F	id_block_default	writes template "MODEL # XXX..." (options "IBC") to EEPROM $087B (140 B) and XOR checksum to $0905; called from $0A5A22
+0AE880	F	id_options_decode	reads OPTIONS LIST chars $08FB-$08FF: A -> $C654, I -> $C65C, B -> $C655, C/D/E -> $C656/$C657/$C658, F -> $C659, G -> $C65A/$8215; sets $820E = 1
+0B02F2	L	out_len_A_tab	words, output frame lengths
+0B033A	L	out_len_B_tab	words: Ba 68, Bb 92, Bc 82, Bd 23, Bf 80, Bg 122, Bj 8, Bk 69, Bl 41, Bm 28, Bn 59, Bz 273
+0B036E	L	out_len_C_tab	words: Ca 9, Cb 33, Cc 80, Cd 171, Ce 52, Cf 7, Cg 8, Ch 9, Cj 294, Ck 7, Cl 43, Cm 12
+0B0388	L	out_len_E_tab	words: Ea 76, Ec 100, Eg 158, Ek 71, En 69, Ez 361
+0B03BC	L	out_len_F_tab	words: Fa 9, Fd 189
+0B03C4	L	out_len_T_tab	words: Ta 12, Tb 11, Tc 61, Td 55
+0B0460	L	terse_names	"BIN", "NMEA", "T", "Z", 6 bytes each
+0B04AC	L	nmea_ids	"PMOTG", "GGA", ... "FOR", 6 bytes each
