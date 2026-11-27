@@ -362,6 +362,40 @@ EEPROM write routine $09B2DE (address, source, count): writes only
 bytes that differ, waits for completion after each, and sets bit 1 of
 RAM $7A38 if a byte reads back wrong.
 
+### @@Ea receiver status byte
+
+Built by $0A9BEC (via $0AA772) from RAM $8F1E, which $08ABD4 assembles:
+
+| Bit | Source | Meaning |
+|---|---|---|
+| 7 | $25F7 = 1 | Set by $08FD50 (navigation step) |
+| 6 | mode 6 | Navigation mode ($25F6, copy of $0B6C) |
+| 5 | mode 2 | 3D fix |
+| 4 | mode 3 | 2D fix |
+| 3 | mode 1 or 4 | Mode 4: position-hold solution ($093906; inferred) |
+| 2 | $75C2 != 1 | Replaces $8F1E bit 2 ($25F8) at output; $75C2 cleared while corrections are younger than $79F6 x 10 ($09BC0A) |
+| 1 | count = 0 | $37A2 (or $42B6) zero |
+| 0 | $25F4 = 1 | Almanac not usable |
+
+Navigation mode to bit (table at $08AC48): 0 none, 1 bit 3, 2 bit 5,
+3 bit 4, 4 bit 3, 5 none, 6 bit 6.
+
+Almanac check $09C782(almanac week, current week $81AE), both mod
+256: usable if the current week is at most 2 weeks before and at most
+127 weeks after the almanac week.  Run at almanac load ($09BEDE);
+if it fails there, rerun once when the time is known ($08C718).
+Otherwise the receiver searches without the almanac.
+
+@@Ac (date, $0AC61C) accepts month 1-12, day 1-31, year 1990-2050;
+@@Aa (time, $0ACF46) accepts h < 24, m < 60, s < 60.  Both update the
+GPS week ($81AE) and seconds ($819E) through $09C81A.
+
+2026-11-26, 8ch on the jig, antenna connected: status $09, 0 visible
+for 12.5 min; receiver date 01/03/2026 (week 95), EEPROM almanac week
+byte 142 (week 2446), rejected.  After @@Ac/@@Aa with UTC: status $08,
+9 visible, 6 tracked (mode 8, flags $A0) within 12 s; $25F6 = 4,
+$81EE = 2.  No antenna-sense bit in @@Ea.
+
 ### Protocol modes
 
 RAM $C650, saved at EEPROM $0920 (this unit: 0).  Name table at
@@ -542,8 +576,10 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
   flash and EEPROM, find its oscillator record and the byte sent to the
   QSPI PCS1 device, and compare with the 8ch's ($75BC = $50, $75C0 =
   20507; defaults $67, 20625).
-- Live oscillator drift: rerun the BDM monitor with an antenna
-  connected (the receiver was not tracking on 2026-11-26).
+- Live oscillator drift: rerun the BDM monitor now that the receiver
+  tracks (after @@Ac/@@Aa, 2026-11-26).
+- Where the boot date comes from (RTC on QSPI?) and whether @@Ac/@@Aa
+  update it; a wrong boot date rejects the almanac (cold-start trouble).
 - Confirm the RF chain antenna -> A06 -> 95U01 SAW -> 58M01 by
   continuity.
 - Confirm the /656 is in the hybrid (29.110 kHz on a hybrid pin, traced
