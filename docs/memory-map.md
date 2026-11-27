@@ -225,6 +225,11 @@ the names sub64r, sub64p, add64pp.  The PC/PI (position-independent)
 libraries differ in some 8-byte windows of the first 64 bytes; the AB
 libraries match all of them.
 
+Options: `cc68k -p cpu32 -OT`; hand-written C for 22 functions
+(`third_party/moto/rewritten/`) compiles to the flash's bytes
+(`tools/matchdecomp/`).  `-O` differs (`x*10` as
+`muls.l`).
+
 Run-time library in the image ($0B0AD2-$0B54BE), placed by
 `tools/libsig.py` from ABCPU32.LIB (IEEE-695 modules, relocated bytes
 masked); 37 sections, named by `tools/ghidra/OncoreLibNames.java`.

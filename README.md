@@ -20,6 +20,7 @@ Pages: <https://charlieh0tel.github.io/oncore-vp/>
 | [`tools/oncore.py`](tools/oncore.py) | Host-port tool: decode @@Ea/@@Ba, set date and time, read the DCXO record and the clock drift, self-test, time to first fix |
 | [`tests/`](tests/) | Tests for the Python tools.  Checks: `uv run ruff format`, `uv run ruff check`, `uv run mypy`, `uv run pytest` |
 | [`tools/libsig.py`](tools/libsig.py) | Matches HP B3640 run-time library modules (IEEE-695) against the flash |
+| [`tools/matchdecomp/`](tools/matchdecomp/) | Builds the hand-written C in [`third_party/moto/rewritten/`](third_party/moto/rewritten/) with the original compiler (B3640 A.04.10, `-p cpu32 -OT`) and compares the objects with the flash ([README](tools/matchdecomp/README.md)) |
 | [`docs/board.md`](docs/board.md) | The 6-channel board: parts, test points and their positions, BDM header wiring, flash-read procedure |
 | [`docs/images/`](docs/images/) | Photos and a 600 dpi scan used by `docs/board.md` |
 | [`photos/`](photos/) | Photos of all three boards, both sides ([index](photos/README.md)); `thumbs/` for the pages |

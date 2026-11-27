@@ -18,6 +18,11 @@ moto/decompiled/B4121P1115.c
     types from tools/ghidra.  Derived from the vendor image; regenerate
     with tools/ghidra (OncoreExportC.java).
 
+moto/rewritten/
+    Hand-written C for functions of moto/B4121P1115-flash.bin that HP
+    B3640 A.04.10 (-p cpu32 -OT) compiles to the flash's bytes.  Derived
+    from the vendor image; build and compare with tools/matchdecomp.
+
 moto/MC68HC68.pdf
     Motorola MC68HC68T1 real-time clock data sheet, REV 2.
 

@@ -1,0 +1,7 @@
+# address	kind	name	note
+# Overrides for tools/matchdecomp: function entries and objects the Ghidra tables split or name per field.
+0A1A0E	F	mem_copy	entry is the bra to the loop test; Ghidra calls it mem_copy_thunk and the loop test mem_copy
+003624	L	cfg_block	struct cfg_af_ai: cfg_AF, cfg_AG, cfg_AH
+000CC6	L	pred_work_bank	also vis_buf
+0AF018	L	month_days	days per month [leap][month], 2 x 13 bytes
+009CEA	L	sv_manual	[17]: sv_manual, per-channel flags, sv_manual_list
