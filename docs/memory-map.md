@@ -1062,6 +1062,13 @@ from the 6ch (TM-AB, 84D43579), so its voltages are not a pin-for-pin
 reference.  SOT-23s beside the top antenna pads: antenna DC feed
 (inferred); the SOIC-8 there is the MC33064 reset supervisor.
 
+Alternative (owner): the hybrid includes the mixer (TCXO, LO and
+first conversion in one part; the 58M01 then IF, AGC and quantizer).
+For: the antenna trace enters the hybrid's can; the LO is a multiple
+of the TCXO in the same package; the QSPI trim is in the hybrid.  To
+decide: which part the SAW output connects to (continuity), and where
+the LO leaks strongest (sniffer over each can).
+
 Tests: LO leakage near the open can (1565.85 vs 1527.66 MHz); clock and
 data on the 58M01-to-ASIC lines (9.548 MHz clock expected); DC at both
 ends of each top-can inductor on the two 6ch boards; DC on the antenna
