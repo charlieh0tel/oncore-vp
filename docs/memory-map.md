@@ -250,6 +250,11 @@ $015E, $5091.
   record is saved ($09F876).
 - $097464 builds the frequency-search bin list around $75BC with step
   derived from $75BE, limited to 0-$D6.
+- $75BC is also written to an 8-bit device on QSPI PCS1 ($09B31A; see
+  "QSPI devices"): at init ($09BD66), on each search step ($097464),
+  after the record is saved ($0A02C0), and in a self-test ($0A1696).
+  So $75BC is a setting sent to hardware, plausibly a tuning value for
+  the reference oscillator (inferred; the part is not identified).
 - Dump: active record 1 = $50, $00B9, $501B (20507, 118 below the
   default 20625); record 0 = $50, $00B9, $5055 (20565).
 - Record layout: byte +0, byte +1 (not read by the code above; $00 in
@@ -303,8 +308,16 @@ Tracking loop ($0805B2), per channel:
   order filter, coefficients -$7971 and $39C3, output to +$0).
 - Requested SV per channel: RAM $E0 + n; $088E96 restarts a channel
   when it differs from RAM $E8 + n.
-- Other windows: CS5 $FFE000 read by $08A714; CS0/CS2/CS3, CS1, CS6:
-  few references, not yet identified.
+- Other windows: no accesses to CS0, CS1, CS2, CS3 or CS6 anywhere in
+  the image (absolute, lea/movea, immediates, pointer constants).  CS5
+  $FFE000: one read, value discarded, at $08A752 in the boot
+  continuation $08A714, before the task scheduler starts (a strobe,
+  inferred).
+- Discrete pins (ports E, F, GP, QS) are written once at reset and
+  never again.
+- PAI input low at reset ($08A09C): RAM filled with $FF and EEPROM
+  $0000-$087A and $0906-$1FFF erased to $FF, keeping the ID block
+  $087B-$0905 (a factory clear strap, inferred).
 - Reset entry $089F5C also sets PEPAR $37, DDRE $C8, PORTE1 $08,
   PFPAR $FB, GPTMCR $2000, DDRGP $DF, PORTGP $C1, CFORC $03.
 
@@ -313,8 +326,8 @@ Tracking loop ($0805B2), per channel:
 Receive path: SCI interrupt ($08048E) -> ring buffer RAM $9DAE-$A52D
 (1920 bytes; write pointer $A532, read pointer $A536, count $A53A) ->
 line assembly at RAM $A9B2 ($0A65D6) -> on CR LF, validate ($0A69E2)
-and dispatch ($0A46DC) by protocol mode (RAM $C650: 0 binary, 1 NMEA,
-2 and 3 other; mode 3 frames on byte $DA).
+and dispatch ($0A46DC) by protocol mode (RAM $C650; see "Protocol
+modes").
 
 Binary frames ($0A68C0): `@@`, two command letters, payload, XOR of
 the letters and payload, CR LF.  Frame length comes from per-letter
@@ -348,6 +361,55 @@ Handlers (first call in each case of the second-level dispatch):
 EEPROM write routine $09B2DE (address, source, count): writes only
 bytes that differ, waits for completion after each, and sets bit 1 of
 RAM $7A38 if a byte reads back wrong.
+
+### Protocol modes
+
+RAM $C650, saved at EEPROM $0920 (this unit: 0).  Name table at
+$0B0460: "BIN", "NMEA", "T", "Z".  Baud select $0A20A2(n): 0 9600,
+1 4800, 2 2400, 3 1200, 4 19200.
+
+| Mode | Serial | Entered by | Validate / dispatch / periodic |
+|---|---|---|---|
+| 0 Motorola binary | 9600 8N1 | $0A82AE (from NMEA `FOR,0`, mode-2 `BIN`) | $0A68C0 / $0A4644 / $0A21B4 |
+| 1 NMEA | 4800 8N1 | @@Ci 1 ($0A6CB2); mode-2 `NMEA` ($0A63F2) | $0A839A / $0A7BCC / $0A80A6 |
+| 2 terse ASCII | 1200 8N1 | @@Ci 2 ($0A6C3C); NMEA `$PMOTG,FOR,2` | $0A643C / $0A6006 / $0A6322 |
+| 3 7-bit framed binary | 2400 8E1 | EEPROM $0920 = 3 at boot only; setter $0A6D36 has no callers | $0ADC86 / $0AD9FE / $0ADA36 |
+
+Mode 1 (NMEA) input: `$PMOTG,<id>,<n>[*hh]` only; table at $0B04AC
+(PMOTG, GGA, GLL, GSA, GSV, RMC, VTG, ZDA, FOR).  For GGA-ZDA, n is the
+output rate 0-9999 (0 = off), saved at EEPROM $0922 + 2n ($0ADE12),
+and the sentence is sent once at once.  `FOR,0` -> binary, `FOR,2` ->
+mode 2.  Outputs: $GPGGA ($0A6EC8), $GPGLL ($0A7158), $GPGSA
+($0A720E), $GPGSV ($0A739C), $GPRMC ($0A76E2), $GPVTG ($0A78E0),
+$GPZDA ($0A7ACA); format strings $0B04F1-$0B0646, ending `*%02X\r\n`.
+
+Mode 2 input (CR LF, no checksum): `BIN` -> mode 0; `NMEA` -> mode 1;
+`T<n>` sets the report rate (EEPROM $0930) and echoes `T%04d`; `Z`
+sends one report.  Report ($0A5E9A): DDMMSS N/S DDDMMSS E/W, speed in
+mph (RAM $8F40 x 2.236936292, max 514), heading (RAM $8F38, max 999),
+fix flag.
+
+Mode 3: frames start with a byte with bit 7 set, carry 7-bit payload
+bytes, end with $DA, then XOR(payload) ^ $DA.  Poll: $CD "OTOROLA"
+$DA $9E ("MOTOROLA" with bit 7 on the M).  Output frame $C6, 23 bytes
+($0AD7E8): lat and lon (28-bit, 0.001 arcmin), time, height, speed x10,
+heading x10, status, a count, fix flag.  Input $C6 frame ($0ADA48) sets
+position and time; as decoded, its latitude parse looks off by one
+(unverified).
+
+### QSPI devices
+
+All transfers polled, with interrupts masked; the QSPI interrupt is
+never enabled.
+
+| Device | Chip select | SPCR0 | Functions |
+|---|---|---|---|
+| MC68HC68T1 RTC | PCS0, active high | $A104 (8-bit, CPHA 1, ~2.1 MHz) | $09B4AC init and presence test (T1 RAM $00-$02), $09B5DE read time and date, $09B76C write date, $09B844 write time |
+| Unknown 8-bit device | PCS1, active low | $A008 (8-bit, CPHA 0, ~1 MHz) | $09B31A(value): sends $81; $00 (reads); $C0 + low nibble x 2 (reads); $01; $C1 + high nibble x 2; $01; ~5 ms between bytes; returns the previous value read back |
+
+RTC: control $B1 = $34 to stop, burst read $20-$26, then $B4 to
+start; interrupt control $B2 = $00 then $20.  Time and date in RAM
+$2755-$275A.
 
 ## 6-channel board *7VGN4*, from the Z3801A (owner's photos)
 
@@ -479,8 +541,8 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
 - Confirm the /656 is in the hybrid (29.110 kHz on a hybrid pin, traced
   to EXTAL pin 62).
 - TCXO frequency error (needs a counter, or a long host-timed count).
-- Devices behind CS0-CS3, CS5, CS6.  CS7 ($FFE800) is per-channel
-  hardware (8 x 16-byte blocks, level-5 interrupt); chip not traced
-  (XCT38140 likely).
+- Hardware behind CS0-CS3, CS5, CS6 (unused by this firmware, except
+  one CS5 read).  CS7 chip not traced (XCT38140 likely).
+- The QSPI PCS1 device that receives $75BC.
 - EEPROM field meanings for the "Unknown" blocks.
 - Whether CS9/CS10 have chips fitted.
