@@ -1077,7 +1077,7 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
 - 6ch firmware (`third_party/moto/B1121P1114-flash.bin`) in Ghidra:
   search tables, application type, oscillator record, EEPROM layout;
   compare with the 8ch.
-- T1 VBATT (pin 13): traced to header pin 1 (BATT) on each board
+- T1 VBATT (pin 13): likely fed from header pin 1 (BATT) on each board
   (inferred); whether the jigs supply pin 1 (the RTC kept time across
   power cycles on the 8ch and both 6ch).
 - Confirm the RF chain antenna -> A06 -> 95U01 SAW -> 58M01 by
