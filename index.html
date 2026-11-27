@@ -65,8 +65,8 @@ header a{color:var(--accent)}
 <main>
 <header>
   <h1>Oncore VP Teardown</h1>
-  <p class="sub">Motorola Oncore VP 8-channel from an HP 58503A, read over BDM (mc683xx-bdm, bdm 0.4.0, pod firmware 0.5.0), 2026-11-24. Firmware SFTW P/N 98-P36830P, VER 8, REV 8, dated 06 Aug 1996. Model B4121P1115, serial SSG0220999.</p>
-  <p class="sub">See also: <a href="oncore-vp-test-points.html">test points and BDM header</a> &middot; <a href="mc68331-clock-pins.html">MC68331 clock pins</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/docs/board.md">board notes</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/docs/memory-map.md">memory map and firmware notes</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/docs/messages.md">binary messages</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp/tree/main/tools/ghidra">Ghidra scripts</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp">source</a></p>
+  <p class="sub">Motorola Oncore VP 8-channel from an HP 58503A, read over BDM (mc683xx-bdm, bdm 0.4.0, pod firmware 0.5.0), 2026-11-24. Firmware SFTW P/N 98-P36830P, VER 8, REV 8, dated 06 Aug 1996. Model B4121P1115, serial SSG0220999. Also two 6-channel receivers (B1121P1114) from an HP Z3801A and Z3805A, read over their serial ports.</p>
+  <p class="sub">See also: <a href="oncore-vp-test-points.html">test points and BDM header</a> &middot; <a href="mc68331-clock-pins.html">MC68331 clock pins</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/docs/board.md">board notes</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/docs/memory-map.md">memory map and firmware notes</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/docs/firmware.md">firmware overview</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/third_party/moto/decompiled/B4121P1115.c">8ch decompiled C</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/third_party/moto/decompiled/B1121P1114.c">6ch decompiled C</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/docs/messages.md">binary messages</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp/tree/main/tools/ghidra">Ghidra scripts</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp">source</a></p>
 </header>
 
 <section>
@@ -180,12 +180,33 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
 <section>
   <h2>Firmware</h2>
   <ul>
-    <li>C, built with HP B3640 A.04.10 (68000-family cross compiler). The soft-float and libc routines match ABCPU32.LIB byte for byte; startup code is Motorola's own.</li>
-    <li>Ghidra 12.1.4 project rebuilt from the repo's scripts: 64 switches, 574 functions, every function and RAM global named or typed, none failing to decompile.</li>
+    <li>C, built with HP B3640 A.04.10 (68000-family cross compiler). The soft-float and libc routines match ABCPU32.LIB byte for byte (37 modules); startup code is Motorola's own.</li>
+    <li>Ghidra 12.1.4 project rebuilt from the repo's scripts in under 2 min: 64 switches, 574 functions, every function and RAM global named or typed, none failing to decompile. The decompiled C is committed as one file.</li>
     <li>Tasks: a 26-task pre-emptive scheduler; the CS7 correlator interrupt runs every 1 ms (channel states 0 search &hellip; 5 phase lock).</li>
-    <li>Navigation: unweighted least squares (not a Kalman filter), Klobuchar, Sagnac, relativistic and DGPS corrections, no troposphere model; position hold is time-only; TRAIM excludes one SV.</li>
+    <li>Navigation: unweighted least squares (not a Kalman filter), Klobuchar, Sagnac, relativistic and DGPS corrections, no troposphere model; position hold is time-only; TRAIM excludes one SV. A floating-point error jumps to the reset entry.</li>
     <li>Host port: 87 binary commands, NMEA, a terse ASCII mode and a 7-bit framed mode; an RTCM SC-104 decoder feeds the DGPS table.</li>
+    <li>Fix/idle mode is saved in EEPROM ($091F; 6ch $0919) and restored at boot: 0 boots idle until <code>@@Cg 1</code>. The HP hosts send <code>@@Cg 1</code> at every power-up (smartclock).</li>
   </ul>
+  <h3>Satellite search by application type (<code>@@AB</code>, $8EB8)</h3>
+  <div class="scroll"><table>
+    <tr><th class="t">Type</th><th>Almanac-aided search</th><th>Per satellite</th></tr>
+    <tr><td class="t">Land (2), the default</td><td>100 bins, &plusmn;2 kHz, 2 passes</td><td>about 19 min</td></tr>
+    <tr><td class="t">Air (0)</td><td>100 bins, &plusmn;4.5 kHz, 1 pass</td><td>about 9.5 min</td></tr>
+    <tr><td class="t">Handheld, Marine, Static (1, 3, 4)</td><td>16 bins, &plusmn;2 kHz, 1 pass</td><td>about 1.5 min</td></tr>
+  </table></div>
+  <p class="sub">One bin is a full code sweep (2864 dwells, about 5.7 s, inferred). Then a full-sky search: 31 bins, 0 to &plusmn;7.5 kHz, at each DCXO setting. Tables at $0AEEA2 + type &times; 24 + 4 &times; strategy. The 8ch is now set to Static (what HP's host sends); both 6ch are on Land.</p>
+  <h3>Commands not in the VP Oncore Command Reference (Synergy, 05OCT01)</h3>
+  <div class="scroll"><table>
+    <tr><th>Command</th><th class="t">What</th></tr>
+    <tr><td>@@AF&ndash;@@AI, @@Bm, @@Cl</td><td class="t">Present; partly traced</td></tr>
+    <tr><td>@@Cm</td><td class="t">Option G only</td></tr>
+    <tr><td>@@Bz / @@Ez</td><td class="t">Output messages</td></tr>
+    <tr><td>@@Ta</td><td class="t">DCXO record (below)</td></tr>
+    <tr><td>@@Tb, @@Tc, @@Td</td><td class="t">Factory test</td></tr>
+    <tr><td>@@Th</td><td class="t">Writes the ID block</td></tr>
+    <tr><td>@@Tq, @@Sa&ndash;@@Sg</td><td class="t">Factory loader ($0A1E90; 6ch $09EB54): masks interrupts and runs its own serial loop. @@Sa/@@Sb/@@Sc write data at a 2/3/4-byte address, @@Sg jumps to a RAM address, @@Sd acknowledges, @@Se returns to the firmware. No flash programming in the firmware; flash needs 12 V on header pin 4 (VPP).</td></tr>
+  </table></div>
+  <p class="sub">The @@Ea status and channel-flag bits in the reference match the firmware.</p>
 </section>
 <section>
   <h2>Cold start</h2>
@@ -195,6 +216,7 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
     <li>2026-11-26, antenna connected: 12.5 min with nothing tracked (date 01/03/2026). After @@Ac/@@Aa with UTC: 9 visible, 6 tracked within 12 s.</li>
     <li>@@Ac, @@Aa and the first GPS time each boot write the RTC.</li>
     <li>The 58503A host's power-up script sends no @@Ac or @@Aa, so in the instrument the boot date depends on the T1 keeping time.</li>
+    <li>2026-11-27, power cycle with the RTC kept: first fix about 48 s after power-up. After hours without signal the 8ch's search stuck (no track in 30 min, even with @@Ac/@@Aa); a power cycle cleared it (fix within 49 s).</li>
   </ul>
 </section>
 <section>
@@ -203,9 +225,52 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
     <li>An 8-bit setting ($75BC) goes to the DCXO control on QSPI PCS1 (HP's name: the 58503B sends <code>@@Ta</code> for <code>:DIAGnostic:GPSystem:DCXO</code>): six single-byte frames, nibble data, the previous value read back. Not a commodity DAC or pot; likely in the 24M0x hybrid or the 58M01.</li>
     <li>Blind search steps the setting through a list (here 140, 20, 200, 80), &plusmn;7.5 kHz of Doppler bins per setting; range &plusmn;25 ppm at 185 Hz/LSB.</li>
     <li>Once per power-up, after 10 steady fixes, the drift is driven toward 20625 and the record saved.</li>
-    <li><code>@@Ta FF FF FF FF FF CA</code> reads the record without changing it; this unit: 20625, $50, 185 Hz/LSB.</li>
+    <li><code>@@Ta</code> payload: drift reference (u16, HP "Offs"), setting (u8, "Warp"), Hz/LSB (u16, "Step"). All or nothing: stored only if word &lt; $8000, byte &lt; $D8, word &lt; $8000, then saved to EEPROM at once and sent to the DCXO. <code>@@Ta FF FF FF FF FF CA</code> reads the record without changing it. Default with no valid record: $67, 350 Hz/LSB, 20625.</li>
+    <li>Records: 8ch 20625, $50, 185 Hz/LSB. 6ch SSG0163878 20549, $5F, 351; SSG0178541 20749, $5C, 339 (same firmware rules).</li>
     <li>Live, tracking: drift 20355 Hz at L1, 270 Hz below the 20625 target. 20625 Hz is exactly 1575.42 MHz &minus; 82.5 &times; 19.09575 MHz, the carrier left after mixing down, so the reference is off by 0.17 ppm (sign not determined); the boot's update moved the reference to 20572, as the rule predicts.</li>
   </ul>
+</section>
+
+<section>
+  <h2>6-channel receivers</h2>
+  <div class="scroll"><table>
+    <tr><th class="t"></th><th>SSG0163878</th><th>SSG0178541</th></tr>
+    <tr><td class="t">Instrument / board</td><td>Z3805A (3625A01487), *7VENR*</td><td>Z3801A (3542A01548), *7VGN4*</td></tr>
+    <tr><td class="t">Model / manufactured</td><td>B1121P1114, 6G09</td><td>B1121P1114, 6J25</td></tr>
+    <tr><td class="t">Software</td><td colspan="2">98-P39972M VER 8 REV 4, 13 Jul 1995; the two flashes are identical</td></tr>
+    <tr><td class="t">In service (smartclock logs)</td><td>locked 84%, needed +20 dB</td><td>locked 20%, needed +20 dB; the worse</td></tr>
+    <tr><td class="t">Self-test (@@Ca)</td><td>all pass</td><td>all pass</td></tr>
+  </table></div>
+  <ul>
+    <li>Firmware and EEPROMs read over the host port through the factory loader with a 72-byte RAM stub (<code>tools/loader/dump.py</code>), no BDM: 256 KB in 4.6 min, both flash checksums match.</li>
+    <li>Same code as the 8ch, cut to 6 channels, without @@E*/@@F*: byte-identical search tables, same @@Ta and boot trim, same almanac week window and RTC fallback. 557 functions named by matching the 8ch.</li>
+    <li>As found: silent until polled, idle at power-up (fix mode 0 saved), RTC at the fallback 01/01/2026 12:00:00, almanac rejected. EEPROMs show an @@Cf (ionosphere and UTC blocks invalidated). After @@Cg 1, @@Ac/@@Aa, an almanac by @@Cb and a position: 9 visible, and they boot searching.</li>
+    <li>On the plain distribution-amplifier feed neither tracks (20 min aided runs, and after a clean power cycle). On a higher-gain feed: SSG0178541 3D with 5-6 SVs at once; SSG0163878 4 SVs in 17 s, first fix 46.5 s.</li>
+    <li>Top-side DC bias agrees between the boards at every node (supply-fed chokes, a 0.765 V transistor base, a 2.2&ndash;2.4 V mid-rail node), so the loss is in the RF path (A06, SAW filter, coupling or the 58M01 input; inferred).</li>
+  </ul>
+  <h3>Top-side DC bias, volts to ground (USB-fed jigs)</h3>
+  <div class="scroll"><table>
+    <tr><th class="t">Point</th><th>SSG0178541</th><th>SSG0163878</th></tr>
+    <tr><td class="t">Supply</td><td>4.75</td><td>4.80</td></tr>
+    <tr><td class="t">Antenna center pin</td><td>4.67</td><td>4.73</td></tr>
+    <tr><td class="t">2R2 by the 24M01, A / B</td><td>4.73 / 4.69</td><td>4.80 / 4.75</td></tr>
+    <tr><td class="t">2R2 middle, A / B</td><td>4.69 / 4.67</td><td>4.75 / 4.75</td></tr>
+    <tr><td class="t">2R2 bottom left, A / B</td><td>0.765 / 0.766</td><td>0.765 / 0.767</td></tr>
+    <tr><td class="t">R27, A / B</td><td>2.36 / 2.36</td><td>2.22 / 2.23</td></tr>
+    <tr><td class="t">R56, A / B</td><td>2.36 / 2.36</td><td>2.23 / 2.23</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2>Antenna gain</h2>
+  <div class="scroll"><table>
+    <tr><th class="t"></th><th>VP Oncore (engineering notes, p. 5)</th><th>UT Oncore (engineering notes)</th></tr>
+    <tr><td class="t">Net gain at the receiver input</td><td>preamplifier 18 dB minimum, including 6 dB cable loss</td><td>10 to 33 dB; performance degrades outside</td></tr>
+    <tr><td class="t">Noise figure</td><td>2.5 dB maximum</td><td>2.2 dB maximum (system 4 dB)</td></tr>
+    <tr><td class="t">Antenna power</td><td>+5 V, 25 mA available</td><td>80 mA maximum, 45 mA short circuit</td></tr>
+    <tr><td class="t">Thresholds (0 dBic, no cable)</td><td>acquire &minus;137 dBm, track &minus;143 dBm</td><td></td></tr>
+  </table></div>
+  <p class="sub">No onboard LNA unless the passive-antenna option (23 dB) is fitted. Both notes are in third_party/moto.</p>
 </section>
 
 <section>
@@ -261,6 +326,8 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
       <p class="mono">51 VSS &middot; 52 TXD &middot; 53 RXD &middot; 54 DSO &middot; 55 DSI &middot; 56 BKPT/DSCLK &middot; 57 TSC &middot; 58 FREEZE &middot; 59 VSS &middot; 60 XTAL &middot; 61 VDDSYN &middot; 62 EXTAL &middot; 63 VDD &middot; 64 XFC &middot; 65 VDD &middot; 66 CLKOUT &middot; 67 VSS &middot; 68 RESET &middot; 69 HALT &middot; 70 BERR &middot; 71&ndash;77 IRQ7&ndash;IRQ1 &middot; 78 MODCLK &middot; 79 R/W &middot; 80 SIZ1 &middot; 81 SIZ0 &middot; 82 AS &middot; 83 VSS</p>
     </div>
     <div style="display:grid;gap:6px;min-width:0">
+      <h3>Receiver 10-pin header</h3>
+      <p class="mono">1 BATT (backup power) &middot; 2 PWR (5 V) &middot; 3 GND &middot; 4 VPP (flash programming) &middot; 5 not used &middot; 6 1PPS &middot; 7 1PPS RTN &middot; 8 TTL TXD1 &middot; 9 TTL RXD1 &middot; 10 TTL RTN</p>
       <h3>MC68HC68T1, 16-pin</h3>
       <p class="mono">1 CLKOUT &middot; 2 CPUR &middot; 3 INT &middot; 4 SCK &middot; 5 MOSI &middot; 6 MISO &middot; 7 SS &middot; 8 VSS &middot; 9 PSE &middot; 10 POR &middot; 11 LINE &middot; 12 VSYS &middot; 13 VBATT &middot; 14 XTALin &middot; 15 XTALout &middot; 16 VDD</p>
       <p class="sub">CLKOUT options: XTAL, /2, /4, /8, 1 Hz, 2 Hz, 64 Hz, low.</p>
@@ -307,12 +374,11 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
 <section>
   <h2>Open</h2>
   <ul>
-    <li>Confirm the RF chain antenna &rarr; A06 &rarr; 95U01 SAW &rarr; 58M01 by continuity.</li>
+    <li>6-channel sensitivity loss: continuity of antenna &rarr; A06 &rarr; 95U01 SAW &rarr; 58M01, and the A06 bias on the bottom side, off the jig.</li>
     <li>Confirm the &divide;656 is in the hybrid (29.110 kHz on a hybrid pin, traced to EXTAL).</li>
     <li>Hybrid (TCXO) frequency error and its sign (0.17 ppm from the drift).</li>
     <li>Trace QSPI PCS1 to its part.</li>
-    <li>T1 VBATT: whether the RTC keeps time across a power cycle.</li>
-    <li>6-channel firmware (read over serial with the factory loader) in Ghidra: compare search tables, application type and oscillator record with the 8ch. The 6-channel boards have lost sensitivity: they track only with about 20 dB of extra gain. Bias is normal on the top side, so the loss is in the RF path; check its continuity and the A06 off the jig.</li>
+    <li>T1 VBATT: likely fed from header pin 1 (BATT); whether the jigs supply it.</li>
     <li>Whether CS9/CS10 have chips fitted (CS0&ndash;CS3, CS6 are never accessed; CS5 is one boot read).</li>
   </ul>
 </section>
