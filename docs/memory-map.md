@@ -1008,6 +1008,12 @@ block moved down by 6.
   restart task, so no measurement/navigation tasks (inferred).  The later
   power cycle found $0919 = 1 and a valid RTC (written by
   `task_rtc_write_date`/`_time` after @@Ac/@@Aa or GPS time).
+- Host instruments (smartclock docs/firmware/gps.md, 58503A 3704,
+  Z3801A 3543, Z3805A 3543B): every power-up sends @@Cg 1 (self-test
+  script after @@Ca, init script after @@Cj and set-up echoes, hold
+  script); @@Cg 0 only as the first half of a 0-then-1 pair.  An idle
+  6ch here answered @@Cj, @@Ba and @@Ca, so an instrument takes an idle
+  engine out of idle at power-up.
 - 01/01/2044 after a reset during probing: an RTC year 44 reads as 2044,
   inside 1980-2070, so accepted as valid (inferred).
 
