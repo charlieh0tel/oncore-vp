@@ -5,6 +5,7 @@
   oncore.py [--port P] settime                send @@Ac and @@Aa with UTC from the system clock
   oncore.py [--port P] ta                     read the oscillator record (@@Ta query; changes nothing)
   oncore.py [--port P] drift [--samples N]     clock drift from @@Ek (8ch) or @@Bk (6ch), polled once each
+  oncore.py [--port P] selftest               @@Fa (8ch) or @@Ca (6ch); stops tracking, then @@Cg 1
   oncore.py [--port P] ttff [--settime] [--seconds N]
                                               time until the first channel is used in a fix
 
@@ -129,6 +130,36 @@ def cmd_drift(port, a):
         time.sleep(2)
 
 
+# Self-test word bits (1 = fail), firmware order; docs/messages.md.
+SELFTEST = {0: 'chan1', 1: 'chan2', 2: 'chan3', 3: 'chan4', 4: 'chan5', 5: 'chan6', 6: '1kHz-int',
+            7: 'flash-LS', 8: 'flash-MS', 9: 'RAM-LS', 10: 'RAM-MS', 11: 'EEPROM', 12: 'DCXO-SPI',
+            13: 'RTC', 14: 'chan7', 15: 'chan8'}
+
+
+def cmd_selftest(port, a):
+    # In fix mode the first @@Ca/@@Fa only stops the channels and goes idle;
+    # the second runs the test (answer in about 6 s).  @@Cg 1 resumes fixing.
+    port.reset_input_buffer()
+    eight = None
+    for t, l, p in frames(port, 5, (b'Ea', b'Ba')):
+        eight = l == b'Ea'
+        break
+    cmd = b'Fa' if eight else b'Ca'
+    for attempt in range(2):
+        port.write(frame(cmd))
+        for t, l, p in frames(port, 12, (cmd,)):
+            w = p[0] << 8 | p[1]
+            if cmd == b'Fa':  # undo Fa's packing: 0-5 kept, 6-7 <- 14-15, 8-15 <- 6-13
+                w = (w & 0x3F) | (w >> 6 & 3) << 14 | (w >> 8) << 6
+            print('@@%s word $%04X: %s' % (cmd.decode(), p[0] << 8 | p[1],
+                                            'all pass' if w == 0 else 'FAIL ' + bits(w, SELFTEST)))
+            port.write(frame(b'Cg', b'\x01'))
+            print('sent @@Cg 1 (resume fixing)')
+            return
+    port.write(frame(b'Cg', b'\x01'))
+    sys.exit('no self-test reply; sent @@Cg 1')
+
+
 def cmd_ttff(port, a):
     t0 = time.time()
     port.reset_input_buffer()
@@ -158,6 +189,7 @@ def main():
     w.add_argument('--seconds', type=float, default=1e9)
     sp.add_parser('settime')
     sp.add_parser('ta')
+    sp.add_parser('selftest')
     dr = sp.add_parser('drift')
     dr.add_argument('--samples', type=int, default=5)
     f = sp.add_parser('ttff')
@@ -165,7 +197,7 @@ def main():
     f.add_argument('--seconds', type=float, default=3600)
     a = ap.parse_args()
     port = serial.Serial(a.port, 9600, timeout=0.2)
-    {'watch': cmd_watch, 'settime': lambda p, a: settime(p), 'ta': cmd_ta, 'drift': cmd_drift, 'ttff': cmd_ttff}[a.cmd](port, a)
+    {'watch': cmd_watch, 'settime': lambda p, a: settime(p), 'ta': cmd_ta, 'drift': cmd_drift, 'selftest': cmd_selftest, 'ttff': cmd_ttff}[a.cmd](port, a)
 
 
 if __name__ == '__main__':

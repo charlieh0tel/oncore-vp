@@ -14,7 +14,7 @@ Pages: <https://charlieh0tel.github.io/oncore-vp/>
 | [`docs/memory-map.md`](docs/memory-map.md) | Memory map, chip selects, registers, serial, clock, EEPROM layout, firmware (compiler, tracking, navigation, host commands, date and time, QSPI devices), parts of all three boards, pinouts, open items |
 | [`docs/messages.md`](docs/messages.md) | Binary output message payloads, from the firmware |
 | [`tools/ghidra/`](tools/ghidra/) | Ghidra scripts and name/type tables that rebuild the fully named project from the flash image ([README](tools/ghidra/README.md)) |
-| [`tools/oncore.py`](tools/oncore.py) | Host-port tool: decode @@Ea/@@Ba, set date and time, read the oscillator record, time to first fix |
+| [`tools/oncore.py`](tools/oncore.py) | Host-port tool: decode @@Ea/@@Ba, set date and time, read the DCXO record and the clock drift, self-test, time to first fix |
 | [`tools/libsig.py`](tools/libsig.py) | Matches HP B3640 run-time library modules (IEEE-695) against the flash |
 | [`docs/board.md`](docs/board.md) | The 6-channel board: parts, test points and their positions, BDM header wiring, flash-read procedure |
 | [`docs/images/`](docs/images/) | Photos and a 600 dpi scan used by `docs/board.md` |
