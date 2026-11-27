@@ -204,7 +204,7 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
     <li>Blind search steps the setting through a list (here 140, 20, 200, 80), ±7.5 kHz of Doppler bins per setting; range ±25 ppm at 185 Hz/LSB.</li>
     <li>Once per power-up, after 10 steady fixes, the drift is driven toward 20625 and the record saved.</li>
     <li><code>@@Ta FF FF FF FF FF CA</code> reads the record without changing it; this unit: 20625, $50, 185 Hz/LSB.</li>
-    <li>Live, tracking: drift 20355 Hz at L1, 270 Hz below the 20625 target (−0.17 ppm if 20625 is the zero point); the boot's update moved the reference to 20572, as the rule predicts.</li>
+    <li>Live, tracking: drift 20355 Hz at L1, 270 Hz below the 20625 target. 20625 Hz is exactly 1575.42 MHz − 82.5 × 19.09575 MHz, the carrier left after mixing down, so the reference is off by 0.17 ppm (sign not determined); the boot's update moved the reference to 20572, as the rule predicts.</li>
   </ul>
 </section>
 

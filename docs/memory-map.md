@@ -183,7 +183,10 @@ RAM copies and the commands whose handlers write them:
 - EXTAL (pin 62), probed: 29.110 kHz square wave.  x256 = 7.452 MHz, x576 =
   16.767 MHz.
 - Hybrid on the 8ch: 24M02, 19.09Mhz.  On the 6ch: 24M01, 19.09575M.  19.09575 MHz x 82.5 =
-  1575.42 MHz (GPS L1).  19.09575 MHz / 656 = 29,109.4 Hz, matching
+  1575.399375 MHz, exactly 20625 Hz below GPS L1: the firmware's drift
+  target.  So L1 is mixed down by a total of 82.5 x the reference,
+  leaving a 20.625 kHz carrier for the correlator (frequency plan
+  inferred; stage count and LO frequencies not traced).  19.09575 MHz / 656 = 29,109.4 Hz, matching
   EXTAL.  Owner: the /656 is almost certainly inside the hybrid; not
   yet verified.
 - Nominal clocks from 19.09575 MHz: EXTAL 29,109.38 Hz; f_sys at reset
@@ -342,9 +345,10 @@ $015E, $5091.
 - Live, 2026-11-27, 10 min tracking 1-3 SVs (BDM samples every 10 s):
   drift 20338-20369 Hz at L1, mean 20355, 270 Hz below the 20625
   target.  That boot's fine update set $75C0 = 20572 (rule: 20625 + 20%
-  of (20355 - 20625) = 20571); $75BC stayed $50.  If 20625 is the zero
-  point, the reference is -0.17 ppm (about -3.3 Hz at 19.09575 MHz;
-  inferred).
+  of (20355 - 20625) = 20571); $75BC stayed $50.  With 20625 Hz the
+  nominal carrier (82.5 x 19.09575 MHz below L1), the reference is off
+  by 0.17 ppm, about 3.3 Hz at 19.09575 MHz; the sign depends on the
+  sense of the conversion, not determined.
 
 ### CS7: the tracking channels
 
@@ -972,8 +976,8 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
   continuity.
 - Confirm the /656 is in the hybrid (29.110 kHz on a hybrid pin, traced
   to EXTAL pin 62).
-- TCXO frequency error: -0.17 ppm from the drift if 20625 Hz is the
-  zero point (inferred); a counter on the hybrid would confirm.
+- TCXO frequency error: 0.17 ppm from the drift (sign not determined);
+  a counter on the hybrid would confirm.
 - Hardware behind CS0-CS3, CS5, CS6 (unused by this firmware, except
   one CS5 read).  CS7 chip not traced (XCT38140 likely).
 - Trace QSPI PCS1 to its part (24M0x hybrid or 58M01, inferred).
