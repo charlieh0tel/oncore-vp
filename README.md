@@ -8,10 +8,14 @@ Pages: <https://charlieh0tel.github.io/oncore-vp/>
 
 | Path | What |
 |---|---|
-| [`index.html`](index.html) | Summary page: clock chain, memory map, dumps, registers, boards, photos, pins |
+| [`index.html`](index.html) | Summary page: clock chain, memory map, dumps, firmware, cold start, oscillator tuning, registers, boards, photos, pins |
 | [`oncore-vp-test-points.html`](oncore-vp-test-points.html) | The test points and the CPU's lower-edge pins labeled on a photo, and the wiring to a 10-pin BDM header |
 | [`mc68331-clock-pins.html`](mc68331-clock-pins.html) | MC68331 pins 51-83, with the clock pins |
-| [`docs/memory-map.md`](docs/memory-map.md) | Memory map, chip selects, registers, serial, clock, parts of all three boards, pinouts, open items |
+| [`docs/memory-map.md`](docs/memory-map.md) | Memory map, chip selects, registers, serial, clock, EEPROM layout, firmware (compiler, tracking, navigation, host commands, date and time, QSPI devices), parts of all three boards, pinouts, open items |
+| [`docs/messages.md`](docs/messages.md) | Binary output message payloads, from the firmware |
+| [`tools/ghidra/`](tools/ghidra/) | Ghidra scripts and name/type tables that rebuild the fully named project from the flash image ([README](tools/ghidra/README.md)) |
+| [`tools/oncore.py`](tools/oncore.py) | Host-port tool: decode @@Ea/@@Ba, set date and time, read the oscillator record, time to first fix |
+| [`tools/libsig.py`](tools/libsig.py) | Matches HP B3640 run-time library modules (IEEE-695) against the flash |
 | [`docs/board.md`](docs/board.md) | The 6-channel board: parts, test points and their positions, BDM header wiring, flash-read procedure |
 | [`docs/images/`](docs/images/) | Photos and a 600 dpi scan used by `docs/board.md` |
 | [`photos/`](photos/) | Photos of all three boards, both sides ([index](photos/README.md)); `thumbs/` for the pages |
