@@ -194,12 +194,13 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
     <li>The almanac is used only if the current week is no more than 2 weeks before and 127 after its week ($09C782). A fallback date rejects a good almanac and the receiver searches blind.</li>
     <li>2026-11-26, antenna connected: 12.5 min with nothing tracked (date 01/03/2026). After @@Ac/@@Aa with UTC: 9 visible, 6 tracked within 12 s.</li>
     <li>@@Ac, @@Aa and the first GPS time each boot write the RTC.</li>
+    <li>The 58503A host's power-up script sends no @@Ac or @@Aa, so in the instrument the boot date depends on the T1 keeping time.</li>
   </ul>
 </section>
 <section>
   <h2>Oscillator tuning (QSPI PCS1)</h2>
   <ul>
-    <li>An 8-bit setting ($75BC) goes to a device on QSPI PCS1: six single-byte frames, nibble data, the previous value read back. Not a commodity DAC or pot; likely in the 24M0x hybrid or the 58M01.</li>
+    <li>An 8-bit setting ($75BC) goes to the DCXO control on QSPI PCS1 (HP's name: the 58503B sends <code>@@Ta</code> for <code>:DIAGnostic:GPSystem:DCXO</code>): six single-byte frames, nibble data, the previous value read back. Not a commodity DAC or pot; likely in the 24M0x hybrid or the 58M01.</li>
     <li>Blind search steps the setting through a list (here 140, 20, 200, 80), ±7.5 kHz of Doppler bins per setting; range ±25 ppm at 185 Hz/LSB.</li>
     <li>Once per power-up, after 10 steady fixes, the drift is driven toward 20625 and the record saved.</li>
     <li><code>@@Ta FF FF FF FF FF CA</code> reads the record without changing it; this unit: 20625, $50, 185 Hz/LSB.</li>

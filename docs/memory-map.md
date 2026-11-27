@@ -447,6 +447,12 @@ return type.
 
 Output payload layouts: [messages.md](messages.md).
 
+Commands in the firmware but not in the VP Oncore Command Reference
+(Synergy Systems, 05OCT01): @@AF-@@AI, @@Bm, @@Cl, @@Cm (option G),
+@@Bz/@@Ez, @@Ta (DCXO record), @@Tb, @@Tc, @@Td, @@Th (ID block write),
+@@Tq (factory loader, with @@Sa-@@Sg; `tq_match_cmd` $0A1E68).  The
+reference's @@Ea status and channel-flag bits match the firmware.
+
 Configuration commands (consumers from the firmware):
 
 | Cmd | RAM (default) | Consumer | Effect |
@@ -511,6 +517,12 @@ bytes that differ, waits for completion after each, and sets bit 1 of
 RAM $7A38 if a byte reads back wrong.
 
 ### Date and time
+
+HP's 58503A host (3704) power-up script sends no @@Ac or @@Aa
+(smartclock docs/firmware/oncore/58503a-3704.txt, script $53: Cg, Cj,
+Ab, Ah 2, Aj 0, Ak 10, Al 60, An 1, Ao 49, Aq 1, Ar 1, Ar 65, Av 0,
+Aw 0, Ax 0, Ay 0, AB 4, AC 120, AD 0 32, output rates, Cg 1), so the
+receiver's boot date in an instrument comes from the T1 alone.
 
 Record (RAM $8EBA, and on the stack): +0 month, +1 day, +2 hour,
 +3 minute, +4 year (word), +6 seconds (double).  $09C81A(record) ->
@@ -641,7 +653,7 @@ never enabled.
 | Device | Chip select | SPCR0 | Functions |
 |---|---|---|---|
 | MC68HC68T1 RTC | PCS0, active high | $A104 (8-bit, CPHA 1, ~2.1 MHz) | $09B4AC init and presence test (T1 RAM $00-$02), $09B5DE read time and date, $09B76C write date, $09B844 write time |
-| Oscillator tuning device (inferred) | PCS1, active low | $A008 (8-bit, CPOL 0, CPHA 0, 1.05 MHz) | $09B31A(v), below |
+| DCXO control (HP's name; tunes the reference) | PCS1, active low | $A008 (8-bit, CPOL 0, CPHA 0, 1.05 MHz) | $09B31A(v), below |
 
 RTC (MC68HC68T1, PCS0):
 
@@ -692,8 +704,10 @@ Self-test result bits: $1000 PCS1 readback, $2000 RTC not advancing
 ($0A1C60), $C03F CS7 timing ($0A1A4E).
 
 Not a commodity serial DAC or pot (CS per byte, nibble data,
-readback).  Candidates: inside the 24M0x hybrid, or the 58M01
-(inferred).
+readback); likely inside the 24M0x hybrid or the 58M01 (inferred).
+HP calls it the DCXO: the 58503B 1.01.04 host sends @@Ta for
+`:DIAGnostic:GPSystem:DCXO`, and HP's console self-test lists "DCXO SPI"
+(smartclock docs/firmware/gps.md, console.md).
 
 ## 6-channel board *7VGN4*, from the Z3801A (owner's photos)
 
