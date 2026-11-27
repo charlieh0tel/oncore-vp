@@ -66,7 +66,7 @@ header a{color:var(--accent)}
 <header>
   <h1>Oncore VP Teardown</h1>
   <p class="sub">Motorola Oncore VP 8-channel from an HP 58503A, read over BDM (mc683xx-bdm, bdm 0.4.0, pod firmware 0.5.0), 2026-11-24. Firmware SFTW P/N 98-P36830P, VER 8, REV 8, dated 06 Aug 1996. Model B4121P1115, serial SSG0220999.</p>
-  <p class="sub">See also: <a href="oncore-vp-test-points.html">test points and BDM header</a> · <a href="mc68331-clock-pins.html">MC68331 clock pins</a> · <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/docs/board.md">board notes</a> · <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/docs/memory-map.md">memory map notes</a> · <a href="https://github.com/charlieh0tel/oncore-vp">source</a></p>
+  <p class="sub">See also: <a href="oncore-vp-test-points.html">test points and BDM header</a> · <a href="mc68331-clock-pins.html">MC68331 clock pins</a> · <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/docs/board.md">board notes</a> · <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/docs/memory-map.md">memory map and firmware notes</a> · <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/docs/messages.md">binary messages</a> · <a href="https://github.com/charlieh0tel/oncore-vp/tree/main/tools/ghidra">Ghidra scripts</a> · <a href="https://github.com/charlieh0tel/oncore-vp">source</a></p>
 </header>
 
 <section>
@@ -169,12 +169,42 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
     <li><code>eeprom/B4121P1115-SSG0220999-eeprom.bin</code>, three reads identical.</li>
     <li class="hash mono">SHA-256 003e9f533d66fb448ad2a5504a70d76f016abdbb2a0c19043d4a818589a44261</li>
     <li>$087A–$0904: ID text: MODEL B4121P1115, SERIAL SSG0220999, MANUFACTUR DATE 7D01, OPTIONS IB.</li>
-    <li>$0944–$0C4F, $0CC4–$0FC7: two tables of 24-byte per-satellite records.</li>
-    <li>$1020–$11DD: IEEE doubles: WGS-84 constants and a stored position.</li>
+    <li>$0934, $0CAC: two almanac banks (32 × 24-byte records, page 25, health); active bank at $1024.</li>
+    <li>$1026–$1166: settings blocks (masks, DOP limits, datum, position hold, 1PPS, SV ignore list), each followed by a checksum (−1 minus the byte sum).</li>
+    <li>$116A/$1174: oscillator records; $1180: Klobuchar ionosphere; $118C/$118E: year hint; $1192/$11AE: position records; $11CC: UTC parameters (ΔtLS 18).</li>
     <li>Rest: $AA fill.</li>
   </ul>
 </section>
 </div>
+
+<section>
+  <h2>Firmware</h2>
+  <ul>
+    <li>C, built with HP B3640 A.04.10 (68000-family cross compiler). The soft-float and libc routines match ABCPU32.LIB byte for byte; startup code is Motorola's own.</li>
+    <li>Ghidra 12.1.4 project rebuilt from the repo's scripts: 64 switches, 574 functions, every function and RAM global named or typed, none failing to decompile.</li>
+    <li>Tasks: a 26-task pre-emptive scheduler; the CS7 correlator interrupt runs every 1 ms (channel states 0 search … 5 phase lock).</li>
+    <li>Navigation: unweighted least squares (not a Kalman filter), Klobuchar, Sagnac, relativistic and DGPS corrections, no troposphere model; position hold is time-only; TRAIM excludes one SV.</li>
+    <li>Host port: 87 binary commands, NMEA, a terse ASCII mode and a 7-bit framed mode; an RTCM SC-104 decoder feeds the DGPS table.</li>
+  </ul>
+</section>
+<section>
+  <h2>Cold start</h2>
+  <ul>
+    <li>At power-up the date comes from the MC68HC68T1. If it lost power, the firmware falls back to 01/01/&lt;EEPROM year&gt; 12:00:00.</li>
+    <li>The almanac is used only if the current week is no more than 2 weeks before and 127 after its week ($09C782). A fallback date rejects a good almanac and the receiver searches blind.</li>
+    <li>2026-11-26, antenna connected: 12.5 min with nothing tracked (date 01/03/2026). After @@Ac/@@Aa with UTC: 9 visible, 6 tracked within 12 s.</li>
+    <li>@@Ac, @@Aa and the first GPS time each boot write the RTC.</li>
+  </ul>
+</section>
+<section>
+  <h2>Oscillator tuning (QSPI PCS1)</h2>
+  <ul>
+    <li>An 8-bit setting ($75BC) goes to a device on QSPI PCS1: six single-byte frames, nibble data, the previous value read back. Not a commodity DAC or pot; likely in the 24M0x hybrid or the 58M01.</li>
+    <li>Blind search steps the setting through a list (here 140, 20, 200, 80), ±7.5 kHz of Doppler bins per setting; range ±25 ppm at 185 Hz/LSB.</li>
+    <li>Once per power-up, after 10 steady fixes, the drift is driven toward 20625 and the record saved.</li>
+    <li><code>@@Ta FF FF FF FF FF CA</code> reads the record without changing it; this unit: 20625, $50, 185 Hz/LSB.</li>
+  </ul>
+</section>
 
 <section>
   <h2>On-chip registers, running</h2>
@@ -278,9 +308,10 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
     <li>Confirm the RF chain antenna → A06 → 95U01 SAW → 58M01 by continuity.</li>
     <li>Confirm the ÷656 is in the hybrid (29.110 kHz on a hybrid pin, traced to EXTAL).</li>
     <li>Hybrid (TCXO) frequency error.</li>
-    <li>Devices behind CS0–CS3, CS5–CS7.</li>
-    <li>EEPROM record formats.</li>
-    <li>Whether CS9/CS10 have chips fitted.</li>
+    <li>Trace QSPI PCS1 to its part.</li>
+    <li>T1 VBATT: whether the RTC keeps time across a power cycle.</li>
+    <li>Deaf 6-channel boards: <code>@@Ta</code> query and self-test over serial.</li>
+    <li>Whether CS9/CS10 have chips fitted (CS0–CS3, CS6 are never accessed; CS5 is one boot read).</li>
   </ul>
 </section>
 <div id="lb" hidden><img alt=""><p></p></div>
