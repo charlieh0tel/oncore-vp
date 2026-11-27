@@ -1067,6 +1067,13 @@ from the 6ch (TM-AB, 84D43579), so its voltages are not a pin-for-pin
 reference.  SOT-23s beside the top antenna pads: antenna DC feed
 (inferred); the SOIC-8 there is the MC33064 reset supervisor.
 
+Near-field probe over the 8ch top can, receiver on (tinySA Ultra, RBW
+10 kHz): a line at 80 f (1527.661 MHz, -108 dBm, 18 dB over the floor);
+no line at 76-79 f, 81-84 f, 82 f, 60.5 f, 68.5 f, 2.5 f or L1.  So LO1
+= 80 f = 1527.66 MHz and IF1 = 47.76 MHz (plan B; inferred until the
+receiver-off check).  Comb of whole multiples of f, even ones 10-15 dB
+stronger (strongest 22 f, -73 to -78 dBm).
+
 Tests: LO leakage near the open can (1565.85 vs 1527.66 MHz); clock and
 data on the 58M01-to-ASIC lines (9.548 MHz clock expected); DC at both
 ends of each top-can inductor on the two 6ch boards; DC on the antenna
