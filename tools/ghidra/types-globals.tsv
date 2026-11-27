@@ -70,16 +70,16 @@
 008F30	double	high half precedes the low-half DAT (names-globals)
 008F38	double	high half precedes the low-half DAT (names-globals)
 008F40	double	high half precedes the low-half DAT (names-globals)
-008ED6	double[3]	height, lat, lon
-008F06	double[3]	height, lat, lon
-000B9C	double[3]	height, lat, lon
-000C06	double[3]	height, lat, lon
-000C1E	double[3]	height, lat, lon
-002598	double[3]	height, lat, lon
-0026F0	double[3]	height, lat, lon
-003788	double[3]	height, lat, lon
-000C9C	double[3]	height, lat, lon
-0081F0	double[3]	height, lat, lon
+008ED6	llh_rec	height, lat, lon
+008F06	llh_rec	height, lat, lon
+000B9C	llh_rec	height, lat, lon
+000C06	llh_rec	height, lat, lon
+000C1E	llh_rec	height, lat, lon
+002598	llh_rec	height, lat, lon
+0026F0	llh_rec	height, lat, lon
+003788	llh_rec	height, lat, lon
+000C9C	llh_rec	height, lat, lon
+0081F0	llh_rec	height, lat, lon
 008EEE	double[3]	ECEF x, y, z
 000B6E	double[4]	vel_sol
 000C36	double[3]	vel_filt
@@ -285,3 +285,4 @@
 009D78	double	user_datum2_a
 009D80	u8	user_datum2_num
 009D56	u8	user_datum1_num
+007592	datum_rec	datum in use (block $1046)

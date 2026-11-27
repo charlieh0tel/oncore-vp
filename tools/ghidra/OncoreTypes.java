@@ -144,6 +144,18 @@ public class OncoreTypes extends GhidraScript {
         ut.replaceAtOffset(6, IntegerDataType.dataType, 4, "a0", "2^-30 s");
         ut.replaceAtOffset(10, IntegerDataType.dataType, 4, "a1", "2^-50 s/s");
         add(ut);
+        StructureDataType dr = new StructureDataType(cat, "datum_rec", 42);
+        dr.setPackingEnabled(false);
+        String[] dn = {"dx", "dy", "dz", "inv_f", "a"};
+        for (int k = 0; k < dn.length; k++) dr.replaceAtOffset(8 * k, dbl, 8, dn[k], null);
+        dr.replaceAtOffset(40, u8, 1, "number", "datum number (49 = WGS-84)");
+        add(dr);
+        StructureDataType lr = new StructureDataType(cat, "llh_rec", 24);
+        lr.setPackingEnabled(false);
+        lr.replaceAtOffset(0, dbl, 8, "h", null);
+        lr.replaceAtOffset(8, dbl, 8, "lat", "rad");
+        lr.replaceAtOffset(16, dbl, 8, "lon", "rad");
+        add(lr);
         globalsTable();
 
         // Typed globals.
