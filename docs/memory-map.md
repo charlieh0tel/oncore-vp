@@ -1169,5 +1169,5 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
   a counter on the hybrid would confirm.
 - Hardware behind CS0-CS3, CS5, CS6 (unused by this firmware, except
   one CS5 read).  CS7 chip not traced (XCT38140 likely).
-- 6ch receivers: why they don't acquire with almanac, position and date
-  set (20 dB inline gain test pending).
+- 6ch loss in dB and the IF2 frequency, by injecting an L1 CW tone
+  (HP 8663A, being repaired): tone-to-noise at IF2 on each board.
