@@ -21,8 +21,8 @@ Read over BDM (mc683xx-bdm, `bdm` 0.4.0, pod firmware 0.5.0),
 | $000000-$01FFFF | 128 KB | CS8 | 8 | R/W | RAM |
 | $020000-$021FFF | 8 KB | CS4 | 8 | R/W, 2 wait | EEPROM |
 | $080000-$0FFFFF | 512 KB | CSBOOT | 16 | R/W, 1 wait | Boot flash |
-| $100000-$17FFFF | 512 KB | CS9 | 16 | R/W, 1 wait | Reads all $FF |
-| $180000-$1FFFFF | 512 KB | CS10 | 16 | R/W, 1 wait | Reads all $FF |
+| $100000-$17FFFF | 512 KB | CS9 | 16 | R/W, 1 wait | Reads all $FF; never accessed; pin 124 has no visible trace |
+| $180000-$1FFFFF | 512 KB | CS10 | 16 | R/W, 1 wait | Reads all $FF; never accessed; pin 125 has no visible trace |
 | $FFC800-$FFCFFF | 2 KB | CS0 wr, CS2/CS3 rd | 16 | DS strobe | Not read |
 | $FFD000-$FFD7FF | 2 KB | CS1 | 16 | write, DS strobe | Not read |
 | $FFD800-$FFDFFF | 2 KB | CS6 | 8 | R/W | Not read |
@@ -1137,5 +1137,3 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
 - QSPI PCS1 (CPU pin 47) to the 24M0x hybrid (SCK, MOSI and MISO reach it).
 - 6ch receivers: why they don't acquire with almanac, position and date
   set (20 dB inline gain test pending).
-- Whether CS9/CS10 (CPU pins 124, 125) have chips fitted (they read $FF; the firmware never
-  accesses $100000-$1FFFFF).

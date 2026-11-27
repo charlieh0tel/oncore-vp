@@ -207,8 +207,8 @@ header a{color:var(--accent)}
     <tr><td>$000000&ndash;$01FFFF</td><td>128 KB</td><td>CS8</td><td>8</td><td>R/W</td><td class="t">RAM</td></tr>
     <tr><td>$020000&ndash;$021FFF</td><td>8 KB</td><td>CS4</td><td>8</td><td>R/W, 2 wait</td><td class="t">EEPROM</td></tr>
     <tr><td>$080000&ndash;$0FFFFF</td><td>512 KB</td><td>CSBOOT</td><td>16</td><td>R/W, 1 wait</td><td class="t">Boot flash (256 KB, mirrored)</td></tr>
-    <tr><td>$100000&ndash;$17FFFF</td><td>512 KB</td><td>CS9</td><td>16</td><td>R/W, 1 wait</td><td class="t">Reads all $FF</td></tr>
-    <tr><td>$180000&ndash;$1FFFFF</td><td>512 KB</td><td>CS10</td><td>16</td><td>R/W, 1 wait</td><td class="t">Reads all $FF</td></tr>
+    <tr><td>$100000&ndash;$17FFFF</td><td>512 KB</td><td>CS9</td><td>16</td><td>R/W, 1 wait</td><td class="t">Reads all $FF; never accessed; pin 124 has no visible trace</td></tr>
+    <tr><td>$180000&ndash;$1FFFFF</td><td>512 KB</td><td>CS10</td><td>16</td><td>R/W, 1 wait</td><td class="t">Reads all $FF; never accessed; pin 125 has no visible trace</td></tr>
     <tr><td>$FFC800&ndash;$FFCFFF</td><td>2 KB</td><td>CS0 wr, CS2/3 rd</td><td>16</td><td>DS strobe</td><td class="t">Never accessed</td></tr>
     <tr><td>$FFD000&ndash;$FFD7FF</td><td>2 KB</td><td>CS1</td><td>16</td><td>write, DS</td><td class="t">Never accessed</td></tr>
     <tr><td>$FFD800&ndash;$FFDFFF</td><td>2 KB</td><td>CS6</td><td>8</td><td>R/W</td><td class="t">Never accessed</td></tr>
@@ -388,7 +388,6 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
     <li>Confirm the &divide;656 is in the hybrid (29.110 kHz on a hybrid pin, traced to EXTAL).</li>
     <li>Hybrid (TCXO) frequency error and its sign (0.17 ppm from the drift).</li>
     <li>QSPI PCS1 (CPU pin 47) to the 24M0x hybrid (SCK, MOSI and MISO reach it).</li>
-    <li>Whether CS9/CS10 (CPU pins 124, 125) have chips fitted (CS0&ndash;CS3, CS6 are never accessed; CS5 is one boot read).</li>
   </ul>
 </section>
 <div id="lb" hidden><img alt=""><p></p></div>
