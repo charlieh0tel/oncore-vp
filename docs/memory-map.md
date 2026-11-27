@@ -923,6 +923,35 @@ tantalum capacitors.  The SAW filter's two end terminals sit next to
 the 58M01 and the A06.  58M01: likely the RF front end / downconverter
 (owner); A06 position fits a first LNA stage.  Not traced.
 
+### RF architecture (hypothesis, all inferred)
+
+```
+feed -> A06 -> 95U01 SAW -> 58M01 ---------------------------> XCT38140 (CS7)
+        LNA    L1 band-     LNA? mixer(s) IF/AGC quantizer      8 channels
+                            ^ LO synthesizer (PLL)              ^ clock f/2
+24M0x hybrid: TCXO f = 19.09575 MHz, /656 -> EXTAL, PCS1 trim --+
+```
+
+| Part | Basis |
+|---|---|
+| A06 first LNA | SOT-23 at the SAW's antenna end (photos) |
+| 58M01 LNA, mixer, synthesizer, IF, 1-2 bit quantizer | 32-pad custom part at the SAW's other end; the correlator needs sampled bits and no other part can supply them |
+| LO and sample clock locked to f, total x82.5 | 82.5 f = L1 - 20625 Hz exactly, the drift target |
+| Digital clock f/2 = 9.547875 MHz | 1PPS arithmetic uses 9548000.0 ($091BFA) |
+| Trim on the TCXO | 185 Hz at L1 per LSB = 2.2 Hz at f (0.12 ppm), range +-25 ppm: a crystal-pulling range |
+
+Frequency plans that give 82.5:
+
+- A: LO = 82 f = 1565.85 MHz, IF 9.568 MHz = f/2 + 20.625 kHz,
+  aliased to 20.625 kHz by sampling at f/2 (needs I/Q or another rate:
+  real sampling folds a 2 MHz band this close to 0).
+- B: two conversions, e.g. LO1 = 80 f = 1527.66 MHz (IF 47.76 MHz),
+  LO2 = 2.5 f.
+
+Tests: LO leakage near the open can (1565.85 vs 1527.66 MHz); clock and
+data on the 58M01-to-ASIC lines (9.548 MHz clock expected); A06 DC
+bias, 8ch against both 6ch (both 6ch needed +20 dB in service).
+
 ## From the smartclock repo (github.com/charlieh0tel/smartclock)
 
 Source: docs/oncore-vp-board.md and oncore-vp-test-points.html, per
