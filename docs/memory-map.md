@@ -332,8 +332,12 @@ $015E, $5091.
   $75C0 = 20625, $75BC = $50, $75BE = 185 (was 20507 in the dump;
   consistent with the coarse case after search stepping with
   \|drift - 20625\| < 185, inferred).
-- Absolute TCXO offset: not established.  If 20625 is the zero point
-  (Hz at L1), the stored value is -118 Hz (-0.075 ppm).
+- Live, 2026-11-27, 10 min tracking 1-3 SVs (BDM samples every 10 s):
+  drift 20338-20369 Hz at L1, mean 20355, 270 Hz below the 20625
+  target.  That boot's fine update set $75C0 = 20572 (rule: 20625 + 20%
+  of (20355 - 20625) = 20571); $75BC stayed $50.  If 20625 is the zero
+  point, the reference is -0.17 ppm (about -3.3 Hz at 19.09575 MHz;
+  inferred).
 
 ### CS7: the tracking channels
 
@@ -883,9 +887,8 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
   a 6ch board's test points (docs/board.md; hand soldering).  Dump its
   flash and EEPROM, find its oscillator record and the byte sent to the
   QSPI PCS1 device, and compare with the 8ch's ($75BC = $50, $75C0 =
-  20507; defaults $67, 20625).
-- Live oscillator drift: rerun the BDM monitor now that the receiver
-  tracks (after @@Ac/@@Aa, 2026-11-26).
+  20572, live drift 20355 Hz; defaults $67, 20625).  Over serial alone:
+  `tools/oncore.py ta` and a drift reading.
 - T1 VBATT (pin 13) source on the 8ch board and jig; whether the RTC
   keeps time across a power cycle (poll @@Ac in binary mode after a
   power cycle).
