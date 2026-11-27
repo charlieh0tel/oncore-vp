@@ -865,7 +865,8 @@ Source for instrument and label: smartclock docs and pForth captures
   in the RF path (A06, SAW filter, coupling, 58M01 input; inferred).
 
 Top-side DC to ground, volts, powered from a USB-fed jig (ends A/B as
-in the bias worksheet's photo callouts):
+in [the callout photo](images/6ch-7VGN4-top-can-bias-points.jpg),
+SSG0178541's top can):
 
 | Point | SSG0178541 | SSG0163878 |
 |---|---|---|

@@ -22,7 +22,7 @@ Pages: <https://charlieh0tel.github.io/oncore-vp/>
 | [`tools/libsig.py`](tools/libsig.py) | Matches HP B3640 run-time library modules (IEEE-695) against the flash |
 | [`tools/matchdecomp/`](tools/matchdecomp/) | Builds the hand-written C in [`third_party/moto/rewritten/`](third_party/moto/rewritten/) with the original compiler (B3640 A.04.10, `-p cpu32 -OT`) and compares the objects with the flash ([README](tools/matchdecomp/README.md)) |
 | [`docs/board.md`](docs/board.md) | The 6-channel board: parts, test points and their positions, BDM header wiring, flash-read procedure |
-| [`docs/images/`](docs/images/) | Photos and a 600 dpi scan used by `docs/board.md` |
+| [`docs/images/`](docs/images/) | Photos and a 600 dpi scan used by `docs/board.md`; the 6ch top-can bias-point callouts used by `docs/memory-map.md` |
 | [`photos/`](photos/) | Photos of all three boards, both sides ([index](photos/README.md)); `thumbs/` for the pages |
 | [`eeprom/B4121P1115-SSG0220999-eeprom.bin`](eeprom/B4121P1115-SSG0220999-eeprom.bin) | EEPROM dump, 8 KB, from the 58503A's receiver (B4121P1115, SSG0220999) |
 | [`third_party/`](third_party/) | Vendor files: the 58503A receiver's flash image, datasheets, VP engineering notes ([NOTICE](third_party/NOTICE)) |
