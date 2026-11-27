@@ -312,7 +312,7 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
     <li>Hybrid (TCXO) frequency error and its sign (0.17 ppm from the drift).</li>
     <li>Trace QSPI PCS1 to its part.</li>
     <li>T1 VBATT: whether the RTC keeps time across a power cycle.</li>
-    <li>6-channel firmware (read over serial with the factory loader) in Ghidra: compare search tables, application type and oscillator record with the 8ch. The "deaf" 6-channel boards are not faulty: they track on a higher-gain feed.</li>
+    <li>6-channel firmware (read over serial with the factory loader) in Ghidra: compare search tables, application type and oscillator record with the 8ch. The 6-channel boards have lost sensitivity: they track only with about 20 dB of extra gain. Bias is normal on the top side, so the loss is in the RF path; check its continuity and the A06 off the jig.</li>
     <li>Whether CS9/CS10 have chips fitted (CS0–CS3, CS6 are never accessed; CS5 is one boot read).</li>
   </ul>
 </section>

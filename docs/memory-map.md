@@ -905,9 +905,12 @@ Z3805A's (SSG0163878) locked 84% of snapshots; the Z3801A's
   (SVs 7, 8, 9, 16, 21; signal 35-92), at once after the power cycle.
   The 8ch, moved to another feed at the same time, tracked nothing in
   5 min.
-- Conclusion: none of the three receivers is faulty.  The bench
-  distribution-amplifier feed is short of gain: the 8ch also needs some
-  extra, the 6ch boards more (they needed about 20 dB in service too).
+- Conclusion: both 6ch boards have lost sensitivity.  They track, but
+  only with gain well beyond normal (about 20 dB extra in service, on
+  the instruments' own antenna systems).  The bench feed is also weak
+  (the 8ch needs some extra gain on it).  Top-side DC bias is normal on
+  both, so the loss is in the RF path (A06, SAW filter, coupling, 58M01
+  input; inferred).
 
 ## 6-channel firmware and EEPROM (read 2026-11-27)
 
@@ -1051,6 +1054,8 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
 
 ## Open
 
+- 6ch sensitivity loss: RF path from the antenna pin to the 58M01
+  (continuity, A06 bias on the bottom side), with the board off the jig.
 - 6ch firmware (`third_party/moto/B1121P1114-flash.bin`) in Ghidra:
   search tables, application type, oscillator record, EEPROM layout;
   compare with the 8ch.
