@@ -4,6 +4,7 @@
   oncore.py [--port P] watch [--seconds N]   decode @@Ea (8ch) or @@Ba (6ch)
   oncore.py [--port P] settime                send @@Ac and @@Aa with UTC from the system clock
   oncore.py [--port P] ta                     read the oscillator record (@@Ta query; changes nothing)
+  oncore.py [--port P] drift [--samples N]     clock drift from @@Ek (8ch) or @@Bk (6ch), polled once each
   oncore.py [--port P] ttff [--settime] [--seconds N]
                                               time until the first channel is used in a fix
 
@@ -102,6 +103,32 @@ def cmd_ta(port, a):
     sys.exit('no @@Ta reply')
 
 
+L1_PER_M = 5.2550354685707275  # L1 cycles per meter: m/s -> Hz at L1
+DRIFT_TARGET = 20625           # Hz at L1, the firmware's drift target ($08C252)
+
+
+def cmd_drift(port, a):
+    # One poll (rate 0) per sample; the stored rate is unchanged.
+    port.reset_input_buffer()
+    letters = None
+    for t, l, p in frames(port, 5, (b'Ea', b'Ba')):
+        letters = (b'Ek', 8) if l == b'Ea' else (b'Bk', 6)
+        break
+    if letters is None:
+        sys.exit('no @@Ea/@@Ba from the receiver')
+    cmd, n = letters
+    for i in range(a.samples):
+        port.write(frame(cmd, b'\x00'))
+        for t, l, p in frames(port, 3, (cmd,)):
+            ms = struct.unpack('>H', p[54 + n:56 + n])[0] / 10.0
+            hz = ms * L1_PER_M
+            print('%s drift %.1f m/s = %.1f Hz at L1 (%+.1f from %d, %+.3f ppm)' % (
+                time.strftime('%H:%M:%S'), ms, hz, hz - DRIFT_TARGET, DRIFT_TARGET,
+                (hz - DRIFT_TARGET) / 1575.42), flush=True)
+            break
+        time.sleep(2)
+
+
 def cmd_ttff(port, a):
     t0 = time.time()
     port.reset_input_buffer()
@@ -131,12 +158,14 @@ def main():
     w.add_argument('--seconds', type=float, default=1e9)
     sp.add_parser('settime')
     sp.add_parser('ta')
+    dr = sp.add_parser('drift')
+    dr.add_argument('--samples', type=int, default=5)
     f = sp.add_parser('ttff')
     f.add_argument('--settime', action='store_true')
     f.add_argument('--seconds', type=float, default=3600)
     a = ap.parse_args()
     port = serial.Serial(a.port, 9600, timeout=0.2)
-    {'watch': cmd_watch, 'settime': lambda p, a: settime(p), 'ta': cmd_ta, 'ttff': cmd_ttff}[a.cmd](port, a)
+    {'watch': cmd_watch, 'settime': lambda p, a: settime(p), 'ta': cmd_ta, 'drift': cmd_drift, 'ttff': cmd_ttff}[a.cmd](port, a)
 
 
 if __name__ == '__main__':
