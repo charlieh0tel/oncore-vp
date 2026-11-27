@@ -83,7 +83,7 @@ all match the dump.
 | $0932, $0933 | 1 + 1 | | Test bytes: written $00 and $80 and read back at start ($09C096); bit 7 polled for write completion ($09B2A6) |
 | $0934 | 884 | $0CA8 | Almanac bank 0 |
 | $0CAC | 884 | $1020 | Almanac bank 1 |
-| $1024 | 1 | | Active almanac bank (0 or 1); dump: 1 |
+| $1024 | 1 | | Almanac bank state: 0 or 1 = active bank; 2 = no valid almanac (written by `almanac_load` when neither bank checks, and by @@Cf).  A save writes bank 0 if the state is 1 or 2, else bank 1, then sets the state to that bank.  Dump: 1 |
 | $1026 | 28 | $1042 | @@An $1026, @@Aj $1027 (stored code), @@Ak $1028 (double), 2D HDOP limit $1030 (@@AC), 3D PDOP limit $1038 (@@Al), mask angle $1040 (@@Ag); dump = defaults 01 02 1.0 12.0 6.0 $0A |
 | $1046 | 78 | $1094 | 10 bytes 0; 3 doubles 0; 1/f; a; datum number $31 (49 = WGS-84 in Oncore numbering, inferred); pad; doubles 12.65, lat 0.6523 rad, lon -2.1309 rad; $01 $00 |
 | $1098 | 6 | $109E | $369A (@@Ar b6), $9D86 (@@Aw), $81C2 (@@Aq), $8216 (@@Ar b7), $8EB8; dump = defaults 01 01 01 01 02 |
@@ -530,9 +530,9 @@ almanac check in $09BEDE):
 | Display | $08B1A4 rebuilds $8EBA from $81AE/$819E, $81C4, $819C, $9D86 |
 
 RTC write ($09FE2A): $8EBA minus local offset $819C/$819D; if
-$9D86 = 1, plus the double at $26AE ($09D3E6; UTC -> GPS, inferred);
-then $09B202 (date) and $09B25A (time).  The RTC holds GPS time
-(inferred).  If $9D82 = 1, $81C4 is saved to the other EEPROM year
+$9D86 = 1, plus GPS - UTC ($26AE), passed to `gps_to_date` as its last
+argument ($09D438); then $09B202 (date) and $09B25A (time).  The RTC
+holds GPS time.  If $9D82 = 1, $81C4 is saved to the other EEPROM year
 slot and $1190 flipped.
 
 | Trigger | Flags | Task |
