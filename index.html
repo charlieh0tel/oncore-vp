@@ -104,7 +104,7 @@ header a{color:var(--accent)}
     <tr><td class="t">CPU</td><td>MC68331CFC16 0E93N DEUZ9702</td><td>MC68331CFC16 G91H DENU9621 ('01A)</td><td>MC68331CFC16 G91H DEVT9614 ('05A)</td></tr>
     <tr><td class="t">SRAM 128K x 8</td><td>Toshiba TC551001BFI-85L 9706HAK</td><td>Hitachi HM628128BLFPI-8 9629</td><td>Hitachi HM628128LFPI-8 9621</td></tr>
     <tr><td class="t">RTC</td><td>MC68HC68T1 CKAC9703</td><td>MC68HC68T1 CKBG9631</td><td>MC68HC68T1 CKAN9620</td></tr>
-    <tr><td class="t">Crystal</td><td>32.768 VT, MC 9710 <span class="tag">32.768 kHz</span></td><td>32.768 VT, MC 9634</td><td>32.768 VT, MC 9619</td></tr>
+    <tr><td class="t">Crystal</td><td>32.768 VT, MC 9710</td><td>32.768 VT, MC 9634</td><td>32.768 VT, MC 9619</td></tr>
     <tr><td class="t">Hybrid</td><td>24M02, 19.09Mhz, 9711</td><td>24M01, 19.09575M, 9630</td><td>24M01, 19.09 M, 9601</td></tr>
     <tr><td class="t">Reset supervisor (MC33064, 4.6 V)</td><td>33064</td><td>33064</td><td>33064</td></tr>
     <tr><td class="t">EEPROM 8K x 8</td><td>Atmel AT28C64B 20JI 9705</td><td>Atmel AT28C64B 20JI 9626</td><td>Atmel AT28C64B 20JI 9612</td></tr>
@@ -147,7 +147,6 @@ header a{color:var(--accent)}
       <rect class="box hot" x="390" y="30" width="150" height="90" rx="4"/>
       <text class="t1" x="465" y="56" text-anchor="middle">EXTAL, pin 62</text>
       <text class="t2" x="465" y="78" text-anchor="middle">29,109.4 Hz nom.</text>
-      <text class="meas" x="465" y="100" text-anchor="middle">29.110 kHz square</text>
 
       <rect class="box" x="580" y="30" width="170" height="90" rx="4"/>
       <text class="t1" x="665" y="56" text-anchor="middle">68331 PLL</text>
@@ -157,8 +156,6 @@ header a{color:var(--accent)}
       <rect class="box" x="790" y="30" width="200" height="90" rx="4"/>
       <text class="t1" x="890" y="54" text-anchor="middle">f_sys</text>
       <text class="t2" x="890" y="74" text-anchor="middle">7.452 / 16.767 MHz nom.</text>
-      <text class="meas" x="890" y="92" text-anchor="middle">CLKOUT 7.4505 MHz</text>
-      <text class="meas" x="890" y="108" text-anchor="middle">GPT 16.769 MHz</text>
 
       <line class="arr" x1="170" y1="75" x2="208" y2="75" marker-end="url(#ah)"/>
       <line class="arr" x1="350" y1="75" x2="388" y2="75" marker-end="url(#ah)"/>
@@ -172,14 +169,13 @@ header a{color:var(--accent)}
 
       <rect class="box" x="10" y="160" width="160" height="70" rx="4"/>
       <text class="t1" x="90" y="186" text-anchor="middle">Crystal 32.768 VT</text>
-      <text class="meas" x="90" y="206" text-anchor="middle">32.768 kHz sine</text>
       <rect class="box" x="210" y="160" width="140" height="70" rx="4"/>
       <text class="t1" x="280" y="186" text-anchor="middle">MC68HC68T1</text>
       <text class="t3" x="280" y="206" text-anchor="middle">RTC; not the CPU clock</text>
       <line class="arr" x1="170" y1="195" x2="208" y2="195" marker-end="url(#ah)"/>
     </svg>
     </div>
-    <figcaption>Green values were measured on the 8-channel board. Nominal values assume 19.09575 MHz. The firmware's baud table only fits f_sys = 16.762&ndash;16.781 MHz, i.e. a 29.10&ndash;29.13 kHz reference.</figcaption>
+    <figcaption>Nominal values for 19.09575 MHz. The firmware's baud table only fits f_sys = 16.762&ndash;16.781 MHz, i.e. a 29.10&ndash;29.13 kHz reference.</figcaption>
   </figure>
 </section>
 
