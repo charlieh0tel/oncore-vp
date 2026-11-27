@@ -951,9 +951,19 @@ Frequency plans that give 82.5:
 - B: two conversions, e.g. LO1 = 80 f = 1527.66 MHz (IF 47.76 MHz),
   LO2 = 2.5 f.
 
+Photos (6ch, top side): the antenna center pad's trace enters the
+top-side RF can beside the 2R2, R27 and R56 inductors (bias chokes,
+inferred), so the first RF stage may be on the top side, not the A06.
+An empty 8-pad footprint in that can on both 6ch boards (option,
+inferred).  The 8ch board (TM-AA, 84D44800) has a different RF layout
+from the 6ch (TM-AB, 84D43579), so its voltages are not a pin-for-pin
+reference.  SOT-23s beside the top antenna pads: antenna DC feed
+(inferred); the SOIC-8 there is the MC33064 reset supervisor.
+
 Tests: LO leakage near the open can (1565.85 vs 1527.66 MHz); clock and
-data on the 58M01-to-ASIC lines (9.548 MHz clock expected); A06 DC
-bias, 8ch against both 6ch (both 6ch needed +20 dB in service).
+data on the 58M01-to-ASIC lines (9.548 MHz clock expected); DC at both
+ends of each top-can inductor on the two 6ch boards; DC on the antenna
+center pin (feed circuit only).
 
 ## From the smartclock repo (github.com/charlieh0tel/smartclock)
 
