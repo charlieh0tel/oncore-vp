@@ -94,10 +94,10 @@ all match the dump.
 | $1046 | 78 | $1094 | 10 bytes 0; 3 doubles 0; 1/f; a; datum number $31 (49 = WGS-84 in Oncore numbering, inferred); pad; doubles 12.65, lat 0.6523 rad, lon -2.1309 rad; $01 $00 |
 | $1098 | 6 | $109E | $369A (@@Ar b6), $9D86 (@@Aw), $81C2 (@@Aq), $8216 (@@Ar b7), $8EB8; dump = defaults 01 01 01 01 02 |
 | $10A2 | 42 | $10CC | $10A2 @@Ar b0 ($81DA), $10A4-$10C8 SV ignore list 1-37 ($8F89-$8FAD, @@Am), $10C9 @@Ah ($9D0C), $10CA @@AD ($7A3A) |
-| $10D0 | 42 | $10FA | Unknown: mixed bytes incl. $03E8 (1000) |
+| $10D0 | 42 | $10FA | Loader $09EF44: $10D0 @@AJ max correction age (90), $10D2/$10D3 local offset h/min (@@Ab), $10D4 @@Ax (word), $10D6 @@Az cable delay (long), $10DC @@Ay 1PPS offset (long), $10E0 1PPS mode (1), $10E1 UTC/GPS ($9D0F), $10E3 TRAIM on (1), $10E4 $9D12 (1), $10E8 TRAIM alarm limit (1000 ns), $10EC-$10F9 @@En date/time (0).  Dump: all defaults except TRAIM on |
 | $10FE | 42 | $1128 | 3 doubles 0; 1/f; a; $32 |
 | $112C | 42 | $1156 | 3 doubles 0; 1/f; a; $33 |
-| $115A | 12 | $1166 | Unknown: 00 07 01 00 40 AC F0 00 00 00 00 00 |
+| $115A | 12 | $1166 | @@AF word ($3624) 7, @@AG ($3626) 1, @@AH ($3627) 0, @@AI double ($3628) 3704.0: 00 07 01 00 40 AC F0 00 00 00 00 00 |
 | $116A | 6 | $1170 | Oscillator record 0: search center, bin step, learned drift ($50, $00B9, $5055); see "Learned oscillator offset" |
 | $1174 | 6 | $117A | Oscillator record 1: ($50, $00B9, $501B) |
 | $117E | 1 | | Active record (0 or 1); dump: 1.  If invalid, defaults $67, $015E, $5091 ($09C096) |
@@ -896,10 +896,11 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
   continuity.
 - Confirm the /656 is in the hybrid (29.110 kHz on a hybrid pin, traced
   to EXTAL pin 62).
-- TCXO frequency error (needs a counter, or a long host-timed count).
+- TCXO frequency error: -0.17 ppm from the drift if 20625 Hz is the
+  zero point (inferred); a counter on the hybrid would confirm.
 - Hardware behind CS0-CS3, CS5, CS6 (unused by this firmware, except
   one CS5 read).  CS7 chip not traced (XCT38140 likely).
 - Trace QSPI PCS1 to its part (24M0x hybrid or 58M01, inferred).
 - 6ch boards: @@Ta query and self-test bit $1000 over serial.
-- EEPROM field meanings for the "Unknown" blocks.
-- Whether CS9/CS10 have chips fitted.
+- Whether CS9/CS10 have chips fitted (they read $FF; the firmware never
+  accesses $100000-$1FFFFF).
