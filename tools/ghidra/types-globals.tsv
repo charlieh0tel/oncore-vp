@@ -116,3 +116,103 @@
 00310E	float[11]	magnetic variation model
 00331E	float[11]	magnetic variation model
 00334A	float[11]	magnetic variation model
+000000	u8[8]	chan_lock (per-channel, chan_isr)
+000008	u8[8]	chan_dither (per-channel, chan_isr)
+000018	u8[8]	chan_bitsync (per-channel, chan_isr)
+000028	u8[8]	chan_lock_count (per-channel, chan_isr)
+000040	u8[8]	chan_pullin_count (per-channel, chan_isr)
+000068	u8[8]	chan_bit_edge (per-channel, chan_isr)
+000070	u8[8]	chan_done_50ms (per-channel, chan_isr)
+000078	u8[8]	chan_bit_ms (per-channel, chan_isr)
+000080	u8[8]	chan_bit_ms_epoch (per-channel, chan_isr)
+000088	u8[8]	chan_bit_ms_prev (per-channel, chan_isr)
+000090	u8[8]	chan_pll_lock (per-channel, chan_isr)
+0000A0	u8[8]	chan_pll_count (per-channel, chan_isr)
+0000A8	u8[8]	chan_pll_loss (per-channel, chan_isr)
+0000B0	u8[8]	chan_state (per-channel, chan_isr)
+0000C0	u8[8]	chan_pll_new (per-channel, chan_isr)
+0000D8	u8[8]	chan_bit_edge_back (per-channel, chan_isr)
+0000E0	u8[8]	chan_sv (per-channel, chan_isr)
+0000E8	u8[8]	chan_sv_prev (per-channel, chan_isr)
+0001C4	s16[8]	chan_doppler_cmd (per-channel, chan_isr)
+0001D4	s16[8]	chan_code_err (per-channel, chan_isr)
+0001E4	s16[8]	chan_state_count (per-channel, chan_isr)
+000322	s32[8]	chan_el_sum (per-channel, chan_isr)
+000342	s32[8]	chan_srch_start (per-channel, chan_isr)
+000362	s32[8]	chan_srch_width (per-channel, chan_isr)
+000382	s32[8]	chan_code_phase (per-channel, chan_isr)
+000562	u8[8][16]	chan_bits (per-channel, chan_isr)
+000662	s32[8]	chan_carrier_nco (per-channel, chan_isr)
+000682	s32[8]	chan_carrier_nco_epoch (per-channel, chan_isr)
+000742	s32[8]	chan_carrier_epoch (per-channel, chan_isr)
+000762	s32[8]	chan_carrier_800ms (per-channel, chan_isr)
+0007E2	s32[8]	chan_amp (per-channel, chan_isr)
+000802	s32[8]	chan_amp_epoch (per-channel, chan_isr)
+000842	s32[8]	chan_power_sum (per-channel, chan_isr)
+0008A2	s32[8]	chan_detect (per-channel, chan_isr)
+000010	u8[8]	per-channel array (chan_isr), meaning not established
+000020	u8[8]	per-channel array (chan_isr), meaning not established
+000030	u8[8]	per-channel array (chan_isr), meaning not established
+000038	u8[8]	per-channel array (chan_isr), meaning not established
+000048	u8[8]	per-channel array (chan_isr), meaning not established
+000050	u8[8]	per-channel array (chan_isr), meaning not established
+000058	u8[8]	per-channel array (chan_isr), meaning not established
+000060	u8[8]	per-channel array (chan_isr), meaning not established
+000098	u8[8]	per-channel array (chan_isr), meaning not established
+0000B8	u8[8]	per-channel array (chan_isr), meaning not established
+0000C8	u8[8]	per-channel array (chan_isr), meaning not established
+0000D0	u8[8]	per-channel array (chan_isr), meaning not established
+0000F0	u8[8]	per-channel array (chan_isr), meaning not established
+0000F8	u8[8]	per-channel array (chan_isr), meaning not established
+000104	s16[8]	per-channel array (chan_isr), meaning not established
+000114	s16[8]	per-channel array (chan_isr), meaning not established
+000124	s16[8]	per-channel array (chan_isr), meaning not established
+000134	s16[8]	per-channel array (chan_isr), meaning not established
+000154	s16[8]	per-channel array (chan_isr), meaning not established
+000164	s16[8]	per-channel array (chan_isr), meaning not established
+000174	s16[8]	per-channel array (chan_isr), meaning not established
+000184	s16[8]	per-channel array (chan_isr), meaning not established
+0001A4	s16[8]	per-channel array (chan_isr), meaning not established
+0001B4	s16[8]	per-channel array (chan_isr), meaning not established
+0001F4	s16[8]	per-channel array (chan_isr), meaning not established
+000204	s16[8]	per-channel array (chan_isr), meaning not established
+000224	s16[8]	per-channel array (chan_isr), meaning not established
+000234	s16[8]	per-channel array (chan_isr), meaning not established
+000244	s16[8]	per-channel array (chan_isr), meaning not established
+000254	s16[8]	per-channel array (chan_isr), meaning not established
+000264	s16[8]	per-channel array (chan_isr), meaning not established
+000284	s16[8]	per-channel array (chan_isr), meaning not established
+000294	s16[8]	per-channel array (chan_isr), meaning not established
+0002A4	s16[8]	per-channel array (chan_isr), meaning not established
+0002B4	s16[8]	per-channel array (chan_isr), meaning not established
+0002C4	s16[8]	per-channel array (chan_isr), meaning not established
+0002E2	s32[8]	per-channel array (chan_isr), meaning not established
+000302	s32[8]	per-channel array (chan_isr), meaning not established
+0003A2	s32[8]	per-channel array (chan_isr), meaning not established
+0003C2	s32[8]	per-channel array (chan_isr), meaning not established
+0003E2	s32[8]	per-channel array (chan_isr), meaning not established
+000402	s32[8]	per-channel array (chan_isr), meaning not established
+000422	s32[8]	per-channel array (chan_isr), meaning not established
+000442	s32[8]	per-channel array (chan_isr), meaning not established
+000462	s32[8]	per-channel array (chan_isr), meaning not established
+000482	s32[8]	per-channel array (chan_isr), meaning not established
+0004A2	s32[8]	per-channel array (chan_isr), meaning not established
+0004C2	s32[8]	per-channel array (chan_isr), meaning not established
+0004E2	s32[8]	per-channel array (chan_isr), meaning not established
+000502	s32[8]	per-channel array (chan_isr), meaning not established
+000522	s32[8]	per-channel array (chan_isr), meaning not established
+000542	s32[8]	per-channel array (chan_isr), meaning not established
+0005E2	s32[8]	per-channel array (chan_isr), meaning not established
+000602	s32[8]	per-channel array (chan_isr), meaning not established
+000622	s32[8]	per-channel array (chan_isr), meaning not established
+000642	s32[8]	per-channel array (chan_isr), meaning not established
+0006A2	s32[8]	per-channel array (chan_isr), meaning not established
+0006C2	s32[8]	per-channel array (chan_isr), meaning not established
+0006E2	s32[8]	per-channel array (chan_isr), meaning not established
+000722	s32[8]	per-channel array (chan_isr), meaning not established
+000782	s32[8]	per-channel array (chan_isr), meaning not established
+0007A2	s32[8]	per-channel array (chan_isr), meaning not established
+0007C2	s32[8]	per-channel array (chan_isr), meaning not established
+000822	s32[8]	per-channel array (chan_isr), meaning not established
+000862	s32[8]	per-channel array (chan_isr), meaning not established
+000882	s32[8]	per-channel array (chan_isr), meaning not established
