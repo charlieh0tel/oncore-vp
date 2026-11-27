@@ -315,8 +315,15 @@ $015E, $5091.
 - Range 0-$D6: 39.8 kHz at L1 (25 ppm) at 185 Hz/LSB; 75 kHz (48 ppm)
   at 350.
 - @@Ta ($0AD4F4): payload drift (word), $75BC (byte), $75BE (word);
-  applied only if word < $8000, byte < $D8, word < $8000, then sent and
-  saved by task $0A02C0 ($9D83, $8E9).  Reply ($0A2FBE): $75C0, $75BC,
+  all or nothing: stored only if word < $8000, byte < $D8 and word <
+  $8000.  A stored set raises $9D83 and $8E9; the settings task $0A02C0
+  runs on the next scheduler pass, writes the EEPROM record ($09F876
+  osc_record_save, alternate bank, checksum) and then sends $75BC to
+  PCS1.  The boot trim ($08C252) and the EEPROM-load default
+  ($09C096) call the same save directly.  HP 58503B labels: Offs
+  (drift reference), Warp (setting), Step (Hz/LSB); its
+  :DIAGnostic:GPSystem:DCXO allows a Step of 0-$FFFF, so $8000-$FFFF
+  is ignored here.  Reply ($0A2FBE): $75C0, $75BC,
   $75BE.  Query without change: `@@Ta FF FF FF FF FF CA 0D 0A`.
 - Dump: active record 1 = $50, $00B9, $501B (20507, 118 below the
   default 20625); record 0 = $50, $00B9, $5055 (20565).
