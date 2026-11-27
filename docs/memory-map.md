@@ -1156,7 +1156,7 @@ user's guide pinout, supplied by the owner):
 
 | Pin | Name | Function |
 |---|---|---|
-| 1 | BATT | Externally applied backup power (RTC, RAM) |
+| 1 | BATT | Externally applied backup power (RTC, RAM); not supplied by the jigs or the 58503A |
 | 2 | PWR | 5 V main power |
 | 3 | GND | Ground |
 | 4 | VPP | Flash reprogramming voltage |
@@ -1176,9 +1176,6 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
 
 - 6ch sensitivity loss: RF path from the antenna pin to the 58M01
   (continuity, A06 bias on the bottom side), with the board off the jig.
-- T1 VBATT (pin 13): likely fed from header pin 1 (BATT) on each board
-  (inferred); whether the jigs supply pin 1 (the RTC kept time across
-  power cycles on the 8ch and both 6ch).
 - Confirm the RF chain antenna -> A06 -> 95U01 SAW -> 58M01 by
   continuity.
 - Confirm the /656 is in the hybrid (29.110 kHz on a hybrid pin, traced

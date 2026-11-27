@@ -324,7 +324,7 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
     </div>
     <div style="display:grid;gap:6px;min-width:0">
       <h3>Receiver 10-pin header</h3>
-      <p class="mono">1 BATT (backup power) &middot; 2 PWR (5 V) &middot; 3 GND &middot; 4 VPP (flash programming) &middot; 5 not used &middot; 6 1PPS &middot; 7 1PPS RTN &middot; 8 TTL TXD1 &middot; 9 TTL RXD1 &middot; 10 TTL RTN</p>
+      <p class="mono">1 BATT (backup power; not supplied by the jigs or the 58503A) &middot; 2 PWR (5 V) &middot; 3 GND &middot; 4 VPP (flash programming) &middot; 5 not used &middot; 6 1PPS &middot; 7 1PPS RTN &middot; 8 TTL TXD1 &middot; 9 TTL RXD1 &middot; 10 TTL RTN</p>
       <h3>MC68HC68T1, 16-pin</h3>
       <p class="mono">1 CLKOUT &middot; 2 CPUR &middot; 3 INT &middot; 4 SCK &middot; 5 MOSI &middot; 6 MISO &middot; 7 SS &middot; 8 VSS &middot; 9 PSE &middot; 10 POR &middot; 11 LINE &middot; 12 VSYS &middot; 13 VBATT &middot; 14 XTALin &middot; 15 XTALout &middot; 16 VDD</p>
       <p class="sub">CLKOUT options: XTAL, /2, /4, /8, 1 Hz, 2 Hz, 64 Hz, low.</p>
@@ -375,7 +375,6 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
     <li>Confirm the &divide;656 is in the hybrid (29.110 kHz on a hybrid pin, traced to EXTAL).</li>
     <li>Hybrid (TCXO) frequency error and its sign (0.17 ppm from the drift).</li>
     <li>Trace QSPI PCS1 to its part.</li>
-    <li>T1 VBATT: likely fed from header pin 1 (BATT); whether the jigs supply it.</li>
     <li>Whether CS9/CS10 have chips fitted (CS0&ndash;CS3, CS6 are never accessed; CS5 is one boot read).</li>
   </ul>
 </section>
