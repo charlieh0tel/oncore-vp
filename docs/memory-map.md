@@ -206,8 +206,9 @@ No version string in the image.  The soft-double routines match the
 B3640 A.04.10 absolute-addressing run-time libraries (AB68000, AB68020,
 AB68030, ABCPU32.LIB) byte for byte up to each object-record break
 (sub64r: 93 bytes, div64r: 38); the library module `faddsub64` carries
-the names sub64r, sub64p, add64pp.  Not in the PC/PI (position-
-independent) or 6888X libraries.
+the names sub64r, sub64p, add64pp.  The PC/PI (position-independent)
+libraries differ in some 8-byte windows of the first 64 bytes; the AB
+libraries match all of them.
 
 | Trait | Firmware | B3640 manual |
 |---|---|---|
