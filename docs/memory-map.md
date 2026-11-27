@@ -617,7 +617,13 @@ Record (RAM $8EBA, and on the stack): +0 month, +1 day, +2 hour,
 +3 minute, +4 year (word), +6 seconds (double).  $09C81A(record) ->
 GPS week mod 1024 ($81AE) and seconds ($819E); $09CE90 does the
 reverse, with year hint $81C4 choosing the 1024-week epoch and $9D86
-= 1 applying UTC.
+= 1 applying UTC.  Epoch rule ($09CE90, table $0AEFD8: 1980, 1999,
+2019, 2038, 2058, ...): weeks from 01/01/(hint - 1) for 1024 weeks, so
+hint 2026 covers 2025 to mid-2044.  With the invalid-EEPROM default 1992
+(also after @@Cf), dates come out 1024 weeks early (2007 for 2026).  The
+hint is written only by @@Ac and kept in EEPROM, so one @@Ac with the
+current date fixes the year until the window ends; the HP hosts never
+send @@Ac.
 
 Boot ($08A714 -> $09B4AC RTC init, $09BD66 -> $09C52C, then the
 almanac check in $09BEDE):
