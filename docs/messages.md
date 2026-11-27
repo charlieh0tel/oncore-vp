@@ -32,6 +32,8 @@ Frame: `@@`, 2 letters, payload, XOR checksum (letters + payload, `out_end` $0AB
 | 23 | Ec | $0A8CFC | $BF1C | rate byte on; $37A0 changed |
 | 24 | En | $0AAF50 | $C0E5 | rate; option I |
 
+Frame lengths ($0B033A, $0B036E, $0B0388, $0B03BC, $0B03C4) match the reference except where noted.
+
 ## Ba / Ea ($0A9BEC; Ba 6 ch, 68 bytes; Ea 8 ch, 76 bytes)
 
 | Off | Size | Field | RAM | Scale |
@@ -47,14 +49,14 @@ Frame: `@@`, 2 letters, payload, XOR checksum (letters + payload, `out_end` $0AB
 | 19 | 4 | Longitude | $8EE6 | mas |
 | 23 | 4 | Height (GPS) | $8ED6 | x100 (cm) |
 | 27 | 4 | Height (MSL) | $8ED6 - $7574 | x100 |
-| 31 | 2 | Speed | $8F40 | x100 |
-| 33 | 2 | Heading | $8F38 | x10 |
-| 35 | 2 | DOP | $81E4 | x10 |
-| 37 | 1 | DOP type | $81EC != 2 | |
+| 31 | 2 | Speed, cm/s | $8F40 | x100 |
+| 33 | 2 | Heading, true north | $8F38 | x10 |
+| 35 | 2 | DOP (0 = not computable, position hold, propagate; reference p. 72) | $81E4 | x10 |
+| 37 | 1 | DOP type: 0 PDOP, 1 otherwise (reference: HDOP) | $81EC != 2 (internal 2 = PDOP) | |
 | 38 | 1 | Visible | $37A4 + $B14 x $37A0 (0 if $37A0 > 1) | |
 | 39 | 1 | Tracked | $81D0 | |
 | 40 | 4 x n | Per channel: SV, mode, signal, status | chan +0, +1, +$86, +2 | |
-| 40+4n | 1 | Receiver status | $8F1E, bit 2 = ($75C2 != 1) | |
+| 40+4n | 1 | Receiver status (bits: memory-map.md, @@Ea receiver status byte) | $8F1E, bit 2 (differential) = ($75C2 != 1) | |
 
 ## Bb (92 bytes; $0AAF74 -> $0A8FA8)
 
@@ -69,7 +71,7 @@ Frame: `@@`, 2 letters, payload, XOR checksum (letters + payload, `out_end` $0AB
 | 1 | 2 | Doppler, Hz (signed) | rec +6 = -range rate x 5.2550 (1/lambda), $08EA8E |
 | 3 | 1 | Elevation, deg (signed) | rec +4 |
 | 4 | 2 | Azimuth, deg | rec +2 |
-| 6 | 1 | 0 enabled, 1 enabled + @@Am ignored, 2 disabled, 3 disabled + ignored | enable $383C[sv] ($8FAF copy), ignore $3816[sv] ($8F88 copy) |
+| 6 | 1 | 0 enabled, 1 enabled + @@Am ignored, 2 disabled, 3 disabled + ignored (reference p. 75: healthy / removed); enabled = healthy in subframe 1 and not TRAIM-excluded | enable $383C[sv] ($8FAF copy), ignore $3816[sv] ($8F88 copy) |
 
 Zero-filled when $37A0 > 1.
 
@@ -79,8 +81,10 @@ Zero-filled when $37A0 > 1.
 |---|---|---|---|
 | 4 | 1 | DOP type of the set ranking: 0 GDOP, 1 PDOP, 2 HDOP, 3 VDOP, 4 TDOP (@@Aj code) | dop_kind $3DBB (bank +$619; internal 0 G, 1 H, 2 P, 3 T, 4 V; map $0A96D4) |
 | 5 | 1 | SV set count, max 9 | $37A2 |
-| 6 | 1 | SVs per set: 4, or 8 if @@Ar bit 0 | select_mode $3DBA (bank +$618, copy of $81DA) |
-| 7 | (2 + n) x 9 | Per set: DOP x 10 (word), then n SVs | $3DC4 + 10k, $3DBC + 10k |
+| 6 | 1 | SVs per set: 4, or 8 if @@Ar bit 0 (also in Bc, which has 6 SV slots; reference p. 77: 4, 6 or 8) | select_mode $3DBA (bank +$618, copy of $81DA) |
+| 7 | (2 + n) x 9 | Per set (n = 6 Bc, 8 Ec): DOP x 10 (word), then n SVs; unused sets zero | $3DC4 + 10k, $3DBC + 10k |
+
+Zero-filled when $37A0 > 1.  Reference p. 128 gives Ec as 82 bytes with 6 SVs per set; firmware: 100 bytes, 8.
 
 ## Bd (23 bytes; $0A8768, $0AAB44)
 
@@ -90,7 +94,7 @@ Zero-filled when $37A0 > 1.
 | 5 | 1 | Almanac week, mod 256 | almanac_ptr +$36F |
 | 6 | 1 | Almanac toa, 4096 s units | almanac_ptr +$370 / 4096 |
 | 7 | 1 | Healthy SV count | almanac_ptr +$36E |
-| 8 | 4 | Health, bit n-1 = SV n healthy (byte 8 bit 7 SV 32 ... byte 11 bit 0 SV 1) | almanac_ptr +$348 + SV (1 = healthy) |
+| 8 | 4 | Health, bit n-1 = SV n healthy (byte 8 bit 7 SV 32 ... byte 11 bit 0 SV 1); reference p. 79: SVs in almanac | almanac_ptr +$348 + SV (1 = healthy) |
 | 12 | 1 | EEPROM almanac present: 1; bytes 12-19 zero if EEPROM $1024 = 2 | EEPROM $1024 |
 | 13 | 7 | As bytes 5-11 | EEPROM bank $0934 + $378 x ($1024 != 0): +$36F, +$370, +$36E, +$348 |
 
@@ -131,12 +135,12 @@ If alm_valid $3722 != 1: one frame, payload 26 zero bytes.
 | +Off | Size | Field | RAM |
 |---|---|---|---|
 | 0 | 1 | SV | chan +0 |
-| 1 | 1 | Mode (max 4 if $81DB[ch] = 0) \| $80 ($C609[ch] = 0) \| $40 ($C611[ch] = 0) | chan +1 |
-| 2 | 3 | Transmit time, whole s | $81A6 + ($8298[ch] - $8218[ch]) / -c; 0 unless option C or D |
+| 1 | 1 | Mode (max 4 if $81DB[ch] = 0) \| $80 ($C609[ch] = 0; reference p. 86: not phase locked since last message) \| $40 ($C611[ch] = 0; not frequency locked); flag set to 1 after output | chan +1 |
+| 2 | 3 | Transmit time (reference: GPS satellite time, carrier filtered), whole s | $81A6 + ($8298[ch] - $8218[ch]) / -c if $81DB[ch] = 1, else 0; 0 unless option C or D |
 | 5 | 4 | Transmit time, ns | same |
-| 9 | 4 | Carrier phase | chan +$8C; 0 unless option C |
+| 9 | 4 | Integrated carrier phase, cycles x 65536 (reference p. 86) | chan +$8C; 0 unless option C |
 | 13 | 3 | Code phase, L1 cycles (low 24 bits) | chan +$88 |
-| 16 | 2 | Code discriminator | chan +$84 |
+| 16 | 2 | Code discriminator (signed) | chan +$84 |
 
 ## Bh, corrections output (Ce format, 52 bytes; $0AA822 ch 0-5, $0AA9A0 ch 6-7)
 
@@ -151,7 +155,7 @@ Entry sent only if $81DB[ch] = 1 and chan +$A0 > $C652 (EEPROM $087A); else 7 ze
 
 | Off | Size | Field | RAM |
 |---|---|---|---|
-| 4 | 1 | Leap second status | $81C6 |
+| 4 | 1 | Leap second pending: 0 none, 1 insert (dt_LSF > dt_LS), 2 delete | $81C6 |
 
 ## Bk / Ek ($0A9866; Bk 6, 69 bytes; Ek 8, 71 bytes)
 
@@ -160,12 +164,12 @@ Entry sent only if $81DB[ch] = 1 and chan +$A0 > $C652 (EEPROM $087A); else 7 ze
 | 4 | 2 x 5 | GDOP, PDOP, HDOP, VDOP, TDOP | $7A10, $7A18, $7A20, $7A28, $7A30 | x10 |
 | 14 | 2 | Magnetic variation, deg | mag_var $81B2 | x10 |
 | 16 | 2 x 3 | Velocity north, east, up, m/s | $8F28, $8F30, $8F20 | x10 |
-| 22 | 2 | Correction age, s | gps_seconds - $75C4/10 (mod 604800); 0 if $75C2 != 0 | x10 |
+| 22 | 2 | Differential correction age, s | gps_seconds - $75C4/10 (mod 604800); 0 if $75C2 != 0 | x10 |
 | 24 | 4 x 3 | ECEF X, Y, Z, m | $8EEE, $8EF6, $8EFE | x100 |
-| 36 | n | Per channel URA index (subframe 1) | chan +4 | |
+| 36 | n | Per channel URA index (subframe 1; reference p. 98: 63 not decoded) | chan +4 | |
 | 36+n | 2 x 10 | Covariance (H^T H)^-1, upper triangle; order clock, E, N, U: tt, tE, tN, tU, EE, EN, EU, NN, NU, UU | nav_cov $369C [0][0], [0][1], [0][2], [0][3], [1][1], [1][2], [1][3], [2][2], [2][3], [3][3] | x10 |
 | 56+n | 2 | Clock bias correction, m | $756C (s) x c | x10 |
-| 58+n | 2 | Clock drift, m/s | $81D2 | x10 |
+| 58+n | 2 | Clock drift (reference: oscillator offset), m/s | $81D2 | x10 |
 
 ## Bl (41 bytes; $0A88BA, one frame per channel)
 
@@ -177,7 +181,7 @@ Last complete subframe of the channel (sf_last, chan +$44).
 | 5 | 1 | SV | chan +$45 |
 | 6 | 1 | (valid word count << 4) \| subframe id 1-5 | count = leading words with flag chan +$4A + 6i = 1; id chan +$44 |
 | 7 | 1 | Page 1-25; 0 unless subframe 4/5 and count >= 3 | SV ID, word 3 bits 16-21 (chan +$52): 1-32 via table $0B0796 + 12 x ID (SV 1-24 page 1-24, SV 25-32 pages 2-5, 7-10); 51 25, 52 13, 53 14, 54 15, 55 17, 56 18, 57 1, 58 19, 59 20, 60 22, 61 23, 62 24, 63 25; others 0 |
-| 8 | 30 | Words 1-10, 24 data bits each | chan +$46 + 6i (long, low 24 bits) |
+| 8 | 30 | Words 1-10, 24 data bits each; all 10 sent regardless of count (reference p. 101: words past count zero) | chan +$46 + 6i (long, low 24 bits) |
 
 ## Bm (28 bytes; $0AACA8)
 
@@ -202,10 +206,10 @@ Option G only (@@Bm, @@Cl, @@Cm; not set on this unit, options "IB").  No reader
 |---|---|---|---|---|
 | 4 | 1 | Rate | $C61E + 2 slot | |
 | 5 | 1 | TRAIM enable, 0/1 | $9D11 | |
-| 6 | 2 | Alarm limit (input word; default 10) | $9D16 / 100 | |
+| 6 | 2 | Alarm limit, 100 ns (input word; default 10) | $9D16 / 100 | |
 | 8 | 1 | 1PPS mode: 0 off, 1 on, 2 when tracking, 3 when TRAIM ok ($095180) | $9D0E | |
-| 9 | 3 | Always 1 (set by every accepted @@Bn/@@En; default 1; no reader) | $9D12 | |
-| 12 | 1 | Month, always 0 | $9D1A | |
+| 9 | 3 | Always 1 (set by every accepted @@Bn/@@En; default 1; no reader); reference p. 105: 1PPS output rate 0-86400 | $9D12 | |
+| 12 | 1 | Month, always 0 (bytes 12-18: reference "time to next fire") | $9D1A | |
 | 13 | 1 | Day, always 0 | $9D1B | |
 | 14 | 2 | Year, always 0 | $9D1E | |
 | 16 | 1 | Hour, always 0 | $9D1C | |
@@ -213,11 +217,15 @@ Option G only (@@Bm, @@Cl, @@Cm; not set on this unit, options "IB").  No reader
 | 18 | 1 | Seconds, always 0 | $9D20 (double) | x1 |
 | 19 | 1 | 1PPS output enabled now | pps_enable $9D10 | |
 | 20 | 1 | 1 = GPS time, 0 = UTC (complement of $9D86, written only by @@Aw) | $9D0F | |
-| 21 | 1 | TRAIM status: 0 none removed, 1 SV removed, 2 too few SVs | $9D2C | |
-| 22 | 1 | TRAIM alarm: 0 ok, 1 alarm, 2 unknown | $9D28 | |
-| 23 | 2 | Time error estimate ($FFFF unknown) | $9D2A | |
-| 25 | 1 | 1PPS quantization error, ns: (sub-tick remainder - 0.5) / tick length | $9D29 (pps_schedule $091BFA) | |
+| 21 | 1 | TRAIM status: 0 check passed, 1 check failed (worst SV removed if byte 22 = 0), 2 off or fewer SVs than the detect count | $9D2C | |
+| 22 | 1 | TRAIM alarm: 0 ok, 1 alarm (also check passed with fewer SVs than the isolate count), 2 unknown | $9D28 | |
+| 23 | 2 | Time error estimate, one sigma, ns ($FFFF unknown) | $9D2A | |
+| 25 | 1 | 1PPS quantization error (negative sawtooth), ns, signed: (sub-tick remainder - 0.5) / tick length | $9D29 (pps_schedule $091BFA) | |
 | 26 | 5 x n | SV; fractional second of (rx time - Sagnac / c), ns | chan +0; svst +$160, $8F48 + 8 ch | x1e9 |
+
+Reference p. 105-106 orders bytes 21-22 the other way: 21 solution status (0 OK, 1 ALARM, 2 UNKNOWN), 22 TRAIM status (0 detect and isolate, 1 detect only, 2 neither).
+
+SV counts from the alarm limit (`traim` $0A053A), detect / isolate: >= 1000 ns 2 / 3, 700-999 3 / 3, 500-699 4 / 4, < 500 8 / 8 (reference p. 103: 300-500 4 / 8).
 
 Input @@Bn/@@En (22 bytes, option I; $0A4712, $0A4C44): rate; TRAIM 0/1; alarm word > 2 (stored x100); 1PPS mode < 4; 3-byte value < 86401; month, day, year (word), hour, minute, second, checked only if any is nonzero (1-12, 1-31, 1980-2079, <= 23, <= 59, <= 60).  The 3-byte value and the date/time are not stored ($9D12 = 1, $9D1A-$9D20 = 0).
 
@@ -298,14 +306,31 @@ Td channel record ($638B + 18 ch):
 
 | Msg | Builder | Payload |
 |---|---|---|
-| Ca / Fa | $0AAE96 | self-test word (C: & $3FFF; F: bits rearranged) |
+| Ca / Fa | $0AAE96 | self-test word, below |
 | Cc | $0A36F8 | ack of @@Bf |
 | Cf | $0A8C76 | none |
-| Cg | $0AA796 | $C651 != 0 |
+| Cg | $0AA796 | $C651 != 0 (8 bytes; reference p. 119: 7) |
 | Ch | $0A3660 | ack of @@Cb |
-| Cj | $0A9F04 | copyright and ID text (table $0B06A2) |
+| Cj | $0A9F04 | 294 bytes: CR LF, then COPYRIGHT, SFTW P/N #, SOFTWARE VER #, SOFTWARE REV #, SOFTWARE DATE (table $0B06A2, stride $2A), each + CR LF; then 138 bytes EEPROM text from $087B (MODEL #, HDWR P/N #, SERIAL #, MANUFACTUR DATE, OPTIONS LIST) |
 | Ck | $0A93B0 | none; after @@Ce or RTCM corrections |
 | Ap | $0A2DFA | reply to @@Ao |
+
+Self-test word (`selftest` $0A1D8C; 1 = fail):
+
+| Bit | Test |
+|---|---|
+| 0-5 | Channel 1-6 correlation (`selftest_chan` $0A1268; all of $C03F if CS7 fails) |
+| 6 | 1 kHz interrupt (`selftest_cs7` $0A1A4E) |
+| 7 | Flash odd-byte (LS) sum ($0A1CD4) |
+| 8 | Flash even-byte (MS) sum |
+| 9 | RAM LS byte ($0A1C60) |
+| 10 | RAM MS byte |
+| 11 | EEPROM (`selftest_eeprom` $0A16CE has no callers) |
+| 12 | DCXO SPI (PCS1 readback, $0A1696) |
+| 13 | RTC not advancing ($0A1D24) |
+| 14-15 | Channel 7-8 correlation |
+
+Ca: word & $3FFF.  Fa: bits 0-5 kept, 14-15 -> 6-7, 6-13 -> 8-15; matches reference p. 144.  Reference p. 108 (Ca) labels bits 7-9 ROM MS checksum, RAM MS checksum, ROM LS.
 
 # Other protocols
 
