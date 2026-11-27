@@ -8,6 +8,10 @@
   oncore.py [--port P] selftest               @@Fa (8ch) or @@Ca (6ch); stops tracking, then @@Cg 1
   oncore.py [--port P] ttff [--settime] [--seconds N]
                                               time until the first channel is used in a fix
+  oncore.py [--port P] fix                    @@Cg 1: leave idle and start fixing
+
+  --poll Ba|Ea  for a receiver with continuous output off (HP hosts poll):
+                send a one-time @@Ba/@@Ea every second in the background.
 
 Field layouts and bit meanings: docs/messages.md, docs/memory-map.md.
 """
@@ -15,6 +19,7 @@ import argparse
 import datetime
 import struct
 import sys
+import threading
 import time
 
 import serial
@@ -181,15 +186,25 @@ def cmd_ttff(port, a):
     sys.exit('no fix within %d s' % a.seconds)
 
 
+def poller(port, letters):
+    def run():
+        while True:
+            port.write(frame(letters.encode(), b'\x00'))
+            time.sleep(1)
+    threading.Thread(target=run, daemon=True).start()
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--port', default=PORT)
+    ap.add_argument('--poll', choices=('Ba', 'Ea'))
     sp = ap.add_subparsers(dest='cmd', required=True)
     w = sp.add_parser('watch')
     w.add_argument('--seconds', type=float, default=1e9)
     sp.add_parser('settime')
     sp.add_parser('ta')
     sp.add_parser('selftest')
+    sp.add_parser('fix')
     dr = sp.add_parser('drift')
     dr.add_argument('--samples', type=int, default=5)
     f = sp.add_parser('ttff')
@@ -197,7 +212,10 @@ def main():
     f.add_argument('--seconds', type=float, default=3600)
     a = ap.parse_args()
     port = serial.Serial(a.port, 9600, timeout=0.2)
-    {'watch': cmd_watch, 'settime': lambda p, a: settime(p), 'ta': cmd_ta, 'drift': cmd_drift, 'selftest': cmd_selftest, 'ttff': cmd_ttff}[a.cmd](port, a)
+    if a.poll:
+        poller(port, a.poll)
+    {'fix': lambda p, a: (p.write(frame(b'Cg', b'\x01')), print('sent @@Cg 1')),
+     'watch': cmd_watch, 'settime': lambda p, a: settime(p), 'ta': cmd_ta, 'drift': cmd_drift, 'selftest': cmd_selftest, 'ttff': cmd_ttff}[a.cmd](port, a)
 
 
 if __name__ == '__main__':
