@@ -901,6 +901,10 @@ Z3805A's (SSG0163878) locked 84% of snapshots; the Z3801A's
 - After a power cycle (both, 18:16): date and time kept, almanac usable,
   position kept, 9 visible, searching without @@Cg 1 (at the first
   power-up of the day both had come up idle at 01/01/2026 12:00:00).
+- SSG0178541 on a higher-gain antenna feed (18:22): 3D fix, 5 used
+  (SVs 7, 8, 9, 16, 21; signal 35-92), at once after the power cycle.
+  The 8ch, moved to another feed at the same time, tracked nothing in
+  5 min.
 
 ## 6-channel firmware and EEPROM (read 2026-11-27)
 
