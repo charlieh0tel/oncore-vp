@@ -79,7 +79,7 @@ header a{color:var(--accent)}
       <text class="t1" x="90" y="56" text-anchor="middle">Hybrid</text>
       <text class="t2" x="90" y="76" text-anchor="middle">24M02 / 24M01</text>
       <text class="t2" x="90" y="96" text-anchor="middle">19.09575 MHz</text>
-      <text class="t3" x="90" y="112" text-anchor="middle">x82.5 = 1575.42 MHz</text>
+      <text class="t3" x="90" y="112" text-anchor="middle">x82.5 = L1 − 20625 Hz</text>
 
       <rect class="box" x="210" y="30" width="140" height="90" rx="4"/>
       <text class="t1" x="280" y="62" text-anchor="middle">Divider ÷656</text>
@@ -309,10 +309,10 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
   <ul>
     <li>Confirm the RF chain antenna → A06 → 95U01 SAW → 58M01 by continuity.</li>
     <li>Confirm the ÷656 is in the hybrid (29.110 kHz on a hybrid pin, traced to EXTAL).</li>
-    <li>Hybrid (TCXO) frequency error.</li>
+    <li>Hybrid (TCXO) frequency error and its sign (0.17 ppm from the drift).</li>
     <li>Trace QSPI PCS1 to its part.</li>
     <li>T1 VBATT: whether the RTC keeps time across a power cycle.</li>
-    <li>Deaf 6-channel boards: <code>@@Ta</code> query and self-test over serial.</li>
+    <li>Deaf 6-channel boards: self-test passes, <code>@@Ta</code> records healthy, 9 visible with almanac and position loaded, none tracked; both needed 20 dB extra gain in service. RF front end suspected.</li>
     <li>Whether CS9/CS10 have chips fitted (CS0–CS3, CS6 are never accessed; CS5 is one boot read).</li>
   </ul>
 </section>
