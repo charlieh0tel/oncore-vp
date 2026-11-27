@@ -12,6 +12,7 @@ Pages: <https://charlieh0tel.github.io/oncore-vp/>
 | [`oncore-vp-test-points.html`](oncore-vp-test-points.html) | The test points and the CPU's lower-edge pins labeled on a photo, and the wiring to a 10-pin BDM header |
 | [`mc68331-clock-pins.html`](mc68331-clock-pins.html) | MC68331 pins 51-83, with the clock pins |
 | [`docs/memory-map.md`](docs/memory-map.md) | Memory map, chip selects, registers, serial, clock, EEPROM layout, firmware (compiler, tracking, navigation, host commands, date and time, QSPI devices), parts of all three boards, pinouts, open items |
+| [`docs/firmware.md`](docs/firmware.md) | Firmware overview: one diagram of tasks, tracking, navigation, I/O, DCXO and RTC, and where the details are |
 | [`docs/messages.md`](docs/messages.md) | Binary output message payloads, from the firmware |
 | [`tools/ghidra/`](tools/ghidra/) | Ghidra scripts and name/type tables that rebuild the fully named project from the flash image ([README](tools/ghidra/README.md)) |
 | [`tools/oncore.py`](tools/oncore.py) | Host-port tool: decode @@Ea/@@Ba, set date and time, read the DCXO record and the clock drift, self-test, time to first fix |
