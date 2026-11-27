@@ -622,8 +622,12 @@ reverse, with year hint $81C4 choosing the 1024-week epoch and $9D86
 hint 2026 covers 2025 to mid-2044.  With the invalid-EEPROM default 1992
 (also after @@Cf), dates come out 1024 weeks early (2007 for 2026).  The
 hint is written only by @@Ac and kept in EEPROM, so one @@Ac with the
-current date fixes the year until the window ends; the HP hosts never
-send @@Ac.
+current date fixes the year until the window ends.  The HP hosts
+(58503A 3704, Z3801A 3543, Z3805A 3543B; smartclock
+docs/firmware/gps.md) send @@Ac only for :SOURce:GPSystem:INITial:DATE
+<year>,<month>,<day> (and @@Aa for ...:INITial:TIME), and only while
+their time is not valid; otherwise -221 "Settings conflict".  Start-up
+scripts only query @@Ac/@@Aa.
 
 Boot ($08A714 -> $09B4AC RTC init, $09BD66 -> $09C52C, then the
 almanac check in $09BEDE):
