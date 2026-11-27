@@ -875,6 +875,9 @@ Z3805A's (SSG0163878) locked 84% of snapshots; the Z3801A's
   capture of 2026-10-28; all 34 pages echoed): status $08.  Position
   from the 8ch (@@Ad/@@Ae/@@Af): 9 visible.  Antenna from a powered
   distribution amplifier (no DC needed from the receiver).
+- 20 min with almanac, position and date set, antenna on SSG0163878
+  (the better unit in service), SSG0178541 without: 8-9 visible, no
+  channel tracked on either.
 
 ## Host instruments
 
