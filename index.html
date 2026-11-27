@@ -133,11 +133,11 @@ header a{color:var(--accent)}
     <tr><td>$080000–$0FFFFF</td><td>512 KB</td><td>CSBOOT</td><td>16</td><td>R/W, 1 wait</td><td class="t">Boot flash (256 KB, mirrored)</td></tr>
     <tr><td>$100000–$17FFFF</td><td>512 KB</td><td>CS9</td><td>16</td><td>R/W, 1 wait</td><td class="t">Reads all $FF</td></tr>
     <tr><td>$180000–$1FFFFF</td><td>512 KB</td><td>CS10</td><td>16</td><td>R/W, 1 wait</td><td class="t">Reads all $FF</td></tr>
-    <tr><td>$FFC800–$FFCFFF</td><td>2 KB</td><td>CS0 wr, CS2/3 rd</td><td>16</td><td>DS strobe</td><td class="t">Not read</td></tr>
-    <tr><td>$FFD000–$FFD7FF</td><td>2 KB</td><td>CS1</td><td>16</td><td>write, DS</td><td class="t">Not read</td></tr>
-    <tr><td>$FFD800–$FFDFFF</td><td>2 KB</td><td>CS6</td><td>8</td><td>R/W</td><td class="t">Not read</td></tr>
-    <tr><td>$FFE000–$FFE7FF</td><td>2 KB</td><td>CS5</td><td>16</td><td>R/W, DS</td><td class="t">Not read</td></tr>
-    <tr><td>$FFE800–$FFEFFF</td><td>2 KB</td><td>CS7</td><td>16</td><td>R/W</td><td class="t">Not read</td></tr>
+    <tr><td>$FFC800–$FFCFFF</td><td>2 KB</td><td>CS0 wr, CS2/3 rd</td><td>16</td><td>DS strobe</td><td class="t">Never accessed</td></tr>
+    <tr><td>$FFD000–$FFD7FF</td><td>2 KB</td><td>CS1</td><td>16</td><td>write, DS</td><td class="t">Never accessed</td></tr>
+    <tr><td>$FFD800–$FFDFFF</td><td>2 KB</td><td>CS6</td><td>8</td><td>R/W</td><td class="t">Never accessed</td></tr>
+    <tr><td>$FFE000–$FFE7FF</td><td>2 KB</td><td>CS5</td><td>16</td><td>R/W, DS</td><td class="t">One dummy read at boot</td></tr>
+    <tr><td>$FFE800–$FFEFFF</td><td>2 KB</td><td>CS7</td><td>16</td><td>R/W</td><td class="t">Correlator, 8 channels × 16 bytes</td></tr>
     <tr><td>$FFF000–$FFFFFF</td><td>4 KB</td><td>on-chip</td><td></td><td></td><td class="t">Module registers (MM = 1)</td></tr>
   </table></div>
   <ul>
