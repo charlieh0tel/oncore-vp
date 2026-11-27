@@ -664,7 +664,7 @@ byte 142 (week 2446), rejected.  After @@Ac/@@Aa with UTC: status $08,
 9 visible, 6 tracked (mode 8, flags $A0) within 12 s; $25F6 = 4,
 $81EE = 2.  No antenna-sense bit in @@Ea.
 
-2026-11-27, jig power cut (about 1 min), Static, DCXO record $50 /
+2026-11-27, jig power cut (length not logged), Static, DCXO record $50 /
 185 / 20625, no @@Ac/@@Aa: the RTC kept the date; time 8 s behind
 UTC until the first satellite.  9 visible at once; first channel
 used in a fix about 48 s after power-up (port back to fix).
