@@ -42,6 +42,12 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870
 Bus monitor is off (SYPCR $00).  A read outside every chip select
 (e.g. $022000) hangs the BDM link; only `bdm reset` recovers it.
 
+Single-stepping (BDM, gdb `stepi`) with interrupts unmasked enters
+`chan_isr` $0805B2, whose `move.w #0,($E8F2).w` write to CS7 never
+ends its bus cycle while stepping (FREEZE low); only `bdm reset`
+recovers (2026-11-27, pod 0.5.0).  Mask interrupts first
+(`set $ps = 0x2700` in gdb).
+
 ## Boot flash
 
 - 256 KB.  `third_party/moto/B4121P1115-flash.bin`, SHA-256
