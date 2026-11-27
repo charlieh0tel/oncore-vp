@@ -1,0 +1,37 @@
+[project]
+name = "oncore-vp-tools"
+version = "0.1.0"
+description = "Host and analysis tools for the Motorola VP Oncore teardown"
+requires-python = ">=3.11"
+dependencies = ["pyserial>=3.5"]
+
+[dependency-groups]
+dev = ["mypy", "pytest", "ruff"]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 120
+extend-exclude = ["third_party"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["dump", "libsig", "oncore"]
+
+[tool.mypy]
+files = ["tools", "tests"]
+exclude = ["third_party"]
+mypy_path = ["tools", "tools/loader"]
+explicit_package_bases = true
+
+# pyserial ships no type information.
+[[tool.mypy.overrides]]
+module = ["serial"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["tools", "tools/loader"]

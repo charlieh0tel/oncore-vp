@@ -18,6 +18,7 @@ Pages: <https://charlieh0tel.github.io/oncore-vp/>
 | [`third_party/moto/decompiled/B4121P1115.c`](third_party/moto/decompiled/B4121P1115.c) | Decompiled C of the whole firmware (Ghidra output, all 574 functions named; derived from the vendor image, see [NOTICE](third_party/NOTICE)) |
 | [`tools/loader/`](tools/loader/dump.py) | Reads flash or EEPROM over the host port through the firmware's factory loader (`@@Tq`), with a 72-byte RAM stub |
 | [`tools/oncore.py`](tools/oncore.py) | Host-port tool: decode @@Ea/@@Ba, set date and time, read the DCXO record and the clock drift, self-test, time to first fix |
+| [`tests/`](tests/) | Tests for the Python tools.  Checks: `uv run ruff format`, `uv run ruff check`, `uv run mypy`, `uv run pytest` |
 | [`tools/libsig.py`](tools/libsig.py) | Matches HP B3640 run-time library modules (IEEE-695) against the flash |
 | [`docs/board.md`](docs/board.md) | The 6-channel board: parts, test points and their positions, BDM header wiring, flash-read procedure |
 | [`docs/images/`](docs/images/) | Photos and a 600 dpi scan used by `docs/board.md` |
