@@ -74,12 +74,12 @@ all match the dump.
 
 | Offset | Length | Checksum at | Contents |
 |---|---|---|---|
-| $087A | 1 | | Setting written by the @@AD handler ($0AC5CC, second byte if < $80); default $20 ($0A29BC).  The ID text starts at $087B |
+| $087A | 1 | | @@Bh channel threshold ($C652): a channel is sent if chan_rec+$A0 > it.  Written by @@AD ($0AC5CC, second byte if < $80); default $20 ($0A29BC).  The ID text starts at $087B |
 | $0906 + n | 1 each | | Output rate of binary message n, written by the B and E rate commands through $0ADE56 (RAM copy at $C61E + 2n) |
-| $091F | 1 | | Set to 1 the first time the protocol mode changes ($0A6C3C, $0A6CB2) |
+| $091F | 1 | | Position-fix/idle mode flag, RAM $C651: set by `fix_mode_enter` $0AB430 (and the protocol-change handlers), cleared by @@Cg 0, @@Ca, @@Cf |
 | $0920 | 1 | | Protocol mode: 0 = Motorola binary, 1 = NMEA, 2 = third mode (RAM $C650) |
 | $0921 | 1 | | @@AE setting, 0 or 1 ($0ACBFC); default 0 |
-| $0922 + n | 1 each | | Per-message setting written through $0ADE12 (RAM $CAF8) |
+| $0922 + 2n | 2 each | | Output rates, 8 words written through $0ADE12 (RAM $CAF8); the eighth ($0930) is the terse rate |
 | $0932, $0933 | 1 + 1 | | Test bytes: written $00 and $80 and read back at start ($09C096); bit 7 polled for write completion ($09B2A6) |
 | $0934 | 884 | $0CA8 | Almanac bank 0 |
 | $0CAC | 884 | $1020 | Almanac bank 1 |
@@ -105,8 +105,11 @@ Almanac bank ($09BEDE): 32 records of 24 bytes at bank + $18 x SV
 bank + $348; copied to RAM when the checksum matches.
 
 Block loaders ($09E88E, $09EA04, $09ECDE, $09EE0E, $09EF44, $09F226,
-$09F52A, $09F636, $09F72A) dispatch on an argument: 2 = load from
-EEPROM, 3 = defaults, 4 = save changed fields ($09F81E).
+$09F52A, $09F636, $09F72A) dispatch on an argument: 0 = load from
+EEPROM, 1 = defaults then save, 2 = save changed fields ($09F81E).
+$09F3A8 has no loader for block $112C (missing).  Position save slots:
+EEPROM $1192 and $11AE, selected by $11CA.  ID checksum at $0905 (XOR
+of $087B-$0904); on mismatch all output rates are cleared.
 
 Block $1046 ($09EA04): +0-9 -> RAM $633C (written by @@Au, @@Av);
 +10-49, five doubles -> RAM $7592, defaults 0, 0, 0, 298.257223563,
@@ -292,7 +295,7 @@ $015E, $5091.
 - $08FC68 seeds $81D2 = $75C0 / 5.2550354685707275; $097A02 seeds the
   channel search center from $75C0 (from $81D2 once $81EE != 0).
 - Oscillator search ($097464, from $0957BC at the end of each SV-list
-  pass with < 3 channels in state 3): n = 0 steps to the next list
+  pass with < 3 search records in state 3, tracking): n = 0 steps to the next list
   entry, stores it in $75BC and sends it to PCS1, cyclic, with no limit
   flag; n = 1-2 sets $26B6 = 2 and stops stepping ($095446 resets it;
   callers $08A774, $0A03A4).
@@ -327,8 +330,9 @@ $015E, $5091.
 ### CS7: the tracking channels
 
 8 channels, channel n at $FFE800 + $10 x n.  Read in the level-5
-interrupt every C/A code epoch (1 ms, inferred from the counters
-below); written by the handler's loops and by channel setup ($088E96).
+interrupt `chan_isr` $0805B2 (vector 29), a fixed 1 ms tick (1000 per
+second, not tied to a channel's code epoch); written by the handler's
+loops and by channel setup ($088E96).
 
 | Offset | Read | Write | Evidence |
 |---|---|---|---|
@@ -343,9 +347,9 @@ Global registers:
 | Offset | Use | Evidence |
 |---|---|---|
 | $0E0 | Written 0 at correlator init | $088FB8 |
-| $0F0 | Written 0 | $088F78 |
+| $0F0 | Written 0; written $2DE by the interrupt at the PPS millisecond ($2DC, if $103 set; $081342): PPS timing (inferred) | $088F78, $0805B2 |
 | $0F2 | Written 0 first thing in each level-5 interrupt (acknowledge); used to time interrupts against SYNCR in a self-test | $0805B2, $0A1A4E |
-| $0F4 | Control word, shadow in RAM $2D8: init $86 then $87; bits 0, 1, 2 set and cleared by $088F78-$088FAA | $088FB8 |
+| $0F4 | Control word, shadow in RAM $2D8: init $86 then $87; bits 0, 1, 2 set and cleared by $088F78-$088FAA; bit 2 cleared at the PPS millisecond | $088FB8, $0805B2 |
 
 Tracking loop ($0805B2), per channel:
 
@@ -356,10 +360,34 @@ Tracking loop ($0805B2), per channel:
   read from +$0 (carrier aiding).  Slew steps of $37 = 55 cycles.
 - Pairs of 1 ms samples are summed (2 ms coherent integration).
 - State per channel, RAM $B0 + n: 0 = search (envelope max + 3/8 min
-  against a running noise floor; slews code phase until detection),
-  1 = code tracking, 4 = frequency tracking (phase from a 32 x 32
-  arctangent table at $088A20), 5 = carrier phase tracking (second
-  order filter, coefficients -$7971 and $39C3, output to +$0).
+  against a running noise floor; slews +550 L1 cycles per dwell),
+  1 = code acquire, 2 = settle, 3 = frequency pull-in ($08985C; Doppler
+  +$12E02, -$25C04; gives up at count 6), 4 = frequency lock / bit sync
+  (phase from a 32 x 32 arctangent table at $088A20), 5 = carrier phase
+  lock (second order filter, coefficients -$7971 and $39C3, output to
+  +$0).  Transitions in `task_chan_50ms` $089BA0.
+- Code loop once per second ($08916C): normalized early-late
+  ($0890C0) / $800, clamped to +-2 steps of 55 L1 cycles; +-1 dither in
+  state 5.  Carrier aiding of $382 once per second at the epoch.
+- Second epoch in the interrupt: snapshots code phase, carrier phase,
+  NCO rate, amplitude ($7E2 -> $802), data bits ($4E2 -> $562); $2D6
+  reduced by $2E0 (from $2924, `$091BFA`) each second to steer the epoch.
+- Task interface: command block $275C (8 x $C: SV, Doppler word, code
+  window start, width $1809FC full / $133B3 1/20 ms) loaded by $08960C;
+  report $27BC (8 x $2C) built each second by $089670.
+- Search records $CF6 (8 x $28): state 0 idle, 1 searching,
+  2 reacquire, 3 tracking (interrupt state >= 4); strategy 0-5 selects
+  a Doppler bin table ($0AEEA2 + $8EB8 x 24 + 4 x strategy).
+- Search center $113C: seeded by $097A02, then moved each second by
+  $097786 toward the drift implied by a tracked channel's Doppler, at
+  most +-3130 per step.
+- Tasks (scheduler $08A13A, pending flags $8DC-$8F5): $8DD
+  `task_chan_50ms`, $8DE `task_chan_1s` $08916C, $8E0 `task_meas_1s`
+  $08A7AE, $8E6 `task_vis` $09FB22.
+- @@Ea channel mode ($6FBD, `chan_status_update` $099C86): 0-4
+  interrupt state, 5 phase lock, 6 preamble sync, 7 TOW verified,
+  8 ephemeris ready.  Flags ($6FBE): b7 used in fix, b6 alert, b5
+  anti-spoof (HOW), b4 unhealthy, b3 URA >= 6, b0 parity error.
 - Requested SV per channel: RAM $E0 + n; $088E96 restarts a channel
   when it differs from RAM $E8 + n.
 - Other windows: no accesses to CS0, CS1, CS2, CS3 or CS6 anywhere in
@@ -376,6 +404,8 @@ Tracking loop ($0805B2), per channel:
   PFPAR $FB, GPTMCR $2000, DDRGP $DF, PORTGP $C1, CFORC $03.
 
 ## Host commands (from the firmware)
+
+Output payload layouts: [messages.md](messages.md).
 
 Receive path: SCI interrupt ($08048E) -> ring buffer RAM $9DAE-$A52D
 (1920 bytes; write pointer $A532, read pointer $A536, count $A53A) ->
@@ -406,11 +436,11 @@ Handlers (first call in each case of the second-level dispatch):
 | Letter | Dispatch | Handlers |
 |---|---|---|
 | A | $0AD03E | Aa $0ACF46, Ab $0AC9F0, Ac $0AC61C, Ad $0ACAEA, Ae $0ACB32, Af $0ACA4E, Ah $0ACF02, Ai $0ACE30, Aj $0AC85A, Ak $0AC764, Al $0AC806, Am $0ACE8E, An $0AC226, Ao $0AC32A, Ap $0AC39C, Aq $0AC90A, Ar $0ACC30, At $0AC938, Au $0AC254, Av $0AC8B6, Aw $0AD2B6, Ax $0ACB7A, Ay $0ACBD2, Az $0ACBA8, AA $0AC8E4, AB $0AC2CE, AC $0AC7B2, AD $0AC5CC, AE $0ACBFC, AF $0ACE02, AG $0AC966, AH $0ACDB4, AI $0ACD6C, AJ $0AC73C |
-| B | $0A4712 | Each rate command saves its rate ($0ADE56), then: Ba $0AA750, Bb $0AAF74, Bc $0A8CD6, Bd $0A8768, Be $0A8560, Bf $0A937E, Bg $0AAE4E, Bh $0AA822, Bi $0A8EA8, Bj $0A9410, Bk $0A8F5C, Bm $0AACA8, Bn $0AAF2C, Bz $0A8D22 |
+| B | $0A4712 | Each rate command saves its rate ($0ADE56), then: Ba $0AA750, Bb $0AAF74, Bc $0A8CD6, Bd $0A8768, Be $0A8560, Bf $0A937E (ephemeris input, acknowledged with @@Cc), Bg $0AAE4E, Bh $0AA822, Bi $0A8EA8 (ephemeris output; sent as @@Bf by the scheduler), Bj $0A9410, Bk $0A8F5C, Bm $0AACA8, Bn $0AAF2C, Bz $0A8D22 (always @@Ez, 8 x $2C records from $27BC) |
 | C | $0A5288 | Ca, Cf, Cg stop the channels ($088F78) and write the EEPROM; Cb $0A9160, Cd $0A4FC2, Ce $0A508E, Ci $0A6CB2 or $0A6C3C (protocol mode 1 or 2), Cj $0A9F04, Cl $0A51D2, Cm $0A55C4 |
 | E | $0A4C44 | If-chain: Ea, Ec, Eg, Ek (save rate, then output), En (TRAIM: validates date and time fields) |
 | F | $0A54EA | Jump table, Fa-Fd |
-| T | $0A4EDE | Ta $0AD4F4, Tb $0AD754, Tc $0A8B0E, Td $0A8BAA, Th $0AE7CE (writes the ID block), Tq $0A1E90 |
+| T | $0A4EDE | Ta $0AD4F4, Tb $0AD754, Tc $0A8B0E, Td $0A8BAA (output builders, called by the scheduler), Th $0AE7CE (writes the ID block), Tq $0A1E90 |
 
 EEPROM write routine $09B2DE (address, source, count): writes only
 bytes that differ, waits for completion after each, and sets bit 1 of
@@ -526,8 +556,9 @@ $GPZDA ($0A7ACA); format strings $0B04F1-$0B0646, ending `*%02X\r\n`.
 
 Mode 2 input (CR LF, no checksum): `BIN` -> mode 0; `NMEA` -> mode 1;
 `T<n>` sets the report rate (EEPROM $0930) and echoes `T%04d`; `Z`
-sends one report.  Report ($0A5E9A): DDMMSS N/S DDDMMSS E/W, speed in
-mph (RAM $8F40 x 2.236936292, max 514), heading (RAM $8F38, max 999),
+sends one report.  Report ($0A5E9A): degrees, minutes and hundredths
+of a minute, N/S, E/W; speed in mph (RAM $8F40 x 2.236936292; the 514
+cap applies to m/s before conversion), heading (RAM $8F38, max 999),
 fix flag.
 
 Mode 3: frames start with a byte with bit 7 set, carry 7-bit payload
