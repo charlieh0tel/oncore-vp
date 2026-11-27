@@ -212,6 +212,28 @@ the names sub64r, sub64p, add64pp.  The PC/PI (position-independent)
 libraries differ in some 8-byte windows of the first 64 bytes; the AB
 libraries match all of them.
 
+Run-time library in the image ($0B0AD2-$0B54BE), placed by
+`tools/libsig.py` from ABCPU32.LIB (IEEE-695 modules, relocated bytes
+masked); 37 sections, named by `tools/ghidra/OncoreLibNames.java`.
+AB68000 places 30 (misses CPU32-only code), so the build used the
+CPU32 libraries.
+
+| Library | Modules |
+|---|---|
+| lib | faddsub32, faddsub64, fcmp64, fdiv32, fdiv64, dbl_to_flt, dbl_to_int, dbl_to_uint, flt_to_dbl, int_to_dbl, uint_to_dbl, int_to_flt, fmul32, fmul64, fnorm32, fnorm64, fperror |
+| libc | abs, atoi/atol, ctype, labs, memcpy, memset, dbl_to_str, doprnt, sprintf, swrite, data_gen |
+| libm | asin, atan (atan2), cos, floorceil, fmod, mathmisc, sin, sqrt |
+
+- fabs ($0B4AD4), frexp ($0B4DF8), modf ($0B4E8A): a different build
+  from A.04.10; fabs placed by position and error code, the other two by
+  relocations.
+- abs/labs and atoi/atol have identical code; abs/labs assigned by
+  library order, the single atoi/atol copy named `_atoi`.
+- RAM: `__fp_status` $CC14, `__fp_control` $CC16, `_errno` $CC1C.
+- `trap` $0A02AA (called by `__fp_error`): `jmp $089F5C`, the reset
+  entry; a floating-point error resets the receiver.
+- No environment startup code (ENV.LIB, CRT0/CRT1) matches.
+
 | Trait | Firmware | B3640 manual |
 |---|---|---|
 | Prototyped char/short arguments | Not widened: `move.b`/`move.w -(sp)`, 2-byte slot, value at slot start; callee reads (8,A6) | Not widened with prototypes (pp. 37-38); Fig. 4-5 `MOVE.B D0,-(A7)` (p. 75) |

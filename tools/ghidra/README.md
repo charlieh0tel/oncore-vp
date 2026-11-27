@@ -15,10 +15,12 @@ $GHIDRA/support/analyzeHeadless ~/ghidra-projects oncore-vp \
     -preScript OncoreNoSwitch.java \
     -postScript OncoreSwitches.java \
     -postScript OncoreFloat.java \
+    -postScript OncoreLibNames.java \
     -postScript OncoreStackParameters.java
 ```
 
-Result: 64 switches recovered, 19 soft-float entries named, 272 functions
+Result: 64 switches recovered, 19 soft-float entries named, 76 run-time
+library names (OncoreLibNames.java), 272 functions
 given narrow stack parameters, none failing to decompile.
 
 Run from the repository root.  The project lives outside the repository.
@@ -34,6 +36,7 @@ Run from the repository root.  The project lives outside the repository.
 | `OncoreNoSwitch.java` | Turns off Ghidra's switch analysis before auto-analysis (from smartclock) |
 | `OncoreSwitches.java` | Recovers the compiler's switch tables and records jump-table overrides (from smartclock's SmartClockSetup.java) |
 | `OncoreFloat.java` | Names the soft double routines (add64, sub64, sub64r, mul64, div64, div64r, p/pp variants, add64z) and sets their register interfaces |
+| `OncoreLibNames.java` | Names the B3640 run-time library routines and data (table from `tools/libsig.py`) |
 | `OncoreStackParameters.java` | Narrow stack parameters (from smartclock); run last |
 
 Report scripts on an existing project:
