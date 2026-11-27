@@ -208,7 +208,7 @@
 009D28	L	traim_alarm	0 ok, 1 alarm, 2 unknown
 009D2A	L	traim_time_err	Time error estimate, $FFFF unknown
 009D2C	L	traim_status	0 none removed, 1 SV removed, 2 too few SVs
-011192	L	ee_pos_rec	EEPROM $1192/$11AE: two position records (h, lat, lon) + checksum; selector $11CA
+021192	L	ee_pos_rec	EEPROM $1192/$11AE: two position records (h, lat, lon) + checksum; selector $11CA
 007A3C+000	S	valid	eph[ch], stride $EC, ch 0-7
 007A3C+001	S	iode	IODE copy from eph_store +$46
 007A3C+002	S	new	Set at decode; forces phasor init
