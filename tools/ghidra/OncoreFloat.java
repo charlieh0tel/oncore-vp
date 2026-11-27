@@ -67,5 +67,40 @@ public class OncoreFloat extends GhidraScript {
         define(0x0B0DEEL, "add64z", List.of(
             new ParameterImpl("x", dp, one("A0"), currentProgram),
             new ParameterImpl("y", d, pair("D0", "D1"), currentProgram)), d, pair("D0", "D1"));
+
+        // cmp64: x in A0:A1, y in D0:D1, returns -1/0/1 for x <,=,> y in D0;
+        // cmp64r swaps them first ($0B1110 exg).
+        DataType i = IntegerDataType.dataType;
+        DataType u = UnsignedIntegerDataType.dataType;
+        DataType fl = FloatDataType.dataType;
+        DataType flp = new PointerDataType(fl);
+        define(0x0B1114L, "cmp64", List.of(
+            new ParameterImpl("x", d, pair("A0", "A1"), currentProgram),
+            new ParameterImpl("y", d, pair("D0", "D1"), currentProgram)), i, one("D0"));
+        define(0x0B1110L, "cmp64r", List.of(
+            new ParameterImpl("x", d, pair("D0", "D1"), currentProgram),
+            new ParameterImpl("y", d, pair("A0", "A1"), currentProgram)), i, one("D0"));
+
+        // Single precision: x in D0, y in D1, result D0; "z" forms operate
+        // on the float at (A0) in place ($0B1BC2).
+        long[][] f32 = {{0x0B0B70L, 0x0B0B40L}, {0x0B0B4CL, 0x0B0B36L}, {0x0B1BCCL, 0x0B1BC2L}, {0x0B1234L, 0x0B1228L}};
+        String[] f32n = {"add32", "sub32", "mul32", "div32"};
+        for (int k = 0; k < f32.length; k++) {
+            define(f32[k][0], f32n[k], List.of(
+                new ParameterImpl("x", fl, one("D0"), currentProgram),
+                new ParameterImpl("y", fl, one("D1"), currentProgram)), fl, one("D0"));
+            define(f32[k][1], f32n[k] + "z", List.of(
+                new ParameterImpl("x", flp, one("A0"), currentProgram),
+                new ParameterImpl("y", fl, one("D1"), currentProgram)), fl, one("D0"));
+        }
+
+        // Conversions: argument in D0 (D0:D1 for double), result in D0 (D0:D1).
+        define(0x0B1720L, "dtof", List.of(new ParameterImpl("x", d, pair("D0", "D1"), currentProgram)), fl, one("D0"));
+        define(0x0B182CL, "dtoi", List.of(new ParameterImpl("x", d, pair("D0", "D1"), currentProgram)), i, one("D0"));
+        define(0x0B18ECL, "dtoui", List.of(new ParameterImpl("x", d, pair("D0", "D1"), currentProgram)), u, one("D0"));
+        define(0x0B1972L, "ftod", List.of(new ParameterImpl("x", fl, one("D0"), currentProgram)), d, pair("D0", "D1"));
+        define(0x0B19DEL, "itod", List.of(new ParameterImpl("x", i, one("D0"), currentProgram)), d, pair("D0", "D1"));
+        define(0x0B1A58L, "uitod", List.of(new ParameterImpl("x", u, one("D0"), currentProgram)), d, pair("D0", "D1"));
+        define(0x0B1AB8L, "itof", List.of(new ParameterImpl("x", i, one("D0"), currentProgram)), fl, one("D0"));
     }
 }

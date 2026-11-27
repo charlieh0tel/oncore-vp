@@ -17,6 +17,7 @@ $GHIDRA/support/analyzeHeadless ~/ghidra-projects oncore-vp \
     -postScript OncoreFloat.java \
     -postScript OncoreLibNames.java \
     -postScript OncoreNames.java \
+    -postScript OncoreTypes.java \
     -postScript OncoreStackParameters.java
 ```
 
@@ -36,9 +37,10 @@ Run from the repository root.  The project lives outside the repository.
 | `OncoreCallers.java` | Call sites of functions, with the pushes before each |
 | `OncoreNoSwitch.java` | Turns off Ghidra's switch analysis before auto-analysis (from smartclock) |
 | `OncoreSwitches.java` | Recovers the compiler's switch tables and records jump-table overrides (from smartclock's SmartClockSetup.java) |
-| `OncoreFloat.java` | Names the soft double routines (add64, sub64, sub64r, mul64, div64, div64r, p/pp variants, add64z) and sets their register interfaces |
+| `OncoreFloat.java` | Register interfaces of the soft-float routines: double add/sub/mul/div (p/pp/z variants), cmp64, single add/sub/mul/div, conversions |
 | `OncoreLibNames.java` | Names the B3640 run-time library routines and data (table from `tools/libsig.py`) |
 | `OncoreNames.java` | Names functions and RAM variables identified in `docs/memory-map.md` (command handlers, RTC, QSPI, EEPROM, oscillator, time, status) |
+| `OncoreTypes.java` | Data types: date record ($8EBA), channel records ($6FBC), CS7 channel registers, typed globals |
 | `OncoreExportC.java` | Decompiles every function to one C file; prints named/unnamed counts |
 | `OncoreStackParameters.java` | Narrow stack parameters (from smartclock); run last |
 
