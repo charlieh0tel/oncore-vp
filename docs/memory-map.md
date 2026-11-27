@@ -1058,6 +1058,17 @@ tantalum capacitors.  The SAW filter's two end terminals sit next to
 the 58M01 and the A06.  58M01: likely the RF front end / downconverter
 (owner); A06 position fits a first LNA stage.  Not traced.
 
+### Antenna gain (Motorola notes in third_party/moto)
+
+| | VP Oncore (vponcoreengnotesarchive.pdf, p. 5) | UT Oncore (ut-oncore-engnotes.pdf) |
+|---|---|---|
+| Net gain at the receiver input | Preamplifier 18 dB minimum, including 6 dB cable loss | 10 to 33 dB; "performance will degrade" outside |
+| Noise figure | 2.5 dB maximum | 2.2 dB maximum (system 4 dB) |
+| Antenna power at the connector | +5 V, 25 mA available | 80 mA maximum, 45 mA short circuit |
+| Thresholds (0 dBic antenna, no cable) | Acquisition -137 dBm, tracking -143 dBm | |
+
+No onboard LNA unless the passive-antenna option (23 dB) is fitted.
+
 ### RF architecture (hypothesis, all inferred)
 
 ```

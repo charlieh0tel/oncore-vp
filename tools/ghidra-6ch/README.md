@@ -49,4 +49,5 @@ commands and messages (`cmd_E`, `cmd_F`, `msg_Ea`, `msg_Ec`, `msg_Eg`,
 Regenerating `names-core.tsv` and `names-globals.tsv` (needs the 8ch
 project from `tools/ghidra`): run `gen/OncoreFingerprint.java` on both
 projects (`-process ... -noanalysis -readOnly`, argument: output file),
-then `gen/match.py fp8.txt fp6.txt OUT` and `gen/gen_names.py`.
+then `gen/match.py fp8.txt fp6.txt m` and
+`gen/gen_names.py m-funcs.tsv m-globals.tsv .`.
