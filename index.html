@@ -221,7 +221,7 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
 <section>
   <h2>Oscillator tuning (QSPI PCS1)</h2>
   <ul>
-    <li>An 8-bit setting ($75BC) goes to the DCXO control on QSPI PCS1 (HP's name: the 58503B sends <code>@@Ta</code> for <code>:DIAGnostic:GPSystem:DCXO</code>): six single-byte frames, nibble data, the previous value read back. Not a commodity DAC or pot. QSPI SCK and MOSI reach the 24M0x hybrid (continuity), so the control is in the hybrid.</li>
+    <li>An 8-bit setting ($75BC) goes to the DCXO control on QSPI PCS1 (HP's name: the 58503B sends <code>@@Ta</code> for <code>:DIAGnostic:GPSystem:DCXO</code>): six single-byte frames, nibble data, the previous value read back. Not a commodity DAC or pot. QSPI SCK, MOSI and MISO reach the 24M0x hybrid (continuity), so the control is in the hybrid.</li>
     <li>Blind search steps the setting through a list (here 140, 20, 200, 80), &plusmn;7.5 kHz of Doppler bins per setting; range &plusmn;25 ppm at 185 Hz/LSB.</li>
     <li>Once per power-up, after 10 steady fixes, the drift is driven toward 20625 and the record saved.</li>
     <li><code>@@Ta</code> payload: drift reference (u16, HP "Offs"), setting (u8, "Warp"), Hz/LSB (u16, "Step"). All or nothing: stored only if word &lt; $8000, byte &lt; $D8, word &lt; $8000, then saved to EEPROM at once and sent to the DCXO. <code>@@Ta FF FF FF FF FF CA</code> reads the record without changing it. Default with no valid record: $67, 350 Hz/LSB, 20625.</li>
@@ -374,7 +374,7 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
     <li>6-channel sensitivity loss: continuity of antenna &rarr; A06 &rarr; 95U01 SAW &rarr; 58M01, and the A06 bias on the bottom side, off the jig.</li>
     <li>Confirm the &divide;656 is in the hybrid (29.110 kHz on a hybrid pin, traced to EXTAL).</li>
     <li>Hybrid (TCXO) frequency error and its sign (0.17 ppm from the drift).</li>
-    <li>QSPI PCS1 and MISO to the 24M0x hybrid (SCK and MOSI reach it).</li>
+    <li>QSPI PCS1 to the 24M0x hybrid (SCK, MOSI and MISO reach it).</li>
     <li>Whether CS9/CS10 have chips fitted (CS0&ndash;CS3, CS6 are never accessed; CS5 is one boot read).</li>
   </ul>
 </section>
