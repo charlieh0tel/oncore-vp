@@ -66,7 +66,7 @@ header a{color:var(--accent)}
 <header>
   <h1>Oncore VP Teardown</h1>
   <p class="sub">Motorola Oncore VP 8-channel from an HP 58503A, read over BDM (mc683xx-bdm, bdm 0.4.0, pod firmware 0.5.0), 2026-11-24. Firmware SFTW P/N 98-P36830P, VER 8, REV 8, dated 06 Aug 1996. Model B4121P1115, serial SSG0220999.</p>
-  <p class="sub">See also: <a href="oncore-vp-test-points.html">test points and BDM header</a> · <a href="mc68331-clock-pins.html">MC68331 clock pins</a> · <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/docs/board.md">board notes</a> · <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/docs/memory-map.md">memory map and firmware notes</a> · <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/docs/messages.md">binary messages</a> · <a href="https://github.com/charlieh0tel/oncore-vp/tree/main/tools/ghidra">Ghidra scripts</a> · <a href="https://github.com/charlieh0tel/oncore-vp">source</a></p>
+  <p class="sub">See also: <a href="oncore-vp-test-points.html">test points and BDM header</a> &middot; <a href="mc68331-clock-pins.html">MC68331 clock pins</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/docs/board.md">board notes</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/docs/memory-map.md">memory map and firmware notes</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp/blob/main/docs/messages.md">binary messages</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp/tree/main/tools/ghidra">Ghidra scripts</a> &middot; <a href="https://github.com/charlieh0tel/oncore-vp">source</a></p>
 </header>
 
 <section>
@@ -79,10 +79,10 @@ header a{color:var(--accent)}
       <text class="t1" x="90" y="56" text-anchor="middle">Hybrid</text>
       <text class="t2" x="90" y="76" text-anchor="middle">24M02 / 24M01</text>
       <text class="t2" x="90" y="96" text-anchor="middle">19.09575 MHz</text>
-      <text class="t3" x="90" y="112" text-anchor="middle">x82.5 = L1 − 20625 Hz</text>
+      <text class="t3" x="90" y="112" text-anchor="middle">x82.5 = L1 &minus; 20625 Hz</text>
 
       <rect class="box" x="210" y="30" width="140" height="90" rx="4"/>
-      <text class="t1" x="280" y="62" text-anchor="middle">Divider ÷656</text>
+      <text class="t1" x="280" y="62" text-anchor="middle">Divider &divide;656</text>
       <text class="t3" x="280" y="84" text-anchor="middle">likely in the hybrid</text>
 
       <rect class="box hot" x="390" y="30" width="150" height="90" rx="4"/>
@@ -107,7 +107,7 @@ header a{color:var(--accent)}
       <line class="arr" x1="750" y1="75" x2="788" y2="75" marker-end="url(#ah)"/>
 
       <rect class="box" x="790" y="160" width="200" height="70" rx="4"/>
-      <text class="t1" x="890" y="186" text-anchor="middle">SCI ÷(32 x 55)</text>
+      <text class="t1" x="890" y="186" text-anchor="middle">SCI &divide;(32 x 55)</text>
       <text class="t2" x="890" y="206" text-anchor="middle">9525 baud (9600 host)</text>
       <line class="arr" x1="890" y1="120" x2="890" y2="158" marker-end="url(#ah)"/>
 
@@ -120,7 +120,7 @@ header a{color:var(--accent)}
       <line class="arr" x1="170" y1="195" x2="208" y2="195" marker-end="url(#ah)"/>
     </svg>
     </div>
-    <figcaption>Green values were measured on the 8-channel board. Nominal values assume 19.09575 MHz. The firmware's baud table only fits f_sys = 16.762–16.781 MHz, i.e. a 29.10–29.13 kHz reference.</figcaption>
+    <figcaption>Green values were measured on the 8-channel board. Nominal values assume 19.09575 MHz. The firmware's baud table only fits f_sys = 16.762&ndash;16.781 MHz, i.e. a 29.10&ndash;29.13 kHz reference.</figcaption>
   </figure>
 </section>
 
@@ -128,20 +128,20 @@ header a{color:var(--accent)}
   <h2>Memory map, running</h2>
   <div class="scroll"><table>
     <tr><th>Range</th><th>Size</th><th>CS</th><th>Width</th><th>Access</th><th class="t">Contents</th></tr>
-    <tr><td>$000000–$01FFFF</td><td>128 KB</td><td>CS8</td><td>8</td><td>R/W</td><td class="t">RAM</td></tr>
-    <tr><td>$020000–$021FFF</td><td>8 KB</td><td>CS4</td><td>8</td><td>R/W, 2 wait</td><td class="t">EEPROM</td></tr>
-    <tr><td>$080000–$0FFFFF</td><td>512 KB</td><td>CSBOOT</td><td>16</td><td>R/W, 1 wait</td><td class="t">Boot flash (256 KB, mirrored)</td></tr>
-    <tr><td>$100000–$17FFFF</td><td>512 KB</td><td>CS9</td><td>16</td><td>R/W, 1 wait</td><td class="t">Reads all $FF</td></tr>
-    <tr><td>$180000–$1FFFFF</td><td>512 KB</td><td>CS10</td><td>16</td><td>R/W, 1 wait</td><td class="t">Reads all $FF</td></tr>
-    <tr><td>$FFC800–$FFCFFF</td><td>2 KB</td><td>CS0 wr, CS2/3 rd</td><td>16</td><td>DS strobe</td><td class="t">Never accessed</td></tr>
-    <tr><td>$FFD000–$FFD7FF</td><td>2 KB</td><td>CS1</td><td>16</td><td>write, DS</td><td class="t">Never accessed</td></tr>
-    <tr><td>$FFD800–$FFDFFF</td><td>2 KB</td><td>CS6</td><td>8</td><td>R/W</td><td class="t">Never accessed</td></tr>
-    <tr><td>$FFE000–$FFE7FF</td><td>2 KB</td><td>CS5</td><td>16</td><td>R/W, DS</td><td class="t">One dummy read at boot</td></tr>
-    <tr><td>$FFE800–$FFEFFF</td><td>2 KB</td><td>CS7</td><td>16</td><td>R/W</td><td class="t">Correlator, 8 channels × 16 bytes</td></tr>
-    <tr><td>$FFF000–$FFFFFF</td><td>4 KB</td><td>on-chip</td><td></td><td></td><td class="t">Module registers (MM = 1)</td></tr>
+    <tr><td>$000000&ndash;$01FFFF</td><td>128 KB</td><td>CS8</td><td>8</td><td>R/W</td><td class="t">RAM</td></tr>
+    <tr><td>$020000&ndash;$021FFF</td><td>8 KB</td><td>CS4</td><td>8</td><td>R/W, 2 wait</td><td class="t">EEPROM</td></tr>
+    <tr><td>$080000&ndash;$0FFFFF</td><td>512 KB</td><td>CSBOOT</td><td>16</td><td>R/W, 1 wait</td><td class="t">Boot flash (256 KB, mirrored)</td></tr>
+    <tr><td>$100000&ndash;$17FFFF</td><td>512 KB</td><td>CS9</td><td>16</td><td>R/W, 1 wait</td><td class="t">Reads all $FF</td></tr>
+    <tr><td>$180000&ndash;$1FFFFF</td><td>512 KB</td><td>CS10</td><td>16</td><td>R/W, 1 wait</td><td class="t">Reads all $FF</td></tr>
+    <tr><td>$FFC800&ndash;$FFCFFF</td><td>2 KB</td><td>CS0 wr, CS2/3 rd</td><td>16</td><td>DS strobe</td><td class="t">Never accessed</td></tr>
+    <tr><td>$FFD000&ndash;$FFD7FF</td><td>2 KB</td><td>CS1</td><td>16</td><td>write, DS</td><td class="t">Never accessed</td></tr>
+    <tr><td>$FFD800&ndash;$FFDFFF</td><td>2 KB</td><td>CS6</td><td>8</td><td>R/W</td><td class="t">Never accessed</td></tr>
+    <tr><td>$FFE000&ndash;$FFE7FF</td><td>2 KB</td><td>CS5</td><td>16</td><td>R/W, DS</td><td class="t">One dummy read at boot</td></tr>
+    <tr><td>$FFE800&ndash;$FFEFFF</td><td>2 KB</td><td>CS7</td><td>16</td><td>R/W</td><td class="t">Correlator, 8 channels &times; 16 bytes</td></tr>
+    <tr><td>$FFF000&ndash;$FFFFFF</td><td>4 KB</td><td>on-chip</td><td></td><td></td><td class="t">Module registers (MM = 1)</td></tr>
   </table></div>
   <ul>
-    <li>At reset only CSBOOT is set: $000000–$0FFFFF, 1 MB, 16-bit. Reset vectors SSP $00020000, PC $00089F5C.</li>
+    <li>At reset only CSBOOT is set: $000000&ndash;$0FFFFF, 1 MB, 16-bit. Reset vectors SSP $00020000, PC $00089F5C.</li>
     <li>All chip selects asynchronous, S+U space, IPL 0, AVEC 0. Bus monitor off (SYPCR $00): a read outside every chip select hangs the BDM link until <code>bdm reset</code>.</li>
   </ul>
   <pre>CSPAR0 $3BFF  CSPAR1 $03EE
@@ -157,7 +157,7 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
     <li>256 KB, two 8-bit chips (one per byte lane).</li>
     <li><code>third_party/moto/B4121P1115-flash.bin</code>, three reads identical.</li>
     <li class="hash mono">SHA-256 48ea2488486df858bd81c76d9c52acf761d9ea9389581ac1443a8d44d8e75890</li>
-    <li>Last 8 bytes: $00C5B910 = sum of even bytes, $00EC4899 = sum of odd bytes, over $00000–$3FFF7. Both verified.</li>
+    <li>Last 8 bytes: $00C5B910 = sum of even bytes, $00EC4899 = sum of odd bytes, over $00000&ndash;$3FFF7. Both verified.</li>
     <li>Reset entry $089F5C: SR $2700, SP $20000, SIMCR $E041, SYPCR $00, SYNCR $D102, wait SLOCK.</li>
     <li>SCCR0 table $0A20A2: 109, 218, 437, 27, 55 (4800, 2400, 1200, 19200, 9600 baud).</li>
   </ul>
@@ -168,10 +168,10 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
     <li>8 KB at CS4 (mapped only after the firmware runs).</li>
     <li><code>eeprom/B4121P1115-SSG0220999-eeprom.bin</code>, three reads identical.</li>
     <li class="hash mono">SHA-256 003e9f533d66fb448ad2a5504a70d76f016abdbb2a0c19043d4a818589a44261</li>
-    <li>$087A–$0904: ID text: MODEL B4121P1115, SERIAL SSG0220999, MANUFACTUR DATE 7D01, OPTIONS IB.</li>
-    <li>$0934, $0CAC: two almanac banks (32 × 24-byte records, page 25, health); active bank at $1024.</li>
-    <li>$1026–$1166: settings blocks (masks, DOP limits, datum, position hold, 1PPS, SV ignore list), each followed by a checksum (−1 minus the byte sum).</li>
-    <li>$116A/$1174: oscillator records; $1180: Klobuchar ionosphere; $118C/$118E: year hint; $1192/$11AE: position records; $11CC: UTC parameters (ΔtLS 18).</li>
+    <li>$087A&ndash;$0904: ID text: MODEL B4121P1115, SERIAL SSG0220999, MANUFACTUR DATE 7D01, OPTIONS IB.</li>
+    <li>$0934, $0CAC: two almanac banks (32 &times; 24-byte records, page 25, health); active bank at $1024.</li>
+    <li>$1026&ndash;$1166: settings blocks (masks, DOP limits, datum, position hold, 1PPS, SV ignore list), each followed by a checksum (&minus;1 minus the byte sum).</li>
+    <li>$116A/$1174: oscillator records; $1180: Klobuchar ionosphere; $118C/$118E: year hint; $1192/$11AE: position records; $11CC: UTC parameters (&Delta;tLS 18).</li>
     <li>Rest: $AA fill.</li>
   </ul>
 </section>
@@ -182,7 +182,7 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
   <ul>
     <li>C, built with HP B3640 A.04.10 (68000-family cross compiler). The soft-float and libc routines match ABCPU32.LIB byte for byte; startup code is Motorola's own.</li>
     <li>Ghidra 12.1.4 project rebuilt from the repo's scripts: 64 switches, 574 functions, every function and RAM global named or typed, none failing to decompile.</li>
-    <li>Tasks: a 26-task pre-emptive scheduler; the CS7 correlator interrupt runs every 1 ms (channel states 0 search … 5 phase lock).</li>
+    <li>Tasks: a 26-task pre-emptive scheduler; the CS7 correlator interrupt runs every 1 ms (channel states 0 search &hellip; 5 phase lock).</li>
     <li>Navigation: unweighted least squares (not a Kalman filter), Klobuchar, Sagnac, relativistic and DGPS corrections, no troposphere model; position hold is time-only; TRAIM excludes one SV.</li>
     <li>Host port: 87 binary commands, NMEA, a terse ASCII mode and a 7-bit framed mode; an RTCM SC-104 decoder feeds the DGPS table.</li>
   </ul>
@@ -201,10 +201,10 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
   <h2>Oscillator tuning (QSPI PCS1)</h2>
   <ul>
     <li>An 8-bit setting ($75BC) goes to the DCXO control on QSPI PCS1 (HP's name: the 58503B sends <code>@@Ta</code> for <code>:DIAGnostic:GPSystem:DCXO</code>): six single-byte frames, nibble data, the previous value read back. Not a commodity DAC or pot; likely in the 24M0x hybrid or the 58M01.</li>
-    <li>Blind search steps the setting through a list (here 140, 20, 200, 80), ±7.5 kHz of Doppler bins per setting; range ±25 ppm at 185 Hz/LSB.</li>
+    <li>Blind search steps the setting through a list (here 140, 20, 200, 80), &plusmn;7.5 kHz of Doppler bins per setting; range &plusmn;25 ppm at 185 Hz/LSB.</li>
     <li>Once per power-up, after 10 steady fixes, the drift is driven toward 20625 and the record saved.</li>
     <li><code>@@Ta FF FF FF FF FF CA</code> reads the record without changing it; this unit: 20625, $50, 185 Hz/LSB.</li>
-    <li>Live, tracking: drift 20355 Hz at L1, 270 Hz below the 20625 target. 20625 Hz is exactly 1575.42 MHz − 82.5 × 19.09575 MHz, the carrier left after mixing down, so the reference is off by 0.17 ppm (sign not determined); the boot's update moved the reference to 20572, as the rule predicts.</li>
+    <li>Live, tracking: drift 20355 Hz at L1, 270 Hz below the 20625 target. 20625 Hz is exactly 1575.42 MHz &minus; 82.5 &times; 19.09575 MHz, the carrier left after mixing down, so the reference is off by 0.17 ppm (sign not determined); the boot's update moved the reference to 20572, as the rule predicts.</li>
   </ul>
 </section>
 
@@ -257,12 +257,12 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
   <h2>Pins</h2>
   <div class="grid2">
     <div style="display:grid;gap:6px;min-width:0">
-      <h3>MC68331, 132-pin QFP, pins 51–83</h3>
-      <p class="mono">51 VSS · 52 TXD · 53 RXD · 54 DSO · 55 DSI · 56 BKPT/DSCLK · 57 TSC · 58 FREEZE · 59 VSS · 60 XTAL · 61 VDDSYN · 62 EXTAL · 63 VDD · 64 XFC · 65 VDD · 66 CLKOUT · 67 VSS · 68 RESET · 69 HALT · 70 BERR · 71–77 IRQ7–IRQ1 · 78 MODCLK · 79 R/W · 80 SIZ1 · 81 SIZ0 · 82 AS · 83 VSS</p>
+      <h3>MC68331, 132-pin QFP, pins 51&ndash;83</h3>
+      <p class="mono">51 VSS &middot; 52 TXD &middot; 53 RXD &middot; 54 DSO &middot; 55 DSI &middot; 56 BKPT/DSCLK &middot; 57 TSC &middot; 58 FREEZE &middot; 59 VSS &middot; 60 XTAL &middot; 61 VDDSYN &middot; 62 EXTAL &middot; 63 VDD &middot; 64 XFC &middot; 65 VDD &middot; 66 CLKOUT &middot; 67 VSS &middot; 68 RESET &middot; 69 HALT &middot; 70 BERR &middot; 71&ndash;77 IRQ7&ndash;IRQ1 &middot; 78 MODCLK &middot; 79 R/W &middot; 80 SIZ1 &middot; 81 SIZ0 &middot; 82 AS &middot; 83 VSS</p>
     </div>
     <div style="display:grid;gap:6px;min-width:0">
       <h3>MC68HC68T1, 16-pin</h3>
-      <p class="mono">1 CLKOUT · 2 CPUR · 3 INT · 4 SCK · 5 MOSI · 6 MISO · 7 SS · 8 VSS · 9 PSE · 10 POR · 11 LINE · 12 VSYS · 13 VBATT · 14 XTALin · 15 XTALout · 16 VDD</p>
+      <p class="mono">1 CLKOUT &middot; 2 CPUR &middot; 3 INT &middot; 4 SCK &middot; 5 MOSI &middot; 6 MISO &middot; 7 SS &middot; 8 VSS &middot; 9 PSE &middot; 10 POR &middot; 11 LINE &middot; 12 VSYS &middot; 13 VBATT &middot; 14 XTALin &middot; 15 XTALout &middot; 16 VDD</p>
       <p class="sub">CLKOUT options: XTAL, /2, /4, /8, 1 Hz, 2 Hz, 64 Hz, low.</p>
     </div>
   </div>
@@ -307,13 +307,13 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
 <section>
   <h2>Open</h2>
   <ul>
-    <li>Confirm the RF chain antenna → A06 → 95U01 SAW → 58M01 by continuity.</li>
-    <li>Confirm the ÷656 is in the hybrid (29.110 kHz on a hybrid pin, traced to EXTAL).</li>
+    <li>Confirm the RF chain antenna &rarr; A06 &rarr; 95U01 SAW &rarr; 58M01 by continuity.</li>
+    <li>Confirm the &divide;656 is in the hybrid (29.110 kHz on a hybrid pin, traced to EXTAL).</li>
     <li>Hybrid (TCXO) frequency error and its sign (0.17 ppm from the drift).</li>
     <li>Trace QSPI PCS1 to its part.</li>
     <li>T1 VBATT: whether the RTC keeps time across a power cycle.</li>
     <li>6-channel firmware (read over serial with the factory loader) in Ghidra: compare search tables, application type and oscillator record with the 8ch. The 6-channel boards have lost sensitivity: they track only with about 20 dB of extra gain. Bias is normal on the top side, so the loss is in the RF path; check its continuity and the A06 off the jig.</li>
-    <li>Whether CS9/CS10 have chips fitted (CS0–CS3, CS6 are never accessed; CS5 is one boot read).</li>
+    <li>Whether CS9/CS10 have chips fitted (CS0&ndash;CS3, CS6 are never accessed; CS5 is one boot read).</li>
   </ul>
 </section>
 <div id="lb" hidden><img alt=""><p></p></div>

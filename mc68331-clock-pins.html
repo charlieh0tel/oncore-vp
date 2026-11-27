@@ -51,16 +51,16 @@ li strong{font-family:var(--mono);font-weight:600}
 </style>
 <main>
   <header style="display:grid;gap:6px">
-    <h1>MC68331 clock pins: pins 51–83</h1>
+    <h1>MC68331 clock pins: pins 51&ndash;83</h1>
     <p class="sub">Oncore VP 8-channel. Pin numbers from Motorola's MC68331 technical data, Figure 2 (132-pin QFP). Pin 1 is at the middle of the top edge; numbers run counterclockwise, so this bottom edge reads 51 at the left to 83 at the right.</p>
   </header>
   <figure>
     <div class="scroll"><svg viewBox="0 0 1100 330" role="img" aria-label="MC68331 132-pin QFP, top view, the side with pins 51 to 83. EXTAL is pin 62, XTAL pin 60, CLKOUT pin 66, MODCLK pin 78." class="pins">
 <rect x="20" y="40" width="1060" height="90" rx="4" class="body"/>
-<text x="550.0" y="80" text-anchor="middle" class="chipname">MC68331 · 132-pin QFP · top view</text>
-<text x="550.0" y="102" text-anchor="middle" class="muted">this edge holds pins 51–83; chip body above</text>
-<text x="24" y="28" class="muted">← corner with pin 50 (left side)</text>
-<text x="1076" y="28" text-anchor="end" class="muted">corner with pin 84 (right side) →</text>
+<text x="550.0" y="80" text-anchor="middle" class="chipname">MC68331 &middot; 132-pin QFP &middot; top view</text>
+<text x="550.0" y="102" text-anchor="middle" class="muted">this edge holds pins 51&ndash;83; chip body above</text>
+<text x="24" y="28" class="muted">&larr; corner with pin 50 (left side)</text>
+<text x="1076" y="28" text-anchor="end" class="muted">corner with pin 84 (right side) &rarr;</text>
 <g class="pin power"><rect x="63" y="130" width="14" height="36" rx="1"/>
 <text x="70" y="186" text-anchor="middle" class="num">51</text>
 <text transform="translate(74 198) rotate(90)" class="lab">VSS</text></g>
@@ -172,11 +172,11 @@ li strong{font-family:var(--mono);font-weight:600}
   <section style="display:grid;gap:10px">
     <h2 style="font-size:1.1rem;margin:0">What to measure, with the CPU halted at reset</h2>
     <ol>
-      <li><strong class="m">Pin 62, EXTAL</strong>: frequency and waveform, with a 10x probe. Expect about 29.1 kHz (7.4505 MHz ÷ 256). A full logic-level square wave means another chip drives it; a small sine-like signal means a crystal right at the CPU.</li>
+      <li><strong class="m">Pin 62, EXTAL</strong>: frequency and waveform, with a 10x probe. Expect about 29.1 kHz (7.4505 MHz &divide; 256). A full logic-level square wave means another chip drives it; a small sine-like signal means a crystal right at the CPU.</li>
       <li><strong class="m">Pin 60, XTAL</strong>: oscillating, or flat? Oscillating means a crystal sits across pins 60 and 62. Flat or unconnected means EXTAL is driven from outside.</li>
       <li><strong class="m">Pin 78, MODCLK</strong>: DC level. High means PLL mode, which the 7.45 MHz reading predicts.</li>
       <li><strong>If EXTAL is a square wave</strong>: probe the MC68HC68T1's CLK OUT (pin 1) for the same 29.1 kHz. If it doesn't match, follow pin 62's trace back to its source.</li>
     </ol>
   </section>
-  <p class="state">Pins 61–66 sit between grounds and supplies; probe carefully, since a slip onto VDDSYN or XFC can upset the PLL. Pin 82 is AS and pin 83 is VSS; ADDR5 is pin 24 on this package.</p>
+  <p class="state">Pins 61&ndash;66 sit between grounds and supplies; probe carefully, since a slip onto VDDSYN or XFC can upset the PLL. Pin 82 is AS and pin 83 is VSS; ADDR5 is pin 24 on this package.</p>
 </main>

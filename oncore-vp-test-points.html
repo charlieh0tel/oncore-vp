@@ -82,7 +82,7 @@ td.n { font-family: var(--mono); white-space: nowrap; }
         <tbody id="tptable"></tbody>
       </table>
     </div>
-    <p class="caption">BERR (pin 70) and DS (pin 85, PE5/DS) have no test point. The resistors below the lower edge are 10 kΩ ("103") pull-ups: on 55 (DSI) and 56 (BKPT) to one via; on 57 or 58 to a bus joining 61, 63 and 65 (VDDSYN, VDD); on 69 (HALT), 70 (BERR), 71–77 (IRQ7–IRQ1, tied together) and 78 (MODCLK).</p>
+    <p class="caption">BERR (pin 70) and DS (pin 85, PE5/DS) have no test point. The resistors below the lower edge are 10 k&Omega; ("103") pull-ups: on 55 (DSI) and 56 (BKPT) to one via; on 57 or 58 to a bus joining 61, 63 and 65 (VDDSYN, VDD); on 69 (HALT), 70 (BERR), 71&ndash;77 (IRQ7&ndash;IRQ1, tied together) and 78 (MODCLK).</p>
   </section>
 
   <section>
@@ -93,7 +93,7 @@ td.n { font-family: var(--mono); white-space: nowrap; }
         <tbody id="positions"></tbody>
       </table>
     </div>
-    <p class="caption">From a 600 dpi scan of board DEVT9614, about ±0.2 mm. Board as in the photo: component side up, test-point row along the bottom edge. Origin: the bottom-left mounting hole's center; x right, y up. The holes fit a 1.750 × 3.000 in rectangle; B1–B10 a 0.100 in pitch, B11 0.250 in past B10. The notch's center is on the board edge; its radius, about 1.7 mm, is from a photo.</p>
+    <p class="caption">From a 600 dpi scan of board DEVT9614, about &plusmn;0.2 mm. Board as in the photo: component side up, test-point row along the bottom edge. Origin: the bottom-left mounting hole's center; x right, y up. The holes fit a 1.750 &times; 3.000 in rectangle; B1&ndash;B10 a 0.100 in pitch, B11 0.250 in past B10. The notch's center is on the board edge; its radius, about 1.7 mm, is from a photo.</p>
   </section>
 
   <section>
@@ -106,9 +106,9 @@ td.n { font-family: var(--mono); white-space: nowrap; }
         <text x="436" y="30" fill="var(--silk)" font-family="var(--mono)" font-size="12">MC68331 lower edge, every pin</text>
         <rect x="436" y="50" width="348" height="110" rx="4" fill="var(--body)"/>
         <text x="610" y="102" fill="#ddd" text-anchor="middle" font-family="var(--mono)" font-size="15">MC68331</text>
-        <text x="610" y="122" fill="#aaa" text-anchor="middle" font-family="var(--mono)" font-size="11">pins 51 → 83</text>
+        <text x="610" y="122" fill="#aaa" text-anchor="middle" font-family="var(--mono)" font-size="11">pins 51 &rarr; 83</text>
         <g id="chippins" font-family="var(--mono)"></g>
-        <text x="30" y="382" fill="var(--silk)" font-family="var(--mono)" font-size="11">▲ = pin 1. Under each header pin: its test point.</text>
+        <text x="30" y="382" fill="var(--silk)" font-family="var(--mono)" font-size="11">&#9650; = pin 1. Under each header pin: its test point.</text>
       </svg>
     </div>
     <div class="tablewrap" data-scroll="x">
@@ -133,8 +133,8 @@ const TEST_POINTS = [
   ["B3", 358, 600, "gps", "", "", "GPS output header", "traced"], ["B4", 413, 599, "gps", "", "", "GPS output header", "traced"],
   ["B5", 468, 598, "bdm", "GND", "VSS", "GND", "buzzed"],
   ["B6", 522, 597, "bdm", "DSO", "54", "IPIPE/DSO", "traced"],
-  ["B7", 578, 597, "bdm", "DSI", "55", "IFETCH/DSI", "traced; 10 kΩ pull-up"],
-  ["B8", 633, 596, "bdm", "BKPT", "56", "BKPT/DSCLK", "traced; 10 kΩ pull-up, same via as B7"],
+  ["B7", 578, 597, "bdm", "DSI", "55", "IFETCH/DSI", "traced; 10 k&Omega; pull-up"],
+  ["B8", 633, 596, "bdm", "BKPT", "56", "BKPT/DSCLK", "traced; 10 k&Omega; pull-up, same via as B7"],
   ["B9", 688, 595, "bdm", "FRZ", "58", "FREEZE/QUOT", "traced"],
   ["B10", 743, 594, "other", "CLK", "66", "CLKOUT", "traced; not VDD (buzzed)"],
   ["B11", 881, 591, "bdm", "RST", "68", "RESET", "buzzed; trace goes to a via, to the back"],

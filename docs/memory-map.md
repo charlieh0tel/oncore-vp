@@ -164,7 +164,7 @@ RAM copies and the commands whose handlers write them:
 
 - CLKOUT at reset (halted, SYNCR x256): 7.4505 MHz (scope, 46,000
   averages, std dev 5.15 kHz).
-- f_sys running (SYNCR x576): 16.769 MHz ± 0.03%, from GPT TCNT
+- f_sys running (SYNCR x576): 16.769 MHz +- 0.03%, from GPT TCNT
   rollovers timed by the host.
 - PLL reference: 7.4505 MHz / 256 = 29,103.5 Hz; 16.769 MHz / 576 =
   29.11 kHz.

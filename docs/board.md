@@ -29,10 +29,10 @@ and draws the wiring to a 10-pin BDM header.  The photos, in
 | Part | What | Source |
 | ---- | ---- | ------ |
 | MC68331CFC16 | CPU, 16 MHz, 132-pin PQFP | marking |
-| TN28F010-120 × 2 | Intel flash, 128 K × 8 each, 120 ns | marking |
+| TN28F010-120 x 2 | Intel flash, 128 K x 8 each, 120 ns | marking |
 | MC68HC68T1 | real-time clock | marking |
-| AT28C64B | Atmel EEPROM, 8 K × 8, bottom side | marking |
-| HM628128 | Hitachi SRAM, 128 K × 8 | marking |
+| AT28C64B | Atmel EEPROM, 8 K x 8, bottom side | marking |
+| HM628128 | Hitachi SRAM, 128 K x 8 | marking |
 | MC33064 | reset supervisor, 4.6 V, SOIC-8 | marking |
 | VDD | 5 V | buzzed (L6) |
 
@@ -53,8 +53,8 @@ at the board's left edge.
 | B1 to B4 | | GPS output header | traced |
 | B5 | VSS | GND | buzzed |
 | B6 | 54 | IPIPE/DSO | traced |
-| B7 | 55 | IFETCH/DSI | traced; 10 kΩ pull-up |
-| B8 | 56 | BKPT/DSCLK | traced; 10 kΩ pull-up, same via as B7 |
+| B7 | 55 | IFETCH/DSI | traced; 10 kohm pull-up |
+| B8 | 56 | BKPT/DSCLK | traced; 10 kohm pull-up, same via as B7 |
 | B9 | 58 | FREEZE/QUOT | traced |
 | B10 | 66 | CLKOUT | traced; not VDD (buzzed) |
 | B11 | 68 | RESET | buzzed; trace goes to a via, to the back |
@@ -64,7 +64,7 @@ at the board's left edge.
 B5 to B11 are a programming fixture's BDM set, with CLKOUT.  BERR
 (pin 70) and DS (pin 85, PE5/DS) have no test point.
 
-The resistors below the lower edge are 10 kΩ ("103") pull-ups.  A
+The resistors below the lower edge are 10 kohm ("103") pull-ups.  A
 bus joining pins 61 (VDDSYN), 63 and 65 (VDD) pulls up pin 57 or 58
 (not clear from a photo; a pull-up on 57, TSC, would tristate the
 CPU, so 58).  The rest pull up 55 (DSI) and 56 (BKPT) to one via, and
@@ -78,7 +78,7 @@ Pin numbers: MC68331UM Figure 3-2.
 ## Positions
 
 Measured on the 600 dpi scan of DEVT9614, component side, about
-±0.2 mm.  Board held as in the photos: component side up, CPU marking
++-0.2 mm.  Board held as in the photos: component side up, CPU marking
 upright, test-point row along the bottom edge.  Origin: the
 bottom-left mounting hole's center; x right, y up.
 
@@ -102,7 +102,7 @@ bottom-left mounting hole's center; x right, y up.
 | B10 | 28.24 | -0.64 | 1.112 | -0.025 |
 | B11 | 34.54 | -0.64 | 1.360 | -0.025 |
 
-The holes fit a 1.750 × 3.000 in rectangle within the measurement.
+The holes fit a 1.750 x 3.000 in rectangle within the measurement.
 B1 to B10 fit a 0.100 in pitch, B11 0.250 in past B10, the row about
 0.5 mm below the bottom holes' line.  L6 is on the left holes' line.
 The notch's center is on the board edge; its radius, about 1.7 mm, is
