@@ -898,6 +898,9 @@ Z3805A's (SSG0163878) locked 84% of snapshots; the Z3801A's
   9 visible, no channel tracked in 20 min.  It had reset during the
   probing and come back at 01/01/2044 with the almanac rejected; date
   and almanac were set again before the run.
+- After a power cycle (both, 18:16): date and time kept, almanac usable,
+  position kept, 9 visible, searching without @@Cg 1 (at the first
+  power-up of the day both had come up idle at 01/01/2026 12:00:00).
 
 ## 6-channel firmware and EEPROM (read 2026-11-27)
 
@@ -1060,7 +1063,8 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
 - Hardware behind CS0-CS3, CS5, CS6 (unused by this firmware, except
   one CS5 read).  CS7 chip not traced (XCT38140 likely).
 - Trace QSPI PCS1 to its part (24M0x hybrid or 58M01, inferred).
-- 6ch receivers: whether they acquire with almanac, position and date
-  set; whether idle at power-up is a saved setting.
+- 6ch receivers: why they don't acquire with almanac, position and date
+  set (20 dB inline gain test pending); why they first came up idle
+  (saved mode, or the unpowered RTC; from the 6ch firmware).
 - Whether CS9/CS10 have chips fitted (they read $FF; the firmware never
   accesses $100000-$1FFFFF).
