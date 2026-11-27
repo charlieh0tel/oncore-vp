@@ -530,6 +530,28 @@ Ab, Ah 2, Aj 0, Ak 10, Al 60, An 1, Ao 49, Aq 1, Ar 1, Ar 65, Av 0,
 Aw 0, Ax 0, Ay 0, AB 4, AC 120, AD 0 32, output rates, Cg 1), so the
 receiver's boot date in an instrument comes from the T1 alone.
 
+That script in firmware terms (values in the reference's units):
+
+| Command | Value | Effect in the firmware |
+|---|---|---|
+| @@Ah | 2 | Search in elevation order ($9D0C = 1) |
+| @@Aj | 0 | Rank SV sets by PDOP (stored code 0 = GDOP after the remap; the reference's 0 is PDOP) |
+| @@Ak | 10 | Set-switch hysteresis 1.0 |
+| @@Al | 60 | 3D PDOP limit 6.0 |
+| @@AC | 120 | 2D HDOP limit 12.0 |
+| @@AD | 0, 32 | Smoothing count needed for a fix 0; @@Bh threshold 32 |
+| @@An | 1 | Adopt almanacs collected from the satellites |
+| @@Ao | 49 | WGS-84 |
+| @@Aq | 1 | Klobuchar on |
+| @@Ar | 1, then 65 to software 8.4 only | 1 = all in view.  65 also sets bit 6, not in the reference: adaptive state-5 weighting off, PLL loss limit 6 instead of 90 |
+| @@Aw | 0 | GPS time |
+| @@AB | 4 | Static: `doppler_bin_sel` ($8EB8) = 4.  The reference gives about 2 min of almanac-aided search before the full-sky search for Static, 30 min for Land (2, the default and this unit's EEPROM value) |
+
+@@AB values: 0 Air, 1 Handheld, 2 Land, 3 Marine, 4 Static
+(`cmd_AB` $0AC2CE); $8EB8 picks the Doppler bin tables ($0AEEA2 +
+$8EB8 x 24) and is saved in EEPROM block $1098.  This unit is software
+VER 8 REV 8, so the 3704 host would send it only @@Ar 1.
+
 Record (RAM $8EBA, and on the stack): +0 month, +1 day, +2 hour,
 +3 minute, +4 year (word), +6 seconds (double).  $09C81A(record) ->
 GPS week mod 1024 ($81AE) and seconds ($819E); $09CE90 does the
