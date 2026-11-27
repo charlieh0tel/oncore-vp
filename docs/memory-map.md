@@ -790,7 +790,9 @@ Self-test result bits: $1000 PCS1 readback, $2000 RTC not advancing
 ($0A1C60), $C03F CS7 timing ($0A1A4E).
 
 Not a commodity serial DAC or pot (CS per byte, nibble data,
-readback); likely inside the 24M0x hybrid or the 58M01 (inferred).
+readback).  QSPI SCK and MOSI (RTC pins 4 and 5) continue to the
+24M0x hybrid (continuity); MISO (RTC pin 6) not confirmed (potting).
+The DCXO control is in the hybrid (PCS1 itself not yet traced).
 HP calls it the DCXO: the 58503B 1.01.04 host sends @@Ta for
 `:DIAGnostic:GPSystem:DCXO`, and HP's console self-test lists "DCXO SPI"
 (smartclock docs/firmware/gps.md, console.md).
@@ -1184,7 +1186,7 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
   a counter on the hybrid would confirm.
 - Hardware behind CS0-CS3, CS5, CS6 (unused by this firmware, except
   one CS5 read).  CS7 chip not traced (XCT38140 likely).
-- Trace QSPI PCS1 to its part (24M0x hybrid or 58M01, inferred).
+- QSPI PCS1 and MISO to the 24M0x hybrid (SCK and MOSI reach it).
 - 6ch receivers: why they don't acquire with almanac, position and date
   set (20 dB inline gain test pending).
 - Whether CS9/CS10 have chips fitted (they read $FF; the firmware never
