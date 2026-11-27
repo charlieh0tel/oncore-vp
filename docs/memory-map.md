@@ -508,9 +508,9 @@ CR LF; each is answered with its letters, a status byte (0 good,
 
 Writes are plain CPU stores, so they change RAM (and the EEPROM).  The
 firmware has no flash erase/program sequence, and the 28F010s ignore
-commands unless VPP is at 12 V; reprogramming flash would need a
-program loaded into RAM with @@Sa-@@Sc, started with @@Sg, and 12 V on
-VPP (whether the board can switch VPP is not traced).
+commands unless VPP is at 12 V; reprogramming flash needs a program
+loaded into RAM with @@Sa-@@Sc, started with @@Sg, and 12 V on the
+header's VPP pin (pin 4, see "Pins").
 
 Configuration commands (consumers from the firmware):
 
@@ -1049,6 +1049,22 @@ MC68331, 132-pin QFP (Motorola technical data, Figure 2):
 71-77 IRQ7-IRQ1, 78 PF0/MODCLK, 79 R/W, 80 SIZ1, 81 SIZ0, 82 PE4/AS,
 83 VSS.
 
+Receiver 10-pin power/I/O header (2 x 5, beside the CPU; Oncore
+user's guide pinout, supplied by the owner):
+
+| Pin | Name | Function |
+|---|---|---|
+| 1 | BATT | Externally applied backup power (RTC, RAM) |
+| 2 | PWR | 5 V main power |
+| 3 | GND | Ground |
+| 4 | VPP | Flash reprogramming voltage |
+| 5 | N/A | Not used |
+| 6 | 1PPS | Timing pulse |
+| 7 | 1PPS RTN | Timing pulse return |
+| 8 | TTL TXD1 | Primary output |
+| 9 | TTL RXD1 | Primary input |
+| 10 | TTL RTN | Return |
+
 MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
 
 1 CLKOUT, 2 CPUR, 3 INT, 4 SCK, 5 MOSI, 6 MISO, 7 SS, 8 VSS, 9 PSE,
@@ -1061,9 +1077,9 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
 - 6ch firmware (`third_party/moto/B1121P1114-flash.bin`) in Ghidra:
   search tables, application type, oscillator record, EEPROM layout;
   compare with the 8ch.
-- T1 VBATT (pin 13) source on the 8ch board and jig; whether the RTC
-  keeps time across a power cycle (poll @@Ac in binary mode after a
-  power cycle).
+- T1 VBATT (pin 13): traced to header pin 1 (BATT) on each board
+  (inferred); whether the jigs supply pin 1 (the RTC kept time across
+  power cycles on the 8ch and both 6ch).
 - Confirm the RF chain antenna -> A06 -> 95U01 SAW -> 58M01 by
   continuity.
 - Confirm the /656 is in the hybrid (29.110 kHz on a hybrid pin, traced
