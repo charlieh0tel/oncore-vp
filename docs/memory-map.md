@@ -394,6 +394,22 @@ Tracking loop ($0805B2), per channel:
 - Search records $CF6 (8 x $28): state 0 idle, 1 searching,
   2 reacquire, 3 tracking (interrupt state >= 4); strategy 0-5 selects
   a Doppler bin table ($0AEEA2 + $8EB8 x 24 + 4 x strategy).
+  Tables ($68 bytes: up to 100 signed bin bytes x 100 Hz, +$64 dwells,
+  +$65 bin count, +$66 passes; passes 0 = repeat):
+
+| Strategy | Air | Handheld, Marine, Static | Land | Use |
+|---|---|---|---|---|
+| 0 | $0AEB62: 100 bins, +-4.5 kHz, 1 pass | $0AEAFA: 16 bins, +-2 kHz, 1 pass | $0AEA92: 100 bins, +-2 kHz, 2 passes | Almanac-aided search around the predicted Doppler; then strategy 1 |
+| 1 | $0AEBCA: 31 bins, 0, +-0.5 ... +-7.5 kHz, 1 pass | same | same | Full-sky search, per DCXO setting |
+| 2 | $0AEC32: +-600 Hz | same | same | Reacquisition (repeating) |
+| 3 | $0AEC9A: +-300 Hz | same | same | Reacquisition (repeating) |
+| 4 | $0AED6A: +-4.5 kHz | $0AED02: +-2 kHz | $0AED02 | Reacquisition; SV marked failed after its passes ($25FB) |
+| 5 | $0AEE3A: +-7.5 kHz | $0AEDD2: +-3 kHz | $0AEDD2 | Reacquisition (repeating) |
+
+  One bin is a full code sweep: $1809FC / 550 = 2864 dwells (about
+  5.7 s at 2 ms, inferred).  Strategy 0 is then about 19 min per SV for
+  Land (200 sweeps) and 1.5 min for Static (16); the reference gives
+  30 min and 2 min of initial search.  This unit's EEPROM has Land.
 - Search center $113C: seeded by $097A02, then moved each second by
   $097786 toward the drift implied by a tracked channel's Doppler, at
   most +-3130 per step.
