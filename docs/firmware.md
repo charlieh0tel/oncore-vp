@@ -7,6 +7,12 @@ library; Motorola's own startup code.  Details and addresses:
 rebuild: [tools/ghidra](../tools/ghidra/README.md); decompiled C:
 [B4121P1115.c](../third_party/moto/decompiled/B4121P1115.c).
 
+The 6ch firmware (B1121P1114, 98-P39972M VER 8 REV 4, 13 Jul 1995) is the
+same code for 6 channels without @@E*/@@F*: [memory-map.md](memory-map.md)
+"6ch firmware vs 8ch"; Ghidra rebuild:
+[tools/ghidra-6ch](../tools/ghidra-6ch/README.md); decompiled C:
+[B1121P1114.c](../third_party/moto/decompiled/B1121P1114.c).
+
 ```mermaid
 flowchart LR
   CS7["CS7 correlator<br/>8 channels"] -- "I, Q, disc, carrier<br/>every 1 ms" --> ISR["chan_isr $0805B2<br/>level 5, 1 ms"]

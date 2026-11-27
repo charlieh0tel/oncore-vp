@@ -931,6 +931,86 @@ Read from SSG0163878 (and the EEPROM of SSG0178541) over the host port with `too
   13 JUL 1995.  EEPROM ID text at $087A, as on the 8ch: B1121P1114,
   SSG0163878, 6G09, options IB.
 
+### 6ch firmware vs 8ch (Ghidra)
+
+Project setup: `tools/ghidra-6ch/` (README there); decompiled C:
+`third_party/moto/decompiled/B1121P1114.c`.  Same compiler and library
+(ABCPU32.LIB, all 37 sections, at $0ACB54-$0B1540; 8ch - $3F7E).  557
+functions: 546 paired with 8ch functions by instruction stream, in the
+same order; 11 named by hand.  Names below are the 8ch names.
+
+| Item | 6ch | 8ch |
+|---|---|---|
+| Reset entry | $08797C | $089F5C |
+| Channels | 6 (loops `< 6`, e.g. `osc_offset_update` $089B7C) | 8 |
+| Commands | Same A, B, C, T sets and frame lengths (tables $0AC48A, $0AC4AE, $0AC4C8, $0AC4D5); no @@E*, @@F* (`bin_dispatch` $0A1130) | + E, F |
+| Factory loader @@Tq | `cmd_Tq` $09EB54 | $0A1E90 |
+| Scheduler tasks | 26, request flags $630-$649, same order | $8C2-$8DB |
+| Application type (@@AB) | `cmd_AB` $0A8582, RAM $804A, EEPROM $1096, default 2 Land (`ee_blk_1098` $09B9DA) | $0AC2CE, $8EB8, $109C |
+| Doppler strategy tables | Pointers $0AAF82 + type x 24 + 4 x strategy; tables $0AAB72-$0AAF81 | $0AEEA2; $0AEA92-$0AEEA1, byte-identical (pointers 8ch - $3F20) |
+| @@Ta | `cmd_Ta` $0A97A8: same payload, same limits (word < $8000, byte < $D8, word < $8000) | $0AD4F4 |
+| DCXO RAM | setting $6960, Hz/LSB $6962, drift reference $6964 | $75BC, $75BE, $75C0 |
+| DCXO default (no valid record) | $67, 350, 20625 (`eeprom_load_all` $098E3E) | same |
+| Boot trim | `osc_offset_update` $089B7C: same rule (>10 fixes, \|drift - 20625\| < 3131, < 151 no change, else 20% step; otherwise setting -= (drift - 20625) / Hz/LSB) | $08C252 |
+| Fix/idle mode | RAM $B457, EEPROM $0919; restored at boot (`io_init` $0A2020); `boot_init` $088134 starts the channels only if 1 | $C651, $091F |
+| Year hint | EEPROM $1186/$1188, selector $118A; invalid: 1992 | $118C/$118E, $1190 |
+| RTC at boot | `boot_time_set` $0992D4: same validity test and fallback 01/01/<year hint> 12:00:00; no +2.0 s and no PPS hardware delay | $09C52C |
+| Almanac week check | `almanac_week_ok` $09947E: -2..+127 weeks, identical code; called from `almanac_load` $098C86 and the recheck $08A042 | $09C782 |
+| RTC write tasks | `task_rtc_write_date` $09CB02, `task_rtc_write_time` $09CC74 (`rtc_write_from_time` $09CB26) | $09FE06, $09FF78 |
+| @@Cf | `eeprom_invalidate_all` $097C8E: blocks $1020-$1154, both almanac banks, position records, UTC, ionosphere (checksum + $11111111); not the DCXO records | $09AEA8 |
+
+### 6ch EEPROM layout (from the firmware; checksums verified on both dumps)
+
+Same checksum ($FFFFFFFF minus each byte, long after the block).  Up to
+$092D the 8ch layout less 6 bytes of message rates; from $1020 every 8ch
+block moved down by 6.
+
+| Offset | Length | Checksum at | Contents | SSG0163878 | SSG0178541 |
+|---|---|---|---|---|---|
+| $087A | 1 | | @@Bh threshold (`bh_min`; > $7F reset to $20) | $20 | $20 |
+| $087B-$0904 | 138 | $0905 (XOR) | ID text | B1121P1114, SSG0163878, 6G09, IB | B1121P1114, SSG0178541, 6J25, IB |
+| $0906 + n | 19 x 1 | | Binary output rates (8ch: 25) | 0 | 0 |
+| $0919 | 1 | | Fix/idle mode (1 = fix) | 1 | 1 |
+| $091A | 1 | | Protocol mode | 0 | 0 |
+| $091B | 1 | | 8ch $0921 setting | 0 | 0 |
+| $091C + 2n | 8 x 2 | | NMEA/terse rates | 0 | 0 |
+| $092C, $092D | 2 | | Test bytes | 00 80 | 00 80 |
+| $092E | 884 | $0CA2 | Almanac bank 0; week byte at +$36F | valid, week 138 | valid, week 138 |
+| $0CA6 | 884 | $101A | Almanac bank 1 | invalidated (+$11111111) | valid, week 138 |
+| $101E | 1 | | Almanac bank state | 0 | 1 |
+| $1020 | 28 | $103C | 8ch $1026 (An, Aj, Ak, AC, Al, Ag) | defaults 01 02 1.0 12.0 6.0 $0A | same |
+| $1040 | 78 | $108E | 8ch $1046 (datum, position) | datum 49, a, 1/f; position 0 | same |
+| $1092 | 6 | $1098 | 8ch $1098: @@Ar b6, UTC, @@Aq, @@Ar b7, application type ($1096), pad | 01 01 01 01 02 | same |
+| $109C | 42 | $10C6 | 8ch $10A2 (@@Ar b0, ignore list, @@Ah, @@AD) | defaults | same |
+| $10CA | 42 | $10F4 | 8ch $10D0 (AJ, Ab, Ax, Az, Ay, 1PPS, TRAIM, En) | defaults, TRAIM off | same |
+| $10F8, $1126 | 42 + 42 | $1122, $1150 | 8ch $10FE, $112C (datums $32, $33) | defaults | same |
+| $1154 | 12 | $1160 | 8ch $115A (@@AF-@@AI) | 7, 1, 0, 3704.0 | same |
+| $1164 | 6 | $116A | DCXO record 0: setting, byte, Hz/LSB, drift reference | $5F, $06, 351, 20549 | $5C, $03, 339, 20749 |
+| $116E | 6 | $1174 | DCXO record 1 | $5F, $01, 351, 20584 | $5C, $08, 339, 20789 |
+| $1178 | 1 | | Active DCXO record | 0 | 0 |
+| $117A | 8 | $1182 | Ionosphere | invalidated | invalidated |
+| $1186, $1188 | 2 + 2 | | Year slots | 2026, 2026 | 2026, 2026 |
+| $118A | 1 | | Year selector | 0 | 0 |
+| $118C, $11A8 | 28 + 28 | $11A4, $11C0 | Position records (h, lat, lon) | rec 1 = the bench position copied from the 8ch (@@Ad-@@Af, 2026-11-27); rec 0 partial | rec 0 = the same; rec 1 partial |
+| $11C4 | 1 | | Position selector | 1 | 0 |
+| $11C6 | 14 | $11D4 | UTC parameters | invalidated | invalidated |
+
+- Active DCXO records match the live @@Ta replies (20549/$5F/351,
+  20749/$5C/339).
+- Invalidated blocks (ionosphere, UTC, one almanac bank on SSG0163878):
+  an @@Cf at some time, not rewritten since (no ionosphere/UTC page decoded
+  after it; inferred).
+- First power-up idle (2026-11-27): fix mode is saved in EEPROM $0919 and
+  restored at boot; a 0 there boots idle until @@Cg 1 (which writes 1).
+  @@Cg 0, and @@Ca or @@Cf in fix mode, write 0 (`cmd_C` $0A1A82).  The
+  frozen date 01/01/2026 12:00:00 is the invalid-RTC fallback (year slot
+  2026), separate from the mode.  Time not advancing while idle: no
+  restart task, so no measurement/navigation tasks (inferred).  The later
+  power cycle found $0919 = 1 and a valid RTC (written by
+  `task_rtc_write_date`/`_time` after @@Ac/@@Aa or GPS time).
+- 01/01/2044 after a reset during probing: an RTC year 44 reads as 2044,
+  inside 1980-2070, so accepted as valid (inferred).
+
 ## Host instruments
 
 CPU hand marks (owner): '03A = from the HP 58503A, '01A = Z3801A,
@@ -1074,9 +1154,6 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
 
 - 6ch sensitivity loss: RF path from the antenna pin to the 58M01
   (continuity, A06 bias on the bottom side), with the board off the jig.
-- 6ch firmware (`third_party/moto/B1121P1114-flash.bin`) in Ghidra:
-  search tables, application type, oscillator record, EEPROM layout;
-  compare with the 8ch.
 - T1 VBATT (pin 13): likely fed from header pin 1 (BATT) on each board
   (inferred); whether the jigs supply pin 1 (the RTC kept time across
   power cycles on the 8ch and both 6ch).
@@ -1090,7 +1167,6 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
   one CS5 read).  CS7 chip not traced (XCT38140 likely).
 - Trace QSPI PCS1 to its part (24M0x hybrid or 58M01, inferred).
 - 6ch receivers: why they don't acquire with almanac, position and date
-  set (20 dB inline gain test pending); why they first came up idle
-  (saved mode, or the unpowered RTC; from the 6ch firmware).
+  set (20 dB inline gain test pending).
 - Whether CS9/CS10 have chips fitted (they read $FF; the firmware never
   accesses $100000-$1FFFFF).

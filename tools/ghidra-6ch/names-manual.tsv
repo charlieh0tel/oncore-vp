@@ -1,0 +1,16 @@
+# 6ch names found by hand; read after names-core.tsv and names-globals.tsv, and wins.
+# Columns: address, kind, name, note.
+# Tasks: the 26 scheduler tasks pair one to one with the 8ch's by request flag
+# (6ch $630-$649 = 8ch $8C2-$8DB).
+088076	F	task_cs7_reinit	8ch $08A656; task flag $630
+088110	F	task_cs7_bit0	8ch $08A6F0; task flag $640
+0881CE	F	task_meas_1s	8ch $08A7AE; task flag $634
+09CB02	F	task_rtc_write_date	8ch $09FE06; task flag $63B: rtc_write_from_time, then time_known ($9E7) = 1
+09CC74	F	task_rtc_write_time	8ch $09FF78; task flag $63C: rtc_write_from_time
+0A7666	F	task_reply_Ac	8ch $0AB3B2; task flag $646
+0A76BA	F	task_reply_Aa	8ch $0AB406; task flag $647
+09C51A	F	eeprom_save_changed	8ch $09F81E; reached only through computed calls
+0A1130	F	bin_dispatch	8ch $0A4644; letters A, B, C, T only (no E, F)
+092B50	F	chan_cmd_update	8ch $095C06; 6 channels
+09563E	F	chan_range_smooth	8ch $098700 (inferred: position, 299792.458 wrap, N = 128)
+0AAF82	L	doppler_tab_ptrs	Doppler bin table pointers, 5 types x 6 strategies (8ch $0AEEA2); tables $0AAB72-$0AAF81 identical to the 8ch's $0AEA92-$0AEEA1
