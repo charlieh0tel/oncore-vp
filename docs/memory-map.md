@@ -808,6 +808,27 @@ Same layout as the 6ch board (TM-AB / BM-AB, 84D43579M03).
 | ASIC | XCT38140FD04 AASS9603 |
 | RF can | 58M01 9623; 95U01 / 624 (SAW filter); A06 |
 
+## 6-channel receivers over serial (2026-11-27)
+
+Both boards on USB serial, no antennas.  Which receiver is which board
+is not recorded.
+
+| | First | Second |
+|---|---|---|
+| @@Cj model / serial | B1121P1114 / SSG0163878 | B1121P1114 / SSG0178541 |
+| Manufactured | 6G09 | 6J25 |
+| Software | 98-P39972M VER 8 REV 4, 13 JUL 1995 | same |
+| Options | IB | IB |
+
+- Powered up silent at every baud rate (no continuous output); answer
+  polls at 9600 binary.
+- Powered up idle: @@Ba date 01/01/2026 12:00:00, not advancing,
+  status $01 (almanac not usable), channel bytes uninitialized.
+- Self-test (@@Ca): $0000, all pass, on both.
+- After @@Cg 1: time runs from 12:00:00; status $09; six channels
+  searching SVs 9, 22, 6, 24, 14, 1; signal bytes 49-54 (first) and
+  63-75 (second) with no antenna.
+
 ## Host instruments
 
 CPU hand marks (owner): '03A = from the HP 58503A, '01A = Z3801A,
@@ -913,6 +934,8 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
 - Hardware behind CS0-CS3, CS5, CS6 (unused by this firmware, except
   one CS5 read).  CS7 chip not traced (XCT38140 likely).
 - Trace QSPI PCS1 to its part (24M0x hybrid or 58M01, inferred).
-- 6ch boards: @@Ta query and self-test bit $1000 over serial.
+- 6ch receivers: whether they acquire with an antenna after @@Cg 1 and
+  @@Ac/@@Aa; whether idle at power-up is a saved setting.  @@Ta not sent:
+  the 6ch firmware is not dumped, so its handling of the query is unknown.
 - Whether CS9/CS10 have chips fitted (they read $FF; the firmware never
   accesses $100000-$1FFFFF).
