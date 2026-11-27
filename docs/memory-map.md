@@ -790,8 +790,8 @@ Self-test result bits: $1000 PCS1 readback, $2000 RTC not advancing
 ($0A1C60), $C03F CS7 timing ($0A1A4E).
 
 Not a commodity serial DAC or pot (CS per byte, nibble data,
-readback).  QSPI SCK, MOSI and MISO (RTC pins 4, 5 and 6) continue to the 24M0x
-hybrid (continuity).  The DCXO control is in the hybrid (PCS1 itself
+readback).  QSPI SCK, MOSI and MISO (RTC pins 4, 5 and 6) continue to the 24M01
+hybrid (continuity, 6ch SSG0178541, *7VGN4*).  The DCXO control is in the hybrid (PCS1 itself
 not yet traced).
 HP calls it the DCXO: the 58503B 1.01.04 host sends @@Ta for
 `:DIAGnostic:GPSystem:DCXO`, and HP's console self-test lists "DCXO SPI"
@@ -1151,7 +1151,9 @@ MC68331, 132-pin QFP (Motorola technical data, Figure 2):
 57 TSC, 58 FREEZE/QUOT, 59 VSS, 60 XTAL, 61 VDDSYN, 62 EXTAL, 63 VDD,
 64 XFC, 65 VDD, 66 CLKOUT, 67 VSS, 68 RESET, 69 HALT, 70 BERR,
 71-77 IRQ7-IRQ1, 78 PF0/MODCLK, 79 R/W, 80 SIZ1, 81 SIZ0, 82 PE4/AS,
-83 VSS.
+83 VSS.  QSM: 43 PQS0/MISO, 44 PQS1/MOSI, 45 PQS2/SCK, 46 PQS3/PCS0/SS,
+47 PQS4/PCS1, 48 PQS5/PCS2, 49 PQS6/PCS3.  124 PC6/ADDR22/CS9,
+125 ADDR23/CS10 (MC68331 user's manual, Figure 3-2, 132-pin package).
 
 Receiver 10-pin power/I/O header (2 x 5, beside the CPU; Oncore
 user's guide pinout, supplied by the owner):
@@ -1186,8 +1188,8 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
   a counter on the hybrid would confirm.
 - Hardware behind CS0-CS3, CS5, CS6 (unused by this firmware, except
   one CS5 read).  CS7 chip not traced (XCT38140 likely).
-- QSPI PCS1 to the 24M0x hybrid (SCK, MOSI and MISO reach it).
+- QSPI PCS1 (CPU pin 47) to the 24M0x hybrid (SCK, MOSI and MISO reach it).
 - 6ch receivers: why they don't acquire with almanac, position and date
   set (20 dB inline gain test pending).
-- Whether CS9/CS10 have chips fitted (they read $FF; the firmware never
+- Whether CS9/CS10 (CPU pins 124, 125) have chips fitted (they read $FF; the firmware never
   accesses $100000-$1FFFFF).
