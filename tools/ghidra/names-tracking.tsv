@@ -19,7 +19,7 @@
 089BA0	F	task_chan_50ms	Task, pending $8DD (chan_isr each 50 ms once all channels flagged $70+n); per-channel state machine 1->2->3->4->5
 089DC0	F	chan_lock_detect	(ch): ratios of $4C2/$482/$402 accumulators within 14-95 -> $00[ch] = 1 and lock count $28[ch]++
 08A11A	F	sched_isr_exit	Interrupt tail: if interrupted PC in $080434-$088A0A returns, else runs scheduler $08A13A
-08A13A	F	sched_dispatch	Priority scheduler: pending flags $8DC-$8F5, running flags $8C2-$8CF, task entries by lea
+08A13A	F	sched_dispatch	Priority scheduler: pending flags $8DC-$8F5, running flags $8C2-$8DB (26 tasks), task entries by lea
 08A656	F	task_cs7_reinit	Task, pending $8DC (set in cmd_C and at $0A6896): cs7_init, EEPROM checksums $09AEA8, $0A29BC
 08A692	F	task_chan_init	Task, pending $8DF: rcvr_init(0), clear ctl bit 0, chan_cmd_load, chan_restart x 8, chan_start_all
 08A6F0	F	task_cs7_bit0	Task, pending $8EC (set in cmd_F): cs7_ctl_bit0_set, $C666 = 1
@@ -129,7 +129,7 @@
 000802	L	chan_amp_epoch	[8] longs; chan_amp at the epoch; report +2 (clipped $FFFF) -> $7042 signal
 000842	L	chan_power_sum	[8] longs; power sum over the last second (chan_code_disc)
 0008A2	L	chan_detect	[8] longs; search detection accumulator; > 0 -> detection
-0008C2	L	task_running	Bytes $8C2-$8CF: running flags per task (sched_dispatch)
+0008C2	L	task_running	Bytes $8C2-$8DB (26 tasks): running flags per task (sched_dispatch)
 0008DC	L	task_pending	Bytes $8DC-$8F5: pending flags per task (sched_dispatch)
 000CC6	L	vis_buf	Visible-list buffer select (0: $42B6, 1: $37A2)
 000CC7	L	vis_busy	1 while task_vis runs

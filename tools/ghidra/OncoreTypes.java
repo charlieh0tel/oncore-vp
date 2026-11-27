@@ -10,6 +10,8 @@ import ghidra.program.model.address.Address;
 import ghidra.program.model.data.*;
 import ghidra.program.model.listing.*;
 import ghidra.program.model.symbol.SourceType;
+import java.io.File;
+import java.nio.file.Files;
 
 public class OncoreTypes extends GhidraScript {
 
@@ -63,11 +65,12 @@ public class OncoreTypes extends GhidraScript {
         // Per-channel records found by the tracking pass (fields from
         // names-tracking.tsv via OncoreNames.java).  The arrays tile RAM
         // exactly: $CF6-$E35, $E36-$1105, $275C-$27BB, $27BC-$2A1B,
-        // $7A3C-$819B.
+        // $7A3C-$819B; @@Tc/@@Td snapshot $6347-$641B.
         long[][] recs = {{0xCF6L, 0x28, 8}, {0xE36L, 0x5A, 8}, {0x1106L, 0x3C, 1},
-            {0x275CL, 0x0C, 8}, {0x27BCL, 0x2C, 8}, {0x7A3CL, 0xEC, 8}};
-        String[] recn = {"search_rec", "navdata_rec", "search_ctl", "chan_cmd", "chan_report", "eph_rec"};
-        String[] recl = {"search", "navdata", "search_ctl", "chan_cmd", "chan_report", "eph"};
+            {0x275CL, 0x0C, 8}, {0x27BCL, 0x2C, 8}, {0x7A3CL, 0xEC, 8},
+            {0x6347L, 0x0C, 1}, {0x6353L, 0x07, 8}, {0x638BL, 0x12, 8}};
+        String[] recn = {"search_rec", "navdata_rec", "search_ctl", "chan_cmd", "chan_report", "eph_rec", "test_hdr", "test_rec", "test_chan_rec"};
+        String[] recl = {"search", "navdata", "search_ctl", "chan_cmd", "chan_report", "eph", "test_hdr", "test_sv", "test_chan"};
         for (int k = 0; k < recs.length; k++) {
             StructureDataType st = new StructureDataType(cat, recn[k], (int) recs[k][1]);
             st.setPackingEnabled(false);
@@ -119,6 +122,30 @@ public class OncoreTypes extends GhidraScript {
         apply(0xFFFFE800L, cs7A, "cs7_chan");
         apply(0x00FFE800L, cs7A, null);
 
+        // Small records used by types-globals.tsv.
+        StructureDataType dg = new StructureDataType(cat, "dgps_rec", 14);
+        dg.setPackingEnabled(false);
+        dg.replaceAtOffset(0, u8, 1, "valid", null);
+        dg.replaceAtOffset(2, ShortDataType.dataType, 2, "rrc", "range-rate correction");
+        dg.replaceAtOffset(4, u16, 2, "iode", null);
+        dg.replaceAtOffset(6, IntegerDataType.dataType, 4, "prc", "pseudorange correction");
+        dg.replaceAtOffset(10, IntegerDataType.dataType, 4, "time", null);
+        add(dg);
+        StructureDataType cu = new StructureDataType(cat, "chan_use_rec", 4);
+        cu.setPackingEnabled(false);
+        cu.replaceAtOffset(0, u8, 1, "use_pos", null);
+        cu.replaceAtOffset(1, u8, 1, "use_pr", null);
+        cu.replaceAtOffset(2, u8, 1, "has_time", null);
+        add(cu);
+        StructureDataType ut = new StructureDataType(cat, "utc_rec", 14);
+        ut.setPackingEnabled(false);
+        String[] un = {"dt_ls", "dt_lsf", "tot", "wn_t", "wn_lsf", "dn"};
+        for (int k = 0; k < un.length; k++) ut.replaceAtOffset(k, u8, 1, un[k], null);
+        ut.replaceAtOffset(6, IntegerDataType.dataType, 4, "a0", "2^-30 s");
+        ut.replaceAtOffset(10, IntegerDataType.dataType, 4, "a1", "2^-50 s/s");
+        add(ut);
+        globalsTable();
+
         // Typed globals.
         DataType us = UnsignedShortDataType.dataType;
         DataType ss = ShortDataType.dataType;
@@ -134,5 +161,49 @@ public class OncoreTypes extends GhidraScript {
         apply(0x0274L, new ArrayDataType(ss, 8, 2), "trk_q");
         apply(0x0144L, new ArrayDataType(ss, 8, 2), "trk_disc");
         apply(0x0702L, new ArrayDataType(u32, 8, 4), "trk_carrier");
+    }
+
+    // types-globals.tsv: address, type.  Types: u8 s8 u16 s16 u32 s32 float
+    // double char ptr, or a data type name in /oncore; with [n] suffixes.
+    private void globalsTable() throws Exception {
+        File f = new File(getSourceFile().getParentFile().getFile(false), "types-globals.tsv");
+        if (!f.exists()) return;
+        int n = 0;
+        for (String line : Files.readAllLines(f.toPath())) {
+            if (line.isBlank() || line.startsWith("#")) continue;
+            String[] c = line.split("\t");
+            DataType t = parse(c[1].trim());
+            if (t == null) { println("unknown type " + c[1]); continue; }
+            Address a = toAddr(Long.parseLong(c[0].trim(), 16));
+            clearListing(a, a.add(t.getLength() - 1));
+            createData(a, t);
+            n++;
+        }
+        println("types-globals.tsv: " + n + " applied");
+    }
+
+    private DataType parse(String spec) {
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("^(\\w+)((?:\\[\\d+\\])*)$").matcher(spec);
+        if (!m.matches()) return null;
+        DataType t;
+        switch (m.group(1)) {
+            case "u8": t = ByteDataType.dataType; break;
+            case "s8": t = SignedByteDataType.dataType; break;
+            case "char": t = CharDataType.dataType; break;
+            case "u16": t = UnsignedShortDataType.dataType; break;
+            case "s16": t = ShortDataType.dataType; break;
+            case "u32": t = UnsignedIntegerDataType.dataType; break;
+            case "s32": t = IntegerDataType.dataType; break;
+            case "float": t = FloatDataType.dataType; break;
+            case "double": t = DoubleDataType.dataType; break;
+            case "ptr": t = new PointerDataType(DataType.DEFAULT, 4); break;
+            default: t = dtm.getDataType(cat, m.group(1));
+        }
+        if (t == null) return null;
+        java.util.List<Integer> dims = new java.util.ArrayList<>();
+        java.util.regex.Matcher d = java.util.regex.Pattern.compile("\\[(\\d+)\\]").matcher(m.group(2));
+        while (d.find()) dims.add(Integer.parseInt(d.group(1)));
+        for (int k = dims.size() - 1; k >= 0; k--) t = new ArrayDataType(t, dims.get(k), t.getLength());
+        return t;
     }
 }

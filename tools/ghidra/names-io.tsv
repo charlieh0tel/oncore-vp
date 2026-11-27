@@ -30,7 +30,7 @@
 0075BA	L	datum_num	default 49, EEPROM $1078
 0075C3	L	dgps_reset	1 forces correction table reset on next Z-count
 0075C4	L	dgps_time	Z-count time (0.1 s of hour sequence) of current corrections
-0075C8	L	dgps_corr	14 bytes per SV: +0 valid, +2 PRC word, +4 IODE, +6 RRC long, +10 time; written by @@Ce and RTCM
+0075C8	L	dgps_corr	14 bytes per SV: +0 valid, +2 RRC word, +4 IODE, +6 PRC long, +10 time; written by @@Ce and RTCM (dgps_prc $09BA1A: (RRC x age + PRC x 100) x 1e-4)
 0079F6	L	dgps_max_age	@@AJ 5-180; age limit x 10 (diff_age_check)
 0079F7	L	cfg_Aj	@@Aj 0-4
 0079F8	L	cfg_Ak	@@Ak double (< 1000)

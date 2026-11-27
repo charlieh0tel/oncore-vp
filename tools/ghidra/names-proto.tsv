@@ -1,0 +1,62 @@
+# address	kind	name	note
+00633A	L	alm_auto_update	rename: cfg_An. @@An 0/1, default 1, EEPROM $1026. 1 = almanac_switch validates and adopts almanacs collected from the satellites (task from alm_word_store); 0 = only an @@Cb almanac (alm_new_ready) is adopted
+0079F6	L	dgps_max_age	@@AJ 5-180 s, default 90, EEPROM block $10D0; diff_age_check: corrections stale when age >= this x 10
+0079F7	L	svset_dop_kind	rename: cfg_Aj. @@Aj, default internal 2; DOP used to rank SV sets (copied to pred bank +$619, dop_compute $08C7DE). Host 0 GDOP, 1 PDOP, 2 HDOP, 3 VDOP, 4 TDOP -> internal 0, 2, 1, 4, 3 (internal 0 G, 1 H, 2 P, 3 T, 4 V); EEPROM $1027
+0079F8	L	svset_dop_hyst	rename: cfg_Ak. @@Ak x 0.1 (< 100.0), default 1.0, EEPROM $1028; svset_select and sv_select_nav switch to a new SV set only if its DOP x 10 + this x 10 < current set's
+007A00	L	hdop_mask	@@AC x 0.1 (1.0-99.9), default 12.0, EEPROM $1030; nav_solve_mode 2D limit; reset value of pos_smooth_dop
+007A08	L	pdop_mask	@@Al x 0.1 (1.0-99.9), default 6.0, EEPROM $1038; nav_solve_mode 3D limit
+007A3A	L	fix_min_smooth	rename: cfg_AD. @@AD byte 0 (< $80), default 0, EEPROM $10CA; sv_select_nav drops a channel from the fix while its smoothing count (chan_decode +$46, s) < this (0 = off)
+00C652	L	bh_min	@@AD byte 1 (< $80), EEPROM $087A, default $20; msg_Bh sends a channel only if chan_meas smooth_count > this
+0081DA	L	nav_all_in_view	rename: cfg_Ar_b0. @@Ar bit 0, default 1, EEPROM $10A2; also set to 1 by @@Ce, RTCM (rtcm_apply_corr) and fresh corrections (diff_age_check). 1 = SV sets of 8 (pred +$618), all usable channels in the fix, search by svset_select; 0 = sets of 4, fix limited to the best 4-SV set (sv_select_nav, with >= 5 SVs, navigating, no DGPS), search by sv_search_pass(1)
+00369A	L	trk_adapt_on	rename: cfg_Ar_b6n. @@Ar bit 6 clear -> 1, default 1, EEPROM $1098. 1 = chan_isr state-5 amplitude-spread weighting ($1F4/$204 per channel) and PLL loss limit 90 (chan_pll_check); 0 = fixed $204 = $80, $1F4 = 0, loss limit 6
+008216	L	pos_filter_on	@@Ar bit 7 clear -> 1, default 1, EEPROM $109B; 0 disables pos_smooth
+0081C2	L	iono_on	@@Aq 0/1, default 1, EEPROM $109A; sv_clock_update subtracts Klobuchar delay when 1
+009D0C	L	srch_by_elev	rename: cfg_Ah. @@Ah 2 -> 1, default 0, EEPROM $10C9. 1 = sv_search_pass(2): search list = SVs by elevation (pred +4) instead of DOP-set order (+$29); vis_list_default reorders likewise; copied to pred input $CB5
+009CEA	L	sv_manual	@@Ah 1 (not saved); enables @@Ai per-channel SV list $9CF3
+009D0F	L	aw_gps_time	rename: cfg_Aw_9D0F. Complement of utc_mode written by @@Aw (opt I: only bit 0 of 0-7 used); default 0, EEPROM $10E1; read only by reply_Aw and @@Bn/@@En byte 20
+009D12	L	en_rsvd_9d12	rename: cfg_9D12. 3-byte @@Bn/@@En byte 9; set 1 by every accepted @@Bn/@@En and default; no reader
+009D1A	L	en_month	@@Bn/@@En output, always 0 (cleared by the input handlers)
+009D1B	L	en_day	always 0
+009D1C	L	en_hour	always 0
+009D1D	L	en_minute	always 0
+009D1E	L	en_year	word, always 0
+009D20	L	en_seconds	double, always 0
+009D29	L	pps_sawtooth	1PPS quantization error, ns (pps_schedule); @@Bn/@@En byte 25
+000B92	L	pos_smooth_dop	pos_smooth HDOP working limit: reset to hdop_mask (nav_reset, nav_step), lowered to the current HDOP in mode 2/3
+003624	L	cfg_AF	@@AF word (< 900), default 7, EEPROM block $115A; no reader besides reply_AF and the EEPROM block
+003626	L	cfg_AG	@@AG 0/1, default 1; read only by reply_AG and msg_Bm
+003627	L	cfg_AH	@@AH 0-2, default 0; read only by reply_AH and msg_Bm
+003628	L	cfg_AI	@@AI word x 0.5 (double), default 3704.0; read only by reply_AI and msg_Bm
+003605	L	bm_rsvd_3605	6 bytes, @@Bm bytes 15-20; only cleared (bm_fields_clear)
+00360C	L	bm_rsvd_360c	double, @@Bm bytes 21-22; only cleared
+003614	L	bm_rsvd_3614	double, @@Bm bytes 7-8; only cleared
+003642	L	cm_set	set 1 by a valid @@Cm; no reader
+003644	L	cl_echo	@@Cl echo record $3644-$3687 (h, lat, lon, date, time, offset, mask, $366C value); filled by pos_time_snapshot and the cl_parse_* helpers; read only by reply_Cl (task $8EA $09FAF4 is empty)
+00366C	L	cl_value	double, @@Cl word x 0.5; default 3704.0 (pos_time_snapshot)
+09C72E	F	bm_fields_clear	Zeroes $3605-$3618 and @@Cm values $3630-$3642; only caller boot_search_reset
+006347+00	S	bin_sel	test_hdr (@@Tc/@@Td head, 12 bytes): doppler_bin_sel (@@AB)
+006347+01	S	sel_mode	0 auto, 1 manual (sv_manual), 2 by elevation (srch_by_elev)
+006347+02	S	vel_n	word m/s, dtoui of search_ctl +$14
+006347+04	S	vel_e	word m/s, search_ctl +$1C
+006347+06	S	vel_u	word m/s, search_ctl +$0C
+006347+08	S	center	word, search center $113C
+006347+0A	S	center_set	$113E
+006347+0B	S	cold	$113F
+006353+00	S	sv	test_rec[8] x 7 (6 sent in @@Tc): SV ($CF6)
+006353+01	S	state	search state ($CF7)
+006353+02	S	strategy	$CF9
+006353+03	S	bin_hz	word, Doppler bin offset x 100 Hz
+006353+05	S	doppler_hz	word, chan_cmd doppler x 3.3111572265625
+00638B+00	S	chan	test_chan_rec[8] x 18: channel
+00638B+01	S	sv	$CF6
+00638B+02	S	state	$CF7
+00638B+03	S	strategy	$CF9
+00638B+04	S	step_on	$CFF
+00638B+05	S	bin	$D00
+00638B+06	S	bin_hz	word
+00638B+08	S	doppler_hz	word
+00638B+0A	S	code_width	long, chan_cmd +8
+00638B+0E	S	code_start	long, chan_cmd +4
+001106+0C	S	vel_up	search_ctl: copy of $8F20-$8F47 (vel up, north, east, heading, speed) when fix_valid (chan_search_center)
+001106+14	S	vel_north	double
+001106+1C	S	vel_east	double

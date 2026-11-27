@@ -1,0 +1,201 @@
+# address	kind	name	note
+0008C3	L	task_run_chan_50ms	task 1 running flag (sched_dispatch)
+0008C4	L	task_run_chan_1s	task 2 running flag (sched_dispatch)
+0008C5	L	task_run_restart	task 3 running flag (sched_dispatch)
+0008C6	L	task_run_meas_1s	task 4 running flag (sched_dispatch)
+0008C7	L	task_run_pred_alt	task 5 running flag (sched_dispatch)
+0008C8	L	task_run_alm_save	task 6 running flag (sched_dispatch)
+0008C9	L	task_run_alm_switch	task 7 running flag (sched_dispatch)
+0008CA	L	task_run_nav	task 8 running flag (sched_dispatch)
+0008CB	L	task_run_eph_commit	task 9 running flag (sched_dispatch)
+0008CC	L	task_run_vis	task 10 running flag (sched_dispatch)
+0008CD	L	task_run_rtc_date	task 11 running flag (sched_dispatch)
+0008CE	L	task_run_rtc_time	task 12 running flag (sched_dispatch)
+0008CF	L	task_run_settings	task 13 running flag (sched_dispatch)
+0008D0	L	task_run_cl	task 14 running flag (sched_dispatch)
+0008D1	L	task_run_reply_Cl	task 15 running flag (sched_dispatch)
+0008D2	L	task_run_chan_off	task 16 running flag (sched_dispatch)
+0008D3	L	task_run_rx	task 17 running flag (sched_dispatch)
+0008D4	L	task_run_cd_reply	task 18 running flag (sched_dispatch)
+0008D5	L	task_run_bd_reply_a	task 19 running flag (sched_dispatch)
+0008D6	L	task_run_bd_reply_b	task 20 running flag (sched_dispatch)
+0008D7	L	task_run_reply_Cf	task 21 running flag (sched_dispatch)
+0008D8	L	task_run_reply_Ac	task 22 running flag (sched_dispatch)
+0008D9	L	task_run_reply_Aa	task 23 running flag (sched_dispatch)
+0008DA	L	task_run_fix_mode	task 24 running flag (sched_dispatch)
+0008DB	L	task_run_reply_Cg	task 25 running flag (sched_dispatch)
+0008DD	L	task_req_chan_50ms	task 1 request flag (sched_dispatch $08A13A); task_chan_50ms
+0008DE	L	task_req_chan_1s	task 2 request flag (sched_dispatch $08A13A); task_chan_1s $08916C
+0008DF	L	task_req_restart	task 3 request flag (sched_dispatch $08A13A); rcvr_init + chan_restart all; req by boot_init, cmd_Ci, mode_enter_m3, fix_mode_enter
+0008E0	L	task_req_meas_1s	task 4 request flag (sched_dispatch $08A13A); task_meas_1s $08A7AE
+0008E1	L	task_req_pred_alt	task 5 request flag (sched_dispatch $08A13A); @@Cd alternate prediction (pred_alt); req by cmd_C/cmd_F Cd
+0008E2	L	task_req_alm_save	task 6 request flag (sched_dispatch $08A13A); almanac to EEPROM bank; req by almanac_switch
+0008E3	L	task_req_alm_switch	task 7 request flag (sched_dispatch $08A13A); almanac_switch $08AF9A; req by alm_word_store, cmd_Cb
+0008E4	L	task_req_nav	task 8 request flag (sched_dispatch $08A13A); nav_task $08B248 (magvar, UTC/iono, RTC, osc); req by rx_task in fix mode
+0008E5	L	task_req_eph_commit	task 9 request flag (sched_dispatch $08A13A); task_eph_commit
+0008E6	L	task_req_vis	task 10 request flag (sched_dispatch $08A13A); task_vis_predict $09FB22
+0008E7	L	task_req_rtc_date	task 11 request flag (sched_dispatch $08A13A); task_rtc_write_date; req by gps_time_to_rtc, cmd_Ac
+0008E8	L	task_req_rtc_time	task 12 request flag (sched_dispatch $08A13A); task_rtc_write_time; req by gps_time_to_rtc, cmd_Aa
+0008EA	L	task_req_cl	task 14 request flag (sched_dispatch $08A13A); empty body $09FAF4; req by cmd_C Cl when cmd_Cl accepts
+0008EB	L	task_req_reply_Cl	task 15 request flag (sched_dispatch $08A13A); $0AB2B4: reply_Cl unless $C558 = $BEF6; req by cmd_C Cl
+0008EC	L	task_req_chan_off	task 16 request flag (sched_dispatch $08A13A); $08A6F0: cs7_ctl_bit0_set, $C666 = 1; req when leaving fix mode (cmd_C, cmd_F)
+0008EE	L	task_req_cd_reply	task 18 request flag (sched_dispatch $08A13A); $0AB2F2: $C662 = 1 (deferred @@Cd reply); req by cmd_C/cmd_F Cd
+0008EF	L	task_req_bd_reply_a	task 19 request flag (sched_dispatch $08A13A); $0AB326: $C663 = 1 (msg_Bd); req by cmd_Cb
+0008F0	L	task_req_bd_reply_b	task 20 request flag (sched_dispatch $08A13A); $0AB35A: $C664 = 1 (msg_Bd); req by cmd_Cb
+0008F1	L	task_req_reply_Cf	task 21 request flag (sched_dispatch $08A13A); $0AB38E: reply_Cf; req with task 0 by @@Cf and rx_task
+0008F2	L	task_req_reply_Ac	task 22 request flag (sched_dispatch $08A13A); task_reply_Ac; req by cmd_Ac
+0008F3	L	task_req_reply_Aa	task 23 request flag (sched_dispatch $08A13A); task_reply_Aa; req by cmd_Aa
+0008F4	L	task_req_fix_mode	task 24 request flag (sched_dispatch $08A13A); fix_mode_enter; req by @@Cg 1
+0008F5	L	task_req_reply_Cg	task 25 request flag (sched_dispatch $08A13A); $0AB3DC: reply_Cg; req by cmd_C (Ca/Cf/Cg in fix mode)
+0008F6	L	task_sp	26 longs $8F6-$95D: saved SP per task (sched_dispatch); task 0 = defaults (task_pending/task_running)
+0008FA	L	task_sp_chan_50ms	task 1 saved SP (sched_dispatch; restored at task exit)
+0008FE	L	task_sp_chan_1s	task 2 saved SP (sched_dispatch; restored at task exit)
+000902	L	task_sp_restart	task 3 saved SP (sched_dispatch; restored at task exit)
+000906	L	task_sp_meas_1s	task 4 saved SP (sched_dispatch; restored at task exit)
+00090A	L	task_sp_pred_alt	task 5 saved SP (sched_dispatch; restored at task exit)
+00090E	L	task_sp_alm_save	task 6 saved SP (sched_dispatch; restored at task exit)
+000912	L	task_sp_alm_switch	task 7 saved SP (sched_dispatch; restored at task exit)
+000916	L	task_sp_nav	task 8 saved SP (sched_dispatch; restored at task exit)
+00091A	L	task_sp_eph_commit	task 9 saved SP (sched_dispatch; restored at task exit)
+00091E	L	task_sp_vis	task 10 saved SP (sched_dispatch; restored at task exit)
+000922	L	task_sp_rtc_date	task 11 saved SP (sched_dispatch; restored at task exit)
+000926	L	task_sp_rtc_time	task 12 saved SP (sched_dispatch; restored at task exit)
+00092A	L	task_sp_settings	task 13 saved SP (sched_dispatch; restored at task exit)
+00092E	L	task_sp_cl	task 14 saved SP (sched_dispatch; restored at task exit)
+000932	L	task_sp_reply_Cl	task 15 saved SP (sched_dispatch; restored at task exit)
+000936	L	task_sp_chan_off	task 16 saved SP (sched_dispatch; restored at task exit)
+00093A	L	task_sp_rx	task 17 saved SP (sched_dispatch; restored at task exit)
+00093E	L	task_sp_cd_reply	task 18 saved SP (sched_dispatch; restored at task exit)
+000942	L	task_sp_bd_reply_a	task 19 saved SP (sched_dispatch; restored at task exit)
+000946	L	task_sp_bd_reply_b	task 20 saved SP (sched_dispatch; restored at task exit)
+00094A	L	task_sp_reply_Cf	task 21 saved SP (sched_dispatch; restored at task exit)
+00094E	L	task_sp_reply_Ac	task 22 saved SP (sched_dispatch; restored at task exit)
+000952	L	task_sp_reply_Aa	task 23 saved SP (sched_dispatch; restored at task exit)
+000956	L	task_sp_fix_mode	task 24 saved SP (sched_dispatch; restored at task exit)
+00095A	L	task_sp_reply_Cg	task 25 saved SP (sched_dispatch; restored at task exit)
+000963	L	probe_idx	task_timing_probe sample index (< 8); samples stored in chan_meas[n].signal
+000980	L	osc_offset_last	drift estimate of the previous good epoch (osc_offset_update)
+000B6E	L	vel_sol	4 doubles from range-rate residuals x nav_cov (nav_ls_update $093362): clock drift, then 3 velocity components; passed to vel_update; [0] -> clock_drift
+000B76	L	vel_sol_1	double, vel_sol[1] (vel_smooth vs y[1], horizontal, with hdop)
+000B7E	L	vel_sol_2	double, vel_sol[2] (vel_smooth vs y[2], horizontal, with hdop)
+000B86	L	vel_sol_3	double, vel_sol[3] (vel_smooth vs y[0], vertical, with vdop)
+000B92	L	pos_smooth_dop	double: seeded with hdop_mask (nav_reset, nav_step); pos_smooth compares the current DOP with it, then stores hdop
+000B9A	L	pos_smooth_first	set by nav_reset; pos_smooth seeds its state on the first pass and clears it
+000B9B	L	pos_smooth_count	pos_smooth epoch counter (threshold > 5); cleared by nav_reset
+000B9C	L	init_llh	h, lat, lon doubles: nav_init_pos (ecef_to_llh of pos_ecef, or sol_llh copy); nav_cold_fix restores sol_llh from it and runs nav_ls_update on it
+000BA4	L	init_lat	double, element of init_llh
+000BAC	L	init_lon	double, element of init_llh
+000BB4	L	traim_resid_sum	double: sum of PR residuals of time channels ($1148) when traim_on (pr_residuals $091140); nav_ls_update x 1/c -> clock-bias correction
+000BE2	L	pos_smooth_time	double meas_seconds of the last pos_smooth pass; elapsed time = meas_seconds - this
+000BEA	L	pos_smooth_time_prev	double, previous pos_smooth time (restored into $BE2 on reject)
+000C1E	L	pos_filt_prev	h, lat, lon doubles: pos_smooth state (from sol_llh; restored into pos_filt on reject)
+000C36	L	vel_filt	3 doubles (vel_sol[3], [1], [2] order; pos_smooth); passed to vel_smooth as the previous velocity
+000C68	L	cold_fix_time	double meas_seconds of the last nav_cold_fix pass ($0930D0)
+000C9A	L	pred_in_offset	word, local offset (task 5 from $3778, task_vis_predict)
+000C9C	L	pred_in_pos	height, lat, lon doubles (task 5 from $3788; task_vis_predict from pos_llh)
+000CA4	L	pred_in_lat	double, element of pred_in_pos (task 5, task_vis_predict)
+000CAC	L	pred_in_lon	double, element of pred_in_pos (task 5, task_vis_predict)
+000CB4	L	pred_in_mask	mask angle (task 5 from cd_mask)
+000CB5	L	pred_in_ah	copy of cfg_Ah (task_vis_predict; re-predicts when it changes); vis_list_default tests it
+000CB6	L	pred_in_date	14-byte date (task 5 from $377A)
+000CE9	L	alm_health_mask_a	word-received mask of a health page (alm_word_store: health decoded when $CE9 and $CEA = $FF); cleared with the page masks $CC8+
+000CEA	L	alm_health_mask_b	second health page mask (alm_word_store)
+000CF4	L	sv_phasor_ch	channel whose SV phasors are reinitialized next (sv_pos_update_all round robin); cleared by nav_reset
+000CF5	L	sv_phasor_epochs	epoch counter for the phasor reinit (> 9: one channel every 10th epoch; sv_pos_update_all)
+001142	L	osc_offset_count	consecutive good epochs in osc_offset_update (restart when drift moves > 20 from $980)
+001143	L	osc_offset_done	set by osc_offset_update after 10 agreeing epochs (record saved or within 150); nav_task calls osc_offset_update only while 0; cleared by time_rebuild_display
+001144	L	srch_settle_on	passed to sv_select_nav (srch_task $095610); srch_settle_count counts srch_ctl+8 down from 4 and zeroes chan_report states while 1; only cleared, never set to 1 in the image
+001166	L	srch_hold_count	epochs without a fix while nav_init_state = 2 (srch_ref_chan, counts up to srch_hold_limit + 1); srch_state_update case $2C moves search state to 5 when above srch_hold_limit; cleared by nav_reset, fix
+0022F4	L	cold_fix_first	set by nav_reset; nav_cold_fix acts once and clears it
+00247A	L	sv_usable_hour	GPS hour of week (gps_seconds / 3600) last seen by nav_task; on change all sv_usable[1-37] reset to 1; cleared by time_rebuild_display
+002540	L	ee_blk_addr	[8] EEPROM block addresses: $1026, $1046, $1098, $10A2, $10D0, $10FE, $112C, $115A (eeprom_load_all; used by ee_blk_* for checksums)
+002562	L	ee_blk_len	[8] words, block lengths $1C, $4E, 6, $2A, $2A, $2A, $2A, $C
+002576	L	ee_blk_sum	[8] EEPROM addresses of the block checksums ($1042 ... $1166)
+002597	L	sv_select_have_pred	sv_select_nav: vis_state != 3 (prediction available); gates nav_init_pos and channel use; cleared by osc_search_reset
+0025A0	L	pos_saved_lat	double, element of pos_saved (pos_save_ram, pos_restore)
+0025A8	L	pos_saved_lon	double, element of pos_saved
+0025F8	L	alm_ee_busy	1 while task_almanac_save writes the almanac to EEPROM; rcvr_status_build sets rcvr_status bit 2
+002625	L	utc_dt_lsf	byte, delta-t LSF (utc_params + 1, EEPROM $11CD; ee_blk_utc); utc_offset_update compares with utc_params (delta-t LS); gps_to_date adds the difference
+002626	L	utc_tot	byte, t_ot / 4096 (utc_params + 2; utc_offset_update, ee_blk_utc)
+002627	L	utc_wnt	byte, WNt mod 256 (utc_params + 3; utc_offset_update extends to full week)
+002628	L	utc_wnlsf	byte, WNLSF mod 256 (utc_params + 4; utc_offset_update leap window)
+002629	L	utc_dn	byte, DN (utc_params + 5; utc_offset_update: DN x 86400 +- 480 s window)
+00262A	L	utc_a0	long, A0 x 2^-30 s (utc_params + 6; utc_offset_update)
+00262E	L	utc_a1	long, A1 x 2^-50 s/s (utc_params + 10; utc_offset_update)
+0026EE	L	drop_year	year_hint snapshot (pos_time_snapshot2; restored by nav_mode_drop)
+0026F0	L	drop_llh	h, lat, lon doubles snapshot (pos_time_snapshot2; nav_mode_drop restores into pos_llh and resaves)
+0026F8	L	drop_lat	double, element of drop_llh
+002700	L	drop_lon	double, element of drop_llh
+002708	L	drop_seconds	double gps_seconds snapshot; nav_mode_drop advances it and restores gps_seconds
+002710	L	drop_week	gps_week snapshot (nav_mode_drop restores; gps_to_date)
+002712	L	drop_count	nav_mode_drop counter (< 2); cleared by pos_time_snapshot2
+002714	L	drop_epochs	epochs coasted by nav_mode_drop (seconds added = count); cleared by pos_time_snapshot2
+00272A	L	srch_ref_valid	srch_ref_chan: 1 when a reference channel is chosen; srch_state_update uses it
+00272C	L	srch_ref_ch	reference channel index (srch_ref_chan); chan_cmd_reacq centers code window from it
+00272E	L	srch_ref_code	long, code phase of the reference channel (srch_ref_chan from chan_report.code_phase; chan_cmd_reacq)
+002739	L	bits_rem	new bit count mod 8 (nav_data_decode; nav_bits_shift, how_decode, preamble_search)
+00273A	L	bits_idx	byte index into the channel report bit buffer ($27D6 + $2C x ch) (nav_data_decode)
+00273B	L	bits_whole	new bit count rounded down to whole bytes (nav_data_decode; nav_bits_shift)
+002755	L	rtc_day	BCD day copy of the RTC register (rtc_read from $FFFD0B; rtc_read_record, rtc_write_date)
+002756	L	rtc_hour	BCD hour (rtc_read from $FFFD07; rtc_write_time)
+002757	L	rtc_min	BCD minute (rtc_read from $FFFD05; rtc_write_time)
+002758	L	rtc_month	BCD month (rtc_read from $FFFD0D; rtc_write_date)
+002759	L	rtc_sec	BCD second (rtc_read from $FFFD03; rtc_write_time)
+00275A	L	rtc_year	BCD 2-digit year (rtc_read from $FFFD0F; < $50 -> 20xx); rtc_write_date_rec stores year + $94 or + $30
+002926	L	mv_k	float [11][11] recursion constants k[m][n] (magvar_init; geomag.c layout)
+002B0A	L	mv_c	float [11][11] main-field coefficients x snorm (from $0AF036, 13-wide; magvar_init, magvar_model)
+002CEE	L	mv_cd	float [11][11] secular-variation coefficients x snorm (from $0AF2DA)
+002ED2	L	mv_cp	float [11] cos(m lon) (cp[0] = 1.0)
+002EFE	L	mv_dp	float [11][11] dP/dtheta
+0030E2	L	mv_fm	float [11] m
+00310E	L	mv_fn	float [11] n + 1
+00313A	L	mv_snorm	float [11][11] Schmidt normalization / P (snorm[0] = 1.0)
+00331E	L	mv_pp	float [11] (pp[0] = 1.0)
+00334A	L	mv_sp	float [11] sin(m lon) (sp[0] = 0)
+003376	L	mv_tc	float [11][11] time-adjusted coefficients (magvar_model)
+0035F2	L	ay_override_on	chan_test_override: 1 while channel SVs are overridden (ay_test_init clears)
+0035F4	L	ay_chan_override	[8] x 2 bytes: +0 active, +1 saved chan_report SV (chan_test_override, ay_test_init)
+003721	L	alm_expand_pend	set with alm_valid; almanac_recheck_and_predict calls alm_expand until it stays 0 (cleared when almanac_ptr unchanged)
+003722	L	alm_valid	1 when an almanac is loaded (almanac_load, almanac_switch, almanac_recheck_and_predict); msg_Bd sends zeros and task_vis_predict uses defaults when 0
+003725	L	cd_select_mode	copy of cfg_Ar_b0 (pred_alt_init, cmd_Cd) -> pred_alt.select_mode
+003726	L	cd_dop_kind	copy of cfg_Aj (pred_alt_init, cmd_Cd) -> pred_alt.dop_kind
+003728	L	cd_sv_ignore	[37] SV 1-37 at $3727 + sv, copy of sv_ignore (pred_alt_init) -> pred_alt.deselect
+00374E	L	cd_datum	@@Cd prediction inputs staging: datum copy (42 bytes, pred_alt_init), copied to pred_in $C70 by task 5
+003778	L	cd_offset	word, local offset (pred_alt_init, cd_parse_offset) -> $C9A
+00377A	L	cd_date	14 bytes, date_time copy (pred_alt_init, cd_parse_date/time) -> $CB6
+003788	L	cd_pos	height, lat, lon doubles (pred_alt_init, cd_parse_pos) -> $C9C
+003790	L	cd_lat	double, element of cd_pos (pred_alt_init from pos_lat) -> $CA4
+003798	L	cd_lon	double, element of cd_pos (pred_alt_init from pos_lon) -> $CAC
+006346	L	bl_new_data	set by nav_data_decode when a channel has a new subframe word (chan_meas+$4A); bin_output_sched sends @@Bl and clears; cleared by cmd_B, nav_decode_reset_all
+0077DC	L	dgps_delta_stale	1 = delta correction set invalid (dgps_clear, diff_age_check age > dgps_max_age); cleared by rtcm_apply_alt
+0077DE	L	dgps_delta_time	long, hour-sequence time (0.1 s) of the delta set (rtcm_apply_alt); age checked by diff_age_check
+0077E2	L	dgps_delta	delta corrections, 14 bytes per SV at $77E2 + $E x sv (sv 1-37): +0 valid, +2 RRC word, +4 IODE, +6 PRC long, +10 time; written by rtcm_apply_alt, used by dgps_prc/dgps_rrc when IODE differs from dgps_corr
+0081ED	L	nsv_used	channels in the solution (sv_select_nav counts chan_use, sets corr_valid and flags bit 7); cleared by osc_search_reset
+008214	L	any_chan_locked	set by task_meas_1s when any chan_meas mode > 4; cleared by boot_search_reset; cmd_Ac/cmd_Aa accepted in fix mode only while 0
+008EC8	L	meas_date	14-byte date record of the measurement epoch (nav_step: gps_to_date(meas_week, ...)); nav_reset seeds from date_time
+008EF6	L	pos_ecef_y	double, element of pos_ecef (nav_init_pos; msg_Bk_Ek_body)
+008EFE	L	pos_ecef_z	double, element of pos_ecef (nav_init_pos; msg_Bk_Ek_body)
+008F0E	L	sol_lat	double, element of sol_llh (nav_reset, nav_step from pos_lat/hold_lat; pos_smooth)
+008F16	L	sol_lon	double, element of sol_llh (nav_reset, nav_step from pos_lon/hold_lon; pos_smooth)
+009CEB	L	sv_manual_dopp_ok	[8] per channel ($9CEA + n, n 1-8): 1 = use saved Doppler $9CFC for the manual SV (chan_cmd_update); cleared by cmd_Ai, sv_search_select, osc_search_reset
+009CFC	L	sv_manual_dopp	[8] words: channel carrier Doppler saved by sv_search_select (carrier_nco x 0.01293); chan_cmd_update scales x 0.302 for the manual SV
+009D29	L	pps_sawtooth	byte, PPS quantization error of the next pulse (pps_schedule, traim_pps_schedule); sent in @@Bn/@@En (msg_Bn_En_body)
+009D88	L	traim_save_seconds	double gps_seconds saved by traim; traim_time_fix restores
+009D90	L	traim_save_drift	double clock_drift saved by traim; traim_time_fix restores
+009D98	L	traim_save_ms_adjust	ms_adjust saved by traim; traim_time_fix restores
+009D9A	L	traim_save_week	gps_week saved by traim; traim_time_fix restores
+00B1D8	L	out_buf_Cd	slot 9 buffer (io_init, bin_out_flush); rx_task sends the deferred reply_Cd only when out_ptr[9] == this
+00BEF6	L	out_buf_Cl	slot 16 buffer (io_init, bin_out_flush); task 15 sends reply_Cl only when out_ptr[16] == this
+00C65E	L	idle_reply_pend	set by @@Ca/@@Cf in fix mode (cmd_C, cmd_F); rx_task waits for $C666, then @@Ca self-test reply ($C660 = 1) or defaults + @@Cf (task 0, task 21)
+00C65F	L	idle_reply_letter	out_letter1 of the @@Ca that went idle (cmd_C); restored for the deferred self-test reply (rx_task)
+00C660	L	idle_reply_selftest	1 = deferred reply is @@Ca self-test, 0 = @@Cf (cmd_C case a, rx_task)
+00C661	L	cd_reply_letter	out_letter1 of the @@Cd/@@Ft command (cmd_C, cmd_F); rx_task sends reply_Cd(6 if 'C' else 8)
+00C662	L	cd_reply_pend	set by task 18 $0AB2F2; rx_task sends the deferred @@Cd reply
+00C663	L	bd_reply_pend_a	set by task 19 $0AB326 (req by cmd_Cb); rx_task sends msg_Bd
+00C664	L	bd_reply_pend_b	set by task 20 $0AB35A (req by cmd_Cb); rx_task sends msg_Bd
+00C665	L	rx_hold	1 while a command waits for its deferred task (cmd_C, cmd_F, cmd_Ac, cmd_Aa, cmd_Cb); blocks sci_isr wake and rx_task parsing; cleared by task_reply_Ac/Aa, fix_mode_enter, tasks 15-25
+00C666	L	chan_off_done	set by task 16 ($08A6F0) after cs7_ctl_bit0_set; rx_task then sends the deferred idle reply ($C65E)
+00CACE	L	cb_page_seen	[34] @@Cb pages received; all set -> almanac accepted (cmd_Cb); cleared by io_init, cmd_Cb
+00CAF1	L	cd_accepted	return of cmd_Cd (cmd_C, cmd_F); 1 requests task 5 pred_alt; reply_Cd $0A945E reports it
+00CBBE	L	rtcm_seq_next	expected RTCM sequence number mod 8 (rtcm_init 1, rtcm_frame)
+01FFFC	L	sched_idle_pc	initial task frame at RAM top (sched_start): PC $08A76E (idle loop bra .), SR $2000 at $1FFFA, D0-D7/A0-A6 at $1FFBE

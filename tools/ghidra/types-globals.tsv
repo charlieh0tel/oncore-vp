@@ -1,0 +1,118 @@
+# address	type	note  (applied in order; later rows override overlapping earlier ones)
+000B92	double	high half precedes the low-half DAT (names-globals)
+000B9C	double	high half precedes the low-half DAT (names-globals)
+000BA4	double	high half precedes the low-half DAT (names-globals)
+000BAC	double	high half precedes the low-half DAT (names-globals)
+000BE2	double	high half precedes the low-half DAT (names-globals)
+000BEA	double	high half precedes the low-half DAT (names-globals)
+000C06	double	high half precedes the low-half DAT (names-globals)
+000C0E	double	high half precedes the low-half DAT (names-globals)
+000C16	double	high half precedes the low-half DAT (names-globals)
+000C1E	double	high half precedes the low-half DAT (names-globals)
+000C26	double	high half precedes the low-half DAT (names-globals)
+000C2E	double	high half precedes the low-half DAT (names-globals)
+000C68	double	high half precedes the low-half DAT (names-globals)
+000C70	double	high half precedes the low-half DAT (names-globals)
+000C80	double	high half precedes the low-half DAT (names-globals)
+000C88	double	high half precedes the low-half DAT (names-globals)
+000C90	double	high half precedes the low-half DAT (names-globals)
+000C9C	double	high half precedes the low-half DAT (names-globals)
+000CA4	double	high half precedes the low-half DAT (names-globals)
+000CAC	double	high half precedes the low-half DAT (names-globals)
+002598	double	high half precedes the low-half DAT (names-globals)
+0025A0	double	high half precedes the low-half DAT (names-globals)
+0025A8	double	high half precedes the low-half DAT (names-globals)
+0026AE	double	high half precedes the low-half DAT (names-globals)
+0026F0	double	high half precedes the low-half DAT (names-globals)
+0026F8	double	high half precedes the low-half DAT (names-globals)
+002700	double	high half precedes the low-half DAT (names-globals)
+0035B2	double	high half precedes the low-half DAT (names-globals)
+0035C2	double	high half precedes the low-half DAT (names-globals)
+0035E2	double	high half precedes the low-half DAT (names-globals)
+0035EA	double	high half precedes the low-half DAT (names-globals)
+003628	double	high half precedes the low-half DAT (names-globals)
+003630	double	high half precedes the low-half DAT (names-globals)
+00363A	double	high half precedes the low-half DAT (names-globals)
+003644	double	high half precedes the low-half DAT (names-globals)
+00364C	double	high half precedes the low-half DAT (names-globals)
+003654	double	high half precedes the low-half DAT (names-globals)
+003788	double	high half precedes the low-half DAT (names-globals)
+003790	double	high half precedes the low-half DAT (names-globals)
+003798	double	high half precedes the low-half DAT (names-globals)
+00633C	double	high half precedes the low-half DAT (names-globals)
+007574	double	high half precedes the low-half DAT (names-globals)
+007592	double	high half precedes the low-half DAT (names-globals)
+0075A2	double	high half precedes the low-half DAT (names-globals)
+0075AA	double	high half precedes the low-half DAT (names-globals)
+0075B2	double	high half precedes the low-half DAT (names-globals)
+0079F8	double	high half precedes the low-half DAT (names-globals)
+007A00	double	high half precedes the low-half DAT (names-globals)
+007A08	double	high half precedes the low-half DAT (names-globals)
+007A10	double	high half precedes the low-half DAT (names-globals)
+007A18	double	high half precedes the low-half DAT (names-globals)
+007A20	double	high half precedes the low-half DAT (names-globals)
+007A28	double	high half precedes the low-half DAT (names-globals)
+007A30	double	high half precedes the low-half DAT (names-globals)
+0081A6	double	high half precedes the low-half DAT (names-globals)
+0081B2	double	high half precedes the low-half DAT (names-globals)
+0081E4	double	high half precedes the low-half DAT (names-globals)
+0081F0	double	high half precedes the low-half DAT (names-globals)
+0081F8	double	high half precedes the low-half DAT (names-globals)
+008200	double	high half precedes the low-half DAT (names-globals)
+008ED6	double	high half precedes the low-half DAT (names-globals)
+008EDE	double	high half precedes the low-half DAT (names-globals)
+008EE6	double	high half precedes the low-half DAT (names-globals)
+008EEE	double	high half precedes the low-half DAT (names-globals)
+008F06	double	high half precedes the low-half DAT (names-globals)
+008F0E	double	high half precedes the low-half DAT (names-globals)
+008F16	double	high half precedes the low-half DAT (names-globals)
+008F20	double	high half precedes the low-half DAT (names-globals)
+008F28	double	high half precedes the low-half DAT (names-globals)
+008F30	double	high half precedes the low-half DAT (names-globals)
+008F38	double	high half precedes the low-half DAT (names-globals)
+008F40	double	high half precedes the low-half DAT (names-globals)
+008ED6	double[3]	height, lat, lon
+008F06	double[3]	height, lat, lon
+000B9C	double[3]	height, lat, lon
+000C06	double[3]	height, lat, lon
+000C1E	double[3]	height, lat, lon
+002598	double[3]	height, lat, lon
+0026F0	double[3]	height, lat, lon
+003788	double[3]	height, lat, lon
+000C9C	double[3]	height, lat, lon
+0081F0	double[3]	height, lat, lon
+008EEE	double[3]	ECEF x, y, z
+000B6E	double[4]	vel_sol
+000C36	double[3]	vel_filt
+008218	double[8]	pr_resid per channel
+008258	double[8]	rr_resid per channel
+0025B4	double[8]	traim_resid
+0022F6	double[38]	iono_delay[SV]
+00C518	ptr[25]	out_ptr per slot
+00C57C	ptr[25]	out_rd per slot
+00A9B2	char[160]	line_buf
+001146	chan_use_rec[8]	{use_pos, use_pr, has_time}
+0075C8	dgps_rec[38]	dgps_corr[SV], tiles to $77DC
+0077E2	dgps_rec[38]	dgps_delta[SV], tiles to $79F6
+002624	utc_rec	utc_params
+00377A	date_rec	cd_date
+000CB6	date_rec	pred_in_date
+008EC8	date_rec	meas_date
+000194	u16[8]	chan_ctl_shadow
+009CEB	u8[8]	sv_manual_dopp_ok
+009CFC	u16[8]	sv_manual_dopp
+00CACE	u8[34]	cb_page_seen
+002540	ptr[8]	EEPROM block table
+002562	u16[8]	EEPROM block table
+002576	ptr[8]	EEPROM block table
+002926	float[11][11]	magnetic variation model
+002B0A	float[11][11]	magnetic variation model
+002CEE	float[11][11]	magnetic variation model
+002EFE	float[11][11]	magnetic variation model
+00313A	float[11][11]	magnetic variation model
+003376	float[11][11]	magnetic variation model
+002ED2	float[11]	magnetic variation model
+0030E2	float[11]	magnetic variation model
+00310E	float[11]	magnetic variation model
+00331E	float[11]	magnetic variation model
+00334A	float[11]	magnetic variation model

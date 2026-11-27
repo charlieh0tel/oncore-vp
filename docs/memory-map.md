@@ -84,10 +84,10 @@ all match the dump.
 | $0934 | 884 | $0CA8 | Almanac bank 0 |
 | $0CAC | 884 | $1020 | Almanac bank 1 |
 | $1024 | 1 | | Active almanac bank (0 or 1); dump: 1 |
-| $1026 | 28 | $1042 | Unknown: $01 $02, doubles 1.0, 12.0, 6.0, $0A $AA |
+| $1026 | 28 | $1042 | @@An $1026, @@Aj $1027 (stored code), @@Ak $1028 (double), 2D HDOP limit $1030 (@@AC), 3D PDOP limit $1038 (@@Al), mask angle $1040 (@@Ag); dump = defaults 01 02 1.0 12.0 6.0 $0A |
 | $1046 | 78 | $1094 | 10 bytes 0; 3 doubles 0; 1/f; a; datum number $31 (49 = WGS-84 in Oncore numbering, inferred); pad; doubles 12.65, lat 0.6523 rad, lon -2.1309 rad; $01 $00 |
-| $1098 | 6 | $109E | Unknown: 01 01 01 01 02 AA |
-| $10A2 | 42 | $10CC | Unknown: $01 $AA, rest 0 |
+| $1098 | 6 | $109E | $369A (@@Ar b6), $9D86 (@@Aw), $81C2 (@@Aq), $8216 (@@Ar b7), $8EB8; dump = defaults 01 01 01 01 02 |
+| $10A2 | 42 | $10CC | $10A2 @@Ar b0 ($81DA), $10A4-$10C8 SV ignore list 1-37 ($8F89-$8FAD, @@Am), $10C9 @@Ah ($9D0C), $10CA @@AD ($7A3A) |
 | $10D0 | 42 | $10FA | Unknown: mixed bytes incl. $03E8 (1000) |
 | $10FE | 42 | $1128 | 3 doubles 0; 1/f; a; $32 |
 | $112C | 42 | $1156 | 3 doubles 0; 1/f; a; $33 |
@@ -123,10 +123,10 @@ RAM copies and the commands whose handlers write them:
 
 | Block | RAM | Written by |
 |---|---|---|
-| $1026 | $633A, $79F6-$79FF, $8FAE-$8FB1 | @@An ($633A), @@AJ ($79F6), @@Ak ($79F8-$79FF) |
-| $1098 | $369A, $81C2, $8216, $8EB8-$8EBD, $9D86 | @@Ar ($369A, $8216), @@Aq ($81C2), @@Aa ($8EBC-$8EBD), @@Aw ($9D86) |
-| $10A2 | $7A3A, $81DA, $8F88-$8F8A, $9D0C | @@AD ($7A3A), @@Ar, @@Ce ($81DA), @@Ah ($9D0C) |
-| $10D0 | $9D0E-$9D12, $819C-$819E, $820A, $79F6 | @@Ab ($819C), @@Az ($820A), @@Aw ($9D0F), B/E commands ($9D0E-$9D12) |
+| $1026 | $633A, $79F7-$79FF, $7A00, $7A08, $8FAE | @@An ($633A), @@Aj ($79F7), @@Ak ($79F8), @@AC ($7A00), @@Al ($7A08), @@Ag ($8FAE) |
+| $1098 | $369A, $81C2, $8216, $8EB8, $9D86 | @@Ar ($369A, $8216), @@Aq ($81C2), @@Aw ($9D86) |
+| $10A2 | $7A3A, $81DA, $8F89-$8FAD, $9D0C | @@AD ($7A3A), @@Ar b0 / @@Ce ($81DA), @@Am ($8F89-$8FAD), @@Ah ($9D0C) |
+| $10D0 | $9D0E-$9D12, $819C-$819E, $820A, $79F6 (@@AJ), $81C8, $8210, $9D11-$9D24 | @@Ab ($819C), @@Az ($820A), @@Aw ($9D0F), B/E commands ($9D0E-$9D12) |
 | $115A | $3624-$362F | @@AF, @@AH ($3624), @@AG ($3626), @@AI ($3628, $362C) |
 | $116A/$1174 | $75BC, $75BE, $75C0 | @@Ta ($75BC, $75C0) |
 | $1180 | $2426-$242D | No command: saved by $08B248 from a table at $243A + 8n |
@@ -439,6 +439,30 @@ return type.
 
 Output payload layouts: [messages.md](messages.md).
 
+Configuration commands (consumers from the firmware):
+
+| Cmd | RAM (default) | Consumer | Effect |
+|---|---|---|---|
+| @@AC | $7A00 (12.0) | nav_solve_mode $093906 | 2D HDOP limit; also resets the position-smoothing HDOP limit $0B92 |
+| @@Al | $7A08 (6.0) | nav_solve_mode | 3D PDOP limit |
+| @@Ak | $79F8 (1.0) | svset_select $095624, sv_select_nav $096474 | Switch SV set only if new DOP x 10 + Ak x 10 < current |
+| @@An | $633A (1) | almanac_switch $08AF9A | 1: adopt almanacs collected from SVs; 0: only @@Cb almanacs |
+| @@Aj | $79F7 (2) | task_vis_predict, dop_compute $08C7DE; @@Bc byte 4 | DOP used to rank SV sets; host 0-4 stored as 0, 2, 1, 4, 3 (internal 0 GDOP, 1 HDOP, 2 PDOP, 3 TDOP, 4 VDOP) |
+| @@AJ | $79F6 (90) | diff_age_check $09BC0A | Corrections stale at age >= AJ x 10 |
+| @@AD | $7A3A (0), $C652 ($20) | sv_select_nav; msg_Bh | Channel out of the fix while smoothing count < byte 0; @@Bh sends a channel only if count > byte 1 |
+| @@Ar b0 | $81DA (1) | SV selection, svset_find, @@Bc | 1: 8-SV sets, all channels in the fix; 0: best 4-SV set.  @@Ce, RTCM and fresh corrections force 1 |
+| @@Ar b6 | $369A = !b6 (1) | chan_isr, chan_pll_check $089AC4 | b6 = 1: adaptive state-5 weighting off; PLL loss limit 6 instead of 90 |
+| @@Ar b7 | $8216 = !b7 (1) | pos_smooth $0921EC | b7 = 1: position smoothing off |
+| @@Aq | $81C2 (1) | sv_clock_update $09150C | Klobuchar correction on/off |
+| @@Ax | $81C8 (0) | pps_schedule $091BFA | Measurement epoch Ax ms after the second; removed again in the PPS delay |
+| @@Ay, @@Az | $8210, $820A (0) | pps_schedule (timing option) | PPS delay = ... + Ay - Az + hardware delay.  Ay 4041960 enables the channel-state test, 888888888 the timing probe ($09FFC8) |
+| @@Ah | $9CEA, $9D0C | sv_search_select, vis_list_default $08F55E | 0 auto; 1 manual list from @@Ai (not saved); 2 search in elevation order |
+| @@AF-@@AI | $3624-$3628 (7, 1, 0, 3704.0) | Replies; AG-AI also in @@Bm | No functional consumer |
+| @@Cm, @@Cl | $3630-$3642, $3644-$3687 | msg_Bm, reply_Cm, reply_Cl | Stored, reported, echoed only (option G); the @@Cl task $09FAF4 is empty |
+| @@Cd | $3725-$37A0 | task -> reply_Cd $0A945E | Visibility prediction for a given date, time, position and mask |
+| @@Ce | $75C8 table, $81DA = 1 | DGPS | Up to 6 corrections; PRC and RRC negated when stored |
+
+
 Receive path: SCI interrupt ($08048E) -> ring buffer RAM $9DAE-$A52D
 (1920 bytes; write pointer $A532, read pointer $A536, count $A53A) ->
 line assembly at RAM $A9B2 ($0A65D6) -> on CR LF, validate ($0A69E2)
@@ -469,7 +493,7 @@ Handlers (first call in each case of the second-level dispatch):
 |---|---|---|
 | A | $0AD03E | Aa $0ACF46, Ab $0AC9F0, Ac $0AC61C, Ad $0ACAEA, Ae $0ACB32, Af $0ACA4E, Ah $0ACF02, Ai $0ACE30, Aj $0AC85A, Ak $0AC764, Al $0AC806, Am $0ACE8E, An $0AC226, Ao $0AC32A, Ap $0AC39C, Aq $0AC90A, Ar $0ACC30, At $0AC938, Au $0AC254, Av $0AC8B6, Aw $0AD2B6, Ax $0ACB7A, Ay $0ACBD2, Az $0ACBA8, AA $0AC8E4, AB $0AC2CE, AC $0AC7B2, AD $0AC5CC, AE $0ACBFC, AF $0ACE02, AG $0AC966, AH $0ACDB4, AI $0ACD6C, AJ $0AC73C |
 | B | $0A4712 | Each rate command saves its rate ($0ADE56), then: Ba $0AA750, Bb $0AAF74, Bc $0A8CD6, Bd $0A8768, Be $0A8560, Bf $0A937E (ephemeris input, acknowledged with @@Cc), Bg $0AAE4E, Bh $0AA822, Bi $0A8EA8 (ephemeris output; sent as @@Bf by the scheduler), Bj $0A9410, Bk $0A8F5C, Bm $0AACA8, Bn $0AAF2C, Bz $0A8D22 (always @@Ez, 8 x $2C records from $27BC) |
-| C | $0A5288 | Ca, Cf, Cg stop the channels ($088F78) and write the EEPROM; Cb $0A9160, Cd $0A4FC2, Ce $0A508E, Ci $0A6CB2 or $0A6C3C (protocol mode 1 or 2), Cj $0A9F04, Cl $0A51D2, Cm $0A55C4 |
+| C | $0A5288 | In fix mode ($C651 = 1) Ca, Cf, Cg stop the channels ($088F78), write the EEPROM and go idle; when idle, Ca runs the self-test and Cf invalidates every EEPROM checksum (+$11111111, `eeprom_invalidate_all` $09AEA8) so defaults load, Cg 1 enters fix mode; Cb $0A9160, Cd $0A4FC2, Ce $0A508E, Ci $0A6CB2 or $0A6C3C (protocol mode 1 or 2), Cj $0A9F04, Cl $0A51D2, Cm $0A55C4 |
 | E | $0A4C44 | If-chain: Ea, Ec, Eg, Ek (save rate, then output), En (TRAIM: validates date and time fields) |
 | F | $0A54EA | Jump table, Fa-Fd |
 | T | $0A4EDE | Ta $0AD4F4, Tb $0AD754, Tc $0A8B0E, Td $0A8BAA (output builders, called by the scheduler), Th $0AE7CE (writes the ID block), Tq $0A1E90 |

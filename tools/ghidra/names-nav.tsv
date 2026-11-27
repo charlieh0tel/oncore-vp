@@ -147,8 +147,6 @@
 007574	L	geoid_sep	Geoid separation (m, double)
 00757C	L	special_msg	Page 17 text, 22 bytes
 007592	L	datum	dx, dy, dz, 1/f, a (doubles), datum number at +40
-0075C4	L	dgps_corr	Per-SV DGPS correction, $E each (+4 valid, +8 IODE, +$E PRC)
-0077D8	L	dgps_corr_prev	Previous DGPS correction set
 007A00	L	hdop_mask	HDOP limit for 2D (written by @@AC)
 007A08	L	pdop_mask	PDOP limit for 3D (written by @@Al)
 007A10	L	gdop	GDOP
