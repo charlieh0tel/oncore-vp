@@ -836,52 +836,31 @@ Same layout as the 6ch board (TM-AB / BM-AB, 84D43579M03).
 | ASIC | XCT38140FD04 AASS9603 |
 | RF can | 58M01 9623; 95U01 / 624 (SAW filter); A06 |
 
-## 6-channel receivers over serial (2026-11-27)
+## 6-channel receivers
 
-Both boards on USB serial, no antennas.  Serial to instrument and board
-(smartclock docs and pForth captures): SSG0178541 = Z3801A (3542A01548),
-*7VGN4*; SSG0163878 = Z3805A (3625A01487), *7VENR*.  The label pairing
-assumes each module stayed in its instrument.
-
-In service (smartclock daemon logs, 2026-09-26 to 10-11, same feed):
-both tracked only with 20 dB extra gain, and then 2-4 satellites.  The
-Z3805A's (SSG0163878) locked 84% of snapshots; the Z3801A's
-(SSG0178541) 20%, and lost all satellites where the other held.
-
-| | First (Z3805A) | Second (Z3801A) |
+| | SSG0163878 | SSG0178541 |
 |---|---|---|
-| @@Cj model / serial | B1121P1114 / SSG0163878 | B1121P1114 / SSG0178541 |
+| Instrument | Z3805A (3625A01487) | Z3801A (3542A01548) |
+| Board label | *7VENR* | *7VGN4* |
+| Model (@@Cj) | B1121P1114 | B1121P1114 |
 | Manufactured | 6G09 | 6J25 |
 | Software | 98-P39972M VER 8 REV 4, 13 JUL 1995 | same |
 | Options | IB | IB |
+| DCXO record (@@Ta) | 20549, $5F, 351 Hz/LSB | 20749, $5C, 339 Hz/LSB |
+| Self-test (@@Ca) | $0000, all pass | $0000, all pass |
 
-- Powered up silent at every baud rate (no continuous output); answer
-  polls at 9600 binary.
-- Powered up idle: @@Ba date 01/01/2026 12:00:00, not advancing,
-  status $01 (almanac not usable), channel bytes uninitialized.
-- Self-test (@@Ca): $0000, all pass, on both.
-- After @@Cg 1: time runs from 12:00:00; status $09; six channels
-  searching SVs 9, 22, 6, 24, 14, 1; signal bytes 49-54 (first) and
-  63-75 (second) with no antenna.
-- @@Ta query (`FF FF FF FF FF`), same reply layout as the 8ch:
+Source for instrument and label: smartclock docs and pForth captures
+(label pairing assumes each module stayed in its instrument).
 
-| | Drift reference | Setting | Hz/LSB |
-|---|---|---|---|
-| First | 20549 | $5F | 351 |
-| Second | 20749 | $5C | 339 |
-| 8ch, for comparison | 20625 | $50 | 185 |
-| 8ch firmware default | 20625 | $67 | 350 |
+- Host port: 9600 binary; no output until polled.
+- Track only with about 20 dB more antenna gain than the 8ch needs
+  (smartclock logs; bench: no track on the distribution-amplifier feed,
+  tracking on a higher-gain feed).  SSG0178541 is the weaker.
+- Top-side DC bias agrees between the boards at every node; the loss is
+  in the RF path (A06, SAW filter, coupling, 58M01 input; inferred).
 
-- With @@Ac/@@Aa: status $09, almanac still rejected.  Almanac loaded
-  with @@Cb (smartclock-oncore-emulator `bench/almanac.py`, u-blox
-  capture of 2026-10-28; all 34 pages echoed): status $08.  Position
-  from the 8ch (@@Ad/@@Ae/@@Af): 9 visible.  Antenna from a powered
-  distribution amplifier (no DC needed from the receiver).
-- 20 min with almanac, position and date set, antenna on SSG0163878
-  (the better unit in service), SSG0178541 without: 8-9 visible, no
-  channel tracked on either.
-- DC to ground, top side, powered from the jig's USB chain (photo
-  callouts in the bias worksheet; ends A/B as marked there):
+Top-side DC to ground, volts, powered from a USB-fed jig (ends A/B as
+in the bias worksheet's photo callouts):
 
 | Point | SSG0178541 | SSG0163878 |
 |---|---|---|
@@ -892,34 +871,6 @@ Z3805A's (SSG0163878) locked 84% of snapshots; the Z3801A's
 | 2R2 bottom left, A / B | 0.765 / 0.766 | 0.765 / 0.767 |
 | R27, A / B | 2.36 / 2.36 | 2.22 / 2.23 |
 | R56, A / B | 2.36 / 2.36 | 2.23 / 2.23 |
-
-  The two boards agree at every node within supply differences, except
-  R27/R56 about 0.13 V lower on SSG0163878; no node is dead on either.
-  The antenna pin carries DC (feed circuit works).
-- SSG0178541 with the antenna, almanac (@@Cb), position and date set:
-  9 visible, no channel tracked in 20 min.  It had reset during the
-  probing and come back at 01/01/2044 with the almanac rejected; date
-  and almanac were set again before the run.
-- After a power cycle (both, 18:16): date and time kept, almanac usable,
-  position kept, 9 visible, searching without @@Cg 1 (at the first
-  power-up of the day both had come up idle at 01/01/2026 12:00:00).
-- SSG0178541 on a higher-gain antenna feed (18:22): 3D fix, 5 used
-  (SVs 7, 8, 9, 16, 21; signal 35-92), at once after the power cycle.
-  The 8ch, moved to another feed at the same time, tracked nothing in
-  5 min.
-- SSG0163878 on the same higher-gain feed (18:41): 4 tracked in 17 s,
-  6 in 31 s, first fix (2D, 3 used) in 46.5 s.
-- 8ch on its usual (higher-gain) feed after hours without signal: no
-  track in 30 min, channels on SVs not visible (full-sky search), then
-  on visible SVs after @@Ac/@@Aa, still none.  After a power cycle:
-  7 tracked, 5 used, at most 49 s from power-up.  The stuck search
-  state cleared on reset (cause not traced).
-- Conclusion: both 6ch boards have lost sensitivity.  They track, but
-  only with gain well beyond normal (about 20 dB extra in service, on
-  the instruments' own antenna systems).  The bench feed is also weak
-  (the 8ch needs some extra gain on it).  Top-side DC bias is normal on
-  both, so the loss is in the RF path (A06, SAW filter, coupling, 58M01
-  input; inferred).
 
 ## 6-channel firmware and EEPROM (read 2026-11-27)
 
@@ -1005,24 +956,19 @@ block moved down by 6.
 - Active DCXO records match the live @@Ta replies (20549/$5F/351,
   20749/$5C/339).
 - Invalidated blocks (ionosphere, UTC, one almanac bank on SSG0163878):
-  an @@Cf at some time, not rewritten since (no ionosphere/UTC page decoded
-  after it; inferred).
-- First power-up idle (2026-11-27): fix mode is saved in EEPROM $0919 and
-  restored at boot; a 0 there boots idle until @@Cg 1 (which writes 1).
-  @@Cg 0, and @@Ca or @@Cf in fix mode, write 0 (`cmd_C` $0A1A82).  The
-  frozen date 01/01/2026 12:00:00 is the invalid-RTC fallback (year slot
-  2026), separate from the mode.  Time not advancing while idle: no
-  restart task, so no measurement/navigation tasks (inferred).  The later
-  power cycle found $0919 = 1 and a valid RTC (written by
-  `task_rtc_write_date`/`_time` after @@Ac/@@Aa or GPS time).
+  the @@Cf mark (inferred: not rewritten since).
+- Fix mode is saved at $0919 and restored at boot; 0 boots idle until
+  @@Cg 1 (which writes 1).  @@Cg 0, and @@Ca or @@Cf in fix mode, write
+  0 (`cmd_C` $0A1A82).  Idle: no measurement/navigation tasks, so time
+  does not advance (inferred).
 - Host instruments (smartclock docs/firmware/gps.md, 58503A 3704,
   Z3801A 3543, Z3805A 3543B): every power-up sends @@Cg 1 (self-test
   script after @@Ca, init script after @@Cj and set-up echoes, hold
   script); @@Cg 0 only as the first half of a 0-then-1 pair.  An idle
   6ch here answered @@Cj, @@Ba and @@Ca, so an instrument takes an idle
   engine out of idle at power-up.
-- 01/01/2044 after a reset during probing: an RTC year 44 reads as 2044,
-  inside 1980-2070, so accepted as valid (inferred).
+- An RTC year of 44 reads as 2044, inside the 1980-2070 check, so it is
+  accepted (inferred).
 
 ## Host instruments
 
