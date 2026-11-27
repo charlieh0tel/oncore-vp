@@ -86,18 +86,32 @@ Zero-filled when $37A0 > 1.
 
 | Off | Size | Field | Source |
 |---|---|---|---|
-| 4 | 8 | RAM almanac: 1, week ($36F), ..., $36E, page flags ($348..) as bits; zeros if $3722 = 0 | almanac_ptr |
-| 12 | 8 | EEPROM almanac: same; zeros if $21024 = 2 | bank $20934/$20CAC (+$36E/$36F, $348) |
+| 4 | 1 | RAM almanac present: 1; bytes 4-11 zero if not | alm_valid $3722 |
+| 5 | 1 | Almanac week, mod 256 | almanac_ptr +$36F |
+| 6 | 1 | Almanac toa, 4096 s units | almanac_ptr +$370 / 4096 |
+| 7 | 1 | Healthy SV count | almanac_ptr +$36E |
+| 8 | 4 | Health, bit n-1 = SV n healthy (byte 8 bit 7 SV 32 ... byte 11 bit 0 SV 1) | almanac_ptr +$348 + SV (1 = healthy) |
+| 12 | 1 | EEPROM almanac present: 1; bytes 12-19 zero if EEPROM $1024 = 2 | EEPROM $1024 |
+| 13 | 7 | As bytes 5-11 | EEPROM bank $0934 + $378 x ($1024 != 0): +$36F, +$370, +$36E, +$348 |
 
-## Be (33 bytes each, 34 frames; $0A8560)
+## Be (34 frames, letters C b, 33 bytes each; $0A8560)
+
+@@Cb input format.
 
 | Off | Size | Field | Source |
 |---|---|---|---|
-| 4 | 1 | Subframe / page id | tables $0B079E (32 SV pages), $0B091E (2 pages) |
-| 5 | 1 | SV or page number | loop index |
-| 6 | 24 | 8 words x 3 bytes | almanac_ptr + $18 x SV; + $318 |
+| 4 | 1 | Subframe, 4 or 5 | table $0B079E (32 entries), $0B091E (2) |
+| 5 | 1 | Page, 1-25 | same |
+| 6 | 24 | Words 3-10, 24 data bits each | almanac_ptr + $18 x SV; + $318 + $18 x k |
 
-If $3722 != 1: one frame, word 0 + 6 longs 0.
+| Frames | Subframe | Page | Record |
+|---|---|---|---|
+| 1-24 | 5 | 1-24 | SV 1-24 |
+| 25-32 | 4 | 2-5, 7-10 | SV 25-32 |
+| 33 | 5 | 25 | +$318 (SV ID 51) |
+| 34 | 4 | 25 | +$330 (SV ID 63) |
+
+If alm_valid $3722 != 1: one frame, payload 26 zero bytes.
 
 ## Bf, ephemeris output (80 bytes; $0A8EA8, letters set to Bf by the scheduler, Bi when answering @@Bi)
 
@@ -155,13 +169,15 @@ Entry sent only if $81DB[ch] = 1 and chan +$A0 > $C652 (EEPROM $087A); else 7 ze
 
 ## Bl (41 bytes; $0A88BA, one frame per channel)
 
+Last complete subframe of the channel (sf_last, chan +$44).
+
 | Off | Size | Field | Source |
 |---|---|---|---|
 | 4 | 1 | Channel + 1 | |
 | 5 | 1 | SV | chan +$45 |
-| 6 | 1 | (word count << 4) \| type | chan +$4A..., +$52 |
-| 7 | 1 | | |
-| 8 | 30 | 10 x 3 bytes | channel subframe buffer |
+| 6 | 1 | (valid word count << 4) \| subframe id 1-5 | count = leading words with flag chan +$4A + 6i = 1; id chan +$44 |
+| 7 | 1 | Page 1-25; 0 unless subframe 4/5 and count >= 3 | SV ID, word 3 bits 16-21 (chan +$52): 1-32 via table $0B0796 + 12 x ID (SV 1-24 page 1-24, SV 25-32 pages 2-5, 7-10); 51 25, 52 13, 53 14, 54 15, 55 17, 56 18, 57 1, 58 19, 59 20, 60 22, 61 23, 62 24, 63 25; others 0 |
+| 8 | 30 | Words 1-10, 24 data bits each | chan +$46 + 6i (long, low 24 bits) |
 
 ## Bm (28 bytes; $0AACA8)
 

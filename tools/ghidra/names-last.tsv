@@ -1,0 +1,130 @@
+# address	kind	name	note	type (S rows, optional)
+00095E	L	probe_rsvd_95e	only cleared (task_timing_probe reset pass); end bound of bss_clear_tasks
+000960	L	probe_isr_ms	task_timing_probe sample: isr_ms
+000962	L	probe_isr_50ms	task_timing_probe sample: isr_50ms
+000964	L	probe_ms	task_timing_probe: isr_ms + 50 x isr_50ms
+000966	L	probe_ms10	task_timing_probe: probe_ms / 10, stored as chan_meas[probe_idx].signal high byte
+000968	L	magvar_llh	h, lat, lon doubles at the last mag_var computation (magvar_update); pos_get_llh distance > 2000 m triggers a recompute
+000B90	L	nsv_pr	channels with chan_use.use_pr (nav_step; between nsv_pos and nsv_time)
+000BBC	L	pps_adj_hold	pps_schedule: set after a nonzero ms_adjust; next pass forces ms_adjust 0 and clears it
+000BBD	L	dgps_age_n	pos_smooth: averaging count 1-50 for dgps_age_avg; 1 on reseed or stale corrections
+000BBE	L	vel_jump_count	vel_smooth (param 5): consecutive 3D velocity jumps held; > 2 accepts vel_sol; cleared by pos_smooth reseed
+000BC0	L	epochs_since_2d	u16 pos_smooth: 0 while the previous mode was 2 (2D), else +1 (max $FFFE); entering 2D: height gain = table $0AE9BA[$8EB8] / this, height reset if this > table
+000BC2	L	dgps_age_avg	double, running mean of correction age gps_seconds - dgps_time/10 over dgps_age_n (pos_smooth; init 5.0); gain = this/100 (all locked) or /500
+000BCA	L	dgps_age_prev	double, correction age of the previous pass (pos_smooth; init 1.0); prev^2 - age^2 > 100/1000 forces a reseed
+000BD2	L	vsm_hdop	double, vel_smooth: HDOP of the previous 2D/3D pass (0 otherwise); jump test |dHDOP| x 0.56
+000BDA	L	vsm_hdop_save	double, vsm_hdop committed with pos_filt_prev (mode 2/3); restored on a mode-5 reject
+000BF2	L	vsm_vdop	double, vel_smooth: VDOP of the previous 2D pass (0 otherwise)
+000BFA	L	vsm_vdop_save	double, vsm_vdop committed with pos_filt_prev; restored on reject
+000C02	L	alt_hold_prev	pos_smooth: alt_hold_on of the previous pass; 1 keeps height = sol_llh
+000C03	L	dgps_age_reseed	pos_smooth: 1 forces a reseed on the next corrected pass (set at start and while diff_stale)
+000C04	L	nav_mode_prev	pos_smooth: nav_mode of the previous pass
+000C05	L	pos_hold_prev	pos_smooth: pos_hold_on of the previous pass; 1 forces a reseed
+000C66	L	cold_fix_count	nav_cold_fix passes since nav_init_pos; > 3 sets cold_fix_first
+000C78	L	pred_in_datum_dy	double, pred_in datum dy (task_vis_predict compares with datum_dy)
+000C80	L	pred_in_datum_dz	double, pred_in datum dz (task_vis_predict)
+000C88	L	pred_in_datum_inv_f	double, pred_in datum 1/f (task_vis_predict)
+000C90	L	pred_in_datum_a	double, pred_in datum a (task_vis_predict)
+0022F3	L	init_pos_mode	only cleared (nav_reset); nav_init_pos: 1, or 0 without sv_select_have_pred -> start from the SV-position centroid
+0025F5	L	st_rsvd_25f5	only cleared (rcvr_init)
+0026E9	L	osc_search_count	entries in osc_search_list (osc_search_step builds the oscillator setting list, current setting last)
+0026EA	L	osc_search_ptr	pointer into osc_search_list (osc_search_step); wraps at osc_search_list + osc_search_count
+002734	L	vis_wait_busy	srch_hold_flags: vis_busy when navigation was last seen; after fix loss wait for vis_buf != vis_wait_buf
+002735	L	vis_wait_none	srch_hold_flags: vis_state = 3 (no prediction) when navigation was last seen
+002736	L	vis_wait_buf	srch_hold_flags: vis_buf expected after the running prediction
+002737	L	vis_wait_state	srch_hold_flags: vis_state expected after the next prediction; reached -> srch_ctl +$3A = 1
+00273C	L	chan_tx_bit_ms	[8] chan_report.bit_ms at the last chan_tx_time pass (ms-in-bit phase for the ms count $E8A)
+002744	L	chan_state_prev	[8] chan_report.state at the last chan_range_smooth pass; carrier smoothing only if > 3
+00274C	L	chan_bit_phase	[8] ms-in-bit phase (0-19) at the last chan_bit_count pass; > 19 reset to 10
+00355A	L	mv_dec	double, declination deg = atan2(by, bx) / dtr (magvar_model return; geomag.c)
+003562	L	mv_dt	float, years since epoch $0AF57E, clamped 0-5 (geomag.c dt)
+003566	L	mv_rlat	float, lat x dtr
+00356A	L	mv_srlat	float, sin rlat
+00356E	L	mv_srlat2	float, srlat^2
+003572	L	mv_crlat	float, cos rlat
+003576	L	mv_crlat2	float, crlat^2
+00357A	L	mv_q	float, sqrt(a2 - c2 srlat2)
+00357E	L	mv_q1	float, alt x q
+003582	L	mv_q2	float, ((q1 + a2) / (q1 + b2))^2
+003586	L	mv_par	float, ar x P(n, m)
+00358A	L	mv_temp1	float, tc x cp + tc x sp (also holds (q1 + a2)/(q1 + b2) before q2)
+00358E	L	mv_temp2	float, tc x sp - tc x cp
+003592	L	mv_aor	float, re / r
+003596	L	mv_ar	float, aor^(n+2)
+00359A	L	mv_bpp	float, bp at the pole (st = 0)
+00359E	L	mv_ct	float, cos geocentric colatitude
+0035A2	L	mv_st	float, sin geocentric colatitude
+0035A6	L	mv_ca	float, (alt + d) / r
+0035AA	L	mv_sa	float, c2 crlat srlat / (r d)
+0035AE	L	mv_r2	float, r^2
+0035B2	L	mv_r	float, geocentric radius (was typed double; two floats r, d)
+0035B6	L	mv_d	float, sqrt(a2 crlat2 + b2 srlat2)
+0035BA	L	mv_bx	double, -bt ca - br sa (north)
+0035C2	L	mv_by	double, = bp (east)
+0035DA	L	mv_br	double, radial sum
+0035E2	L	mv_bp	double, east sum (/ st)
+0035EA	L	mv_bt	double, theta sum
+0035F5	L	ay_chan_saved_sv	ay_chan_override + 1, stride 2: saved chan_report SV (chan_test_override)
+00365C	L	cl_date	date_rec, @@Cl echo date and time (pos_time_snapshot from date_time; cl_parse_date, cl_parse_time)
+00366A	L	cl_mask	word, @@Cl echo elevation mask (pos_time_snapshot from el_mask; cl_parse_mask)
+003674	L	cl_offset	@@Cl echo local offset: hour byte, minute byte, signed (pos_time_snapshot; cl_parse_offset)
+003676	L	cl_rsvd_3676	@@Cl output byte after cl_value; always 0 (pos_time_snapshot)
+003678	L	cl_rsvd_3678	double, last @@Cl output field (x2); always 0
+003680	L	cl_rsvd_3680	double, @@Cl output field (x2) before cl_rsvd_3678; always 0
+003779	L	cd_offset_min	local offset minutes byte after cd_offset (cd_parse_offset)
+007A39	L	eph_hold_on	@@AA 0/1 (cmd_AA, reply_AA); cleared by rcvr_init, not saved. 1 = eph_word_store clears the collect mask while the channel ephemeris is valid
+008215	L	opt_G_copy	EEPROM $08FF == 'G' (id_options_decode, same test as opt_G); no reader
+009CF3	L	sv_manual_chan_sv	[8] = sv_manual_list + 1, @@Ai SV per channel 0-7 (sv_search_select, osc_search_reset); cmd_Tb/reply_Tb index sv_manual_dopp from $9CFA with channel 1-8
+009D36	L	user_datum1_dy	double, EEPROM $1106 (ee_blk_10fe)
+009D3E	L	user_datum1_dz	double, EEPROM $110E
+009D46	L	user_datum1_inv_f	double, EEPROM $1116, default 298.257223563
+009D4E	L	user_datum1_a	double, EEPROM $111E, default 6378137.0
+009D56	L	user_datum1_num	byte, EEPROM $1126, default 50
+009D60	L	user_datum2_dy	double, EEPROM $1134 (ee_blk_112c)
+009D68	L	user_datum2_dz	double, EEPROM $113C
+009D70	L	user_datum2_inv_f	double, EEPROM $1144, default 298.257223563
+009D78	L	user_datum2_a	double, EEPROM $114C, default 6378137.0
+009D80	L	user_datum2_num	byte, EEPROM $1154, default 51
+00C61F	L	out_cnt_Ba	countdown of slot 0 (array base: countdown of slot n at +2n; out_rate_sync, set_output_rate, out_rates_load)
+00C620	L	out_rate_Bk	slot 1 rate
+00C621	L	out_cnt_Bk	slot 1 countdown
+00C622	L	out_rate_Bg	slot 2 rate (option C/D/E)
+00C623	L	out_cnt_Bg	slot 2 countdown
+00C624	L	out_rate_Bh	slot 3 rate (option B)
+00C625	L	out_cnt_Bh	slot 3 countdown
+00C626	L	out_rate_Bb	slot 4 rate byte (on/off)
+00C628	L	out_rate_Bc	slot 5 rate byte (on/off)
+00C62A	L	out_rate_Bd	slot 6 rate byte (on/off)
+00C62C	L	out_rate_Bf	slot 7 rate byte (on/off; @@Bi)
+00C62E	L	out_rate_Be	slot 8 rate byte (on/off)
+00C640	L	out_rate_Bm	slot 17 rate (option G)
+00C641	L	out_cnt_Bm	slot 17 countdown
+00C642	L	out_rate_Bn	slot 18 rate (option I)
+00C643	L	out_cnt_Bn	slot 18 countdown
+00C644	L	out_rate_Ea	slot 19 rate
+00C645	L	out_cnt_Ea	slot 19 countdown
+00C646	L	out_rate_Ek	slot 20 rate
+00C647	L	out_cnt_Ek	slot 20 countdown
+00C648	L	out_rate_Eg	slot 21 rate (option C/D/E)
+00C649	L	out_cnt_Eg	slot 21 countdown
+00C64A	L	out_rate_Bh67	slot 22 rate (Bh channels 6-7, option B)
+00C64B	L	out_cnt_Bh67	slot 22 countdown
+00C64C	L	out_rate_Ec	slot 23 rate byte (on/off)
+00C64E	L	out_rate_En	slot 24 rate (option I)
+00C64F	L	out_cnt_En	slot 24 countdown
+00CAFA	L	nmea_cnt_gga	$GPGGA countdown (array base: countdown n at +4n; eeprom_save_rate, out_rates_load)
+00CAFC	L	nmea_rate_gll	$GPGLL rate
+00CAFE	L	nmea_cnt_gll	$GPGLL countdown
+00CB00	L	nmea_rate_gsa	$GPGSA rate
+00CB02	L	nmea_cnt_gsa	$GPGSA countdown
+00CB04	L	nmea_rate_gsv	$GPGSV rate
+00CB06	L	nmea_cnt_gsv	$GPGSV countdown
+00CB08	L	nmea_rate_rmc	$GPRMC rate
+00CB0A	L	nmea_cnt_rmc	$GPRMC countdown
+00CB0C	L	nmea_rate_vtg	$GPVTG rate
+00CB0E	L	nmea_cnt_vtg	$GPVTG countdown
+00CB10	L	nmea_rate_zda	$GPZDA rate
+00CB12	L	nmea_cnt_zda	$GPZDA countdown
+00CB30	L	rtcm_resume_word	word index where rtcm_frame ran out of input (array base: previous word at +4n for D29/D30)
+00CB32	L	rtcm_resume_body	1 = rtcm_frame paused inside the data words; resume at rtcm_resume_word
+00CBD0	L	rtcm_corr_rrc_iod	rtcm_corr + 4, stride 6: RRC byte, IOD byte (rtcm_type1_unpack)

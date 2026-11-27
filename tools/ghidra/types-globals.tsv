@@ -26,7 +26,6 @@
 0026F0	double	high half precedes the low-half DAT (names-globals)
 0026F8	double	high half precedes the low-half DAT (names-globals)
 002700	double	high half precedes the low-half DAT (names-globals)
-0035B2	double	high half precedes the low-half DAT (names-globals)
 0035C2	double	high half precedes the low-half DAT (names-globals)
 0035E2	double	high half precedes the low-half DAT (names-globals)
 0035EA	double	high half precedes the low-half DAT (names-globals)
@@ -150,69 +149,139 @@
 000802	s32[8]	chan_amp_epoch (per-channel, chan_isr)
 000842	s32[8]	chan_power_sum (per-channel, chan_isr)
 0008A2	s32[8]	chan_detect (per-channel, chan_isr)
-000010	u8[8]	per-channel array (chan_isr), meaning not established
-000020	u8[8]	per-channel array (chan_isr), meaning not established
-000030	u8[8]	per-channel array (chan_isr), meaning not established
-000038	u8[8]	per-channel array (chan_isr), meaning not established
-000048	u8[8]	per-channel array (chan_isr), meaning not established
-000050	u8[8]	per-channel array (chan_isr), meaning not established
-000058	u8[8]	per-channel array (chan_isr), meaning not established
-000060	u8[8]	per-channel array (chan_isr), meaning not established
-000098	u8[8]	per-channel array (chan_isr), meaning not established
-0000B8	u8[8]	per-channel array (chan_isr), meaning not established
-0000C8	u8[8]	per-channel array (chan_isr), meaning not established
-0000D0	u8[8]	per-channel array (chan_isr), meaning not established
-0000F0	u8[8]	per-channel array (chan_isr), meaning not established
-0000F8	u8[8]	per-channel array (chan_isr), meaning not established
-000104	s16[8]	per-channel array (chan_isr), meaning not established
-000114	s16[8]	per-channel array (chan_isr), meaning not established
-000124	s16[8]	per-channel array (chan_isr), meaning not established
-000134	s16[8]	per-channel array (chan_isr), meaning not established
-000154	s16[8]	per-channel array (chan_isr), meaning not established
-000164	s16[8]	per-channel array (chan_isr), meaning not established
-000174	s16[8]	per-channel array (chan_isr), meaning not established
-000184	s16[8]	per-channel array (chan_isr), meaning not established
-0001A4	s16[8]	per-channel array (chan_isr), meaning not established
-0001B4	s16[8]	per-channel array (chan_isr), meaning not established
-0001F4	s16[8]	per-channel array (chan_isr), meaning not established
-000204	s16[8]	per-channel array (chan_isr), meaning not established
-000224	s16[8]	per-channel array (chan_isr), meaning not established
-000234	s16[8]	per-channel array (chan_isr), meaning not established
-000244	s16[8]	per-channel array (chan_isr), meaning not established
-000254	s16[8]	per-channel array (chan_isr), meaning not established
-000264	s16[8]	per-channel array (chan_isr), meaning not established
-000284	s16[8]	per-channel array (chan_isr), meaning not established
-000294	s16[8]	per-channel array (chan_isr), meaning not established
-0002A4	s16[8]	per-channel array (chan_isr), meaning not established
-0002B4	s16[8]	per-channel array (chan_isr), meaning not established
-0002C4	s16[8]	per-channel array (chan_isr), meaning not established
-0002E2	s32[8]	per-channel array (chan_isr), meaning not established
-000302	s32[8]	per-channel array (chan_isr), meaning not established
-0003A2	s32[8]	per-channel array (chan_isr), meaning not established
-0003C2	s32[8]	per-channel array (chan_isr), meaning not established
-0003E2	s32[8]	per-channel array (chan_isr), meaning not established
-000402	s32[8]	per-channel array (chan_isr), meaning not established
-000422	s32[8]	per-channel array (chan_isr), meaning not established
-000442	s32[8]	per-channel array (chan_isr), meaning not established
-000462	s32[8]	per-channel array (chan_isr), meaning not established
-000482	s32[8]	per-channel array (chan_isr), meaning not established
-0004A2	s32[8]	per-channel array (chan_isr), meaning not established
-0004C2	s32[8]	per-channel array (chan_isr), meaning not established
-0004E2	s32[8]	per-channel array (chan_isr), meaning not established
-000502	s32[8]	per-channel array (chan_isr), meaning not established
-000522	s32[8]	per-channel array (chan_isr), meaning not established
-000542	s32[8]	per-channel array (chan_isr), meaning not established
-0005E2	s32[8]	per-channel array (chan_isr), meaning not established
-000602	s32[8]	per-channel array (chan_isr), meaning not established
-000622	s32[8]	per-channel array (chan_isr), meaning not established
-000642	s32[8]	per-channel array (chan_isr), meaning not established
-0006A2	s32[8]	per-channel array (chan_isr), meaning not established
-0006C2	s32[8]	per-channel array (chan_isr), meaning not established
-0006E2	s32[8]	per-channel array (chan_isr), meaning not established
-000722	s32[8]	per-channel array (chan_isr), meaning not established
-000782	s32[8]	per-channel array (chan_isr), meaning not established
-0007A2	s32[8]	per-channel array (chan_isr), meaning not established
-0007C2	s32[8]	per-channel array (chan_isr), meaning not established
-000822	s32[8]	per-channel array (chan_isr), meaning not established
-000862	s32[8]	per-channel array (chan_isr), meaning not established
-000882	s32[8]	per-channel array (chan_isr), meaning not established
+000010	u8[8]	chan_phase_prev (per-channel, chan_isr)
+000020	u8[8]	chan_bits_pending (per-channel, chan_isr)
+000030	u8[8]	chan_blk_count_acc (per-channel, chan_isr)
+000038	u8[8]	chan_blk_count (per-channel, chan_isr)
+000048	u8[8]	chan_blk_50ms (per-channel, chan_isr)
+000050	u8[8]	chan_blk_50ms_done (per-channel, chan_isr)
+000058	u8[8]	chan_bits_good_acc (per-channel, chan_isr)
+000060	u8[8]	chan_bits_ok (per-channel, chan_isr)
+000098	u8[8]	chan_pll_metric_n (per-channel, chan_isr)
+0000B8	u8[8]	chan_bit_val (per-channel, chan_isr)
+0000C8	u8[8]	chan_lock_inhibit_acc (per-channel, chan_isr)
+0000D0	u8[8]	chan_lock_inhibit (per-channel, chan_isr)
+0000F0	u8[8]	chan_edge_ms (per-channel, chan_isr)
+0000F8	u8[8]	chan_edge_hits (per-channel, chan_isr)
+000104	s16[8]	chan_i_sign (per-channel, chan_isr)
+000114	s16[8]	chan_pll_agc (per-channel, chan_isr)
+000124	s16[8]	chan_pll_z1 (per-channel, chan_isr)
+000134	s16[8]	chan_pll_z2 (per-channel, chan_isr)
+000154	s16[8]	chan_disc_prev (per-channel, chan_isr)
+000164	s16[8]	chan_disc_acc (per-channel, chan_isr)
+000174	s16[8]	chan_disc_10ms (per-channel, chan_isr)
+000184	s16[8]	chan_slew_pending (per-channel, chan_isr)
+0001A4	s16[8]	chan_fll_acc (per-channel, chan_isr)
+0001B4	s16[8]	chan_fll_10ms (per-channel, chan_isr)
+0001F4	s16[8]	chan_fll_weight (per-channel, chan_isr)
+000204	s16[8]	chan_pll_weight (per-channel, chan_isr)
+000224	s16[8]	chan_i_pair (per-channel, chan_isr)
+000234	s16[8]	chan_i_prev (per-channel, chan_isr)
+000244	s16[8]	chan_i_acc (per-channel, chan_isr)
+000254	s16[8]	chan_i_10ms (per-channel, chan_isr)
+000264	s16[8]	chan_i_10ms_prev (per-channel, chan_isr)
+000284	s16[8]	chan_q_pair (per-channel, chan_isr)
+000294	s16[8]	chan_q_prev (per-channel, chan_isr)
+0002A4	s16[8]	chan_q_acc (per-channel, chan_isr)
+0002B4	s16[8]	chan_q_10ms (per-channel, chan_isr)
+0002C4	s16[8]	chan_q_10ms_prev_neg (per-channel, chan_isr)
+0002E2	s32[8]	chan_fll_aid (per-channel, chan_isr)
+000302	s32[8]	chan_el_acc (per-channel, chan_isr)
+0003A2	s32[8]	chan_iq_diff_acc (per-channel, chan_isr)
+0003C2	s32[8]	chan_iq_diff_10ms (per-channel, chan_isr)
+0003E2	s32[8]	chan_iq_diff_50ms_acc (per-channel, chan_isr)
+000402	s32[8]	chan_iq_diff_50ms (per-channel, chan_isr)
+000422	s32[8]	chan_pow_acc (per-channel, chan_isr)
+000442	s32[8]	chan_pow_10ms (per-channel, chan_isr)
+000462	s32[8]	chan_pow_50ms_acc (per-channel, chan_isr)
+000482	s32[8]	chan_pow_50ms (per-channel, chan_isr)
+0004A2	s32[8]	chan_env_50ms_acc (per-channel, chan_isr)
+0004C2	s32[8]	chan_env_50ms (per-channel, chan_isr)
+0004E2	u32[8][4]	chan_bit_shift (per-channel, chan_isr); spans former placeholders $502 $522 $542
+0005E2	s32[8]	chan_fll_sum (per-channel, chan_isr)
+000602	s32[8]	chan_fll_disc (per-channel, chan_isr)
+000622	s32[8]	chan_fll_disc_prev (per-channel, chan_isr)
+000642	s32[8]	chan_pll_metric (per-channel, chan_isr)
+0006A2	s32[8]	chan_bit_i_prev (per-channel, chan_isr)
+0006C2	s32[8]	chan_pow_floor (per-channel, chan_isr)
+0006E2	s32[8]	chan_pow_peak (per-channel, chan_isr)
+000722	s32[8]	chan_bit_env_prev (per-channel, chan_isr)
+000782	s32[8]	chan_i_half (per-channel, chan_isr)
+0007A2	s32[8]	chan_q_half (per-channel, chan_isr)
+0007C2	s32[8]	chan_bit_q_prev (per-channel, chan_isr)
+000822	s32[8]	chan_power_sum_acc (per-channel, chan_isr)
+000862	s32[8]	chan_nco_acc (per-channel, chan_isr)
+000882	s32[8]	chan_nco_acc_prev (per-channel, chan_isr)
+000968	double[3]	magvar_llh (names-last)
+000BB4	double	traim_resid_sum; low half $BB8
+000BC2	double	dgps_age_avg (names-last)
+000BCA	double	dgps_age_prev (names-last)
+000BD2	double	vsm_hdop (names-last)
+000BDA	double	vsm_hdop_save (names-last)
+000BF2	double	vsm_vdop (names-last)
+000BFA	double	vsm_vdop_save (names-last)
+000C78	double	pred_in_datum_dy (names-last)
+00243A	u8[8][8]	iono_page_buf, 8 bytes per channel (alpha +0, beta +4)
+00247C	u8[8][24]	special_msg_buf, $18 per channel (state +0, text +1)
+00263C	utc_rec[8]	utc_page_buf, 14 bytes per channel, utc_params layout
+0026EA	ptr	osc_search_ptr (names-last)
+002708	double	drop_seconds; low half $270C
+00273C	u8[8]	chan_tx_bit_ms (names-last)
+002744	u8[8]	chan_state_prev (names-last)
+00274C	u8[8]	chan_bit_phase (names-last)
+00355A	double	mv_dec (names-last)
+003562	float	mv_dt
+003566	float	mv_rlat
+00356A	float	mv_srlat
+00356E	float	mv_srlat2
+003572	float	mv_crlat
+003576	float	mv_crlat2
+00357A	float	mv_q
+00357E	float	mv_q1
+003582	float	mv_q2
+003586	float	mv_par
+00358A	float	mv_temp1
+00358E	float	mv_temp2
+003592	float	mv_aor
+003596	float	mv_ar
+00359A	float	mv_bpp
+00359E	float	mv_ct
+0035A2	float	mv_st
+0035A6	float	mv_ca
+0035AA	float	mv_sa
+0035AE	float	mv_r2
+0035B2	float	mv_r; replaces the double row above (two floats r, d)
+0035B6	float	mv_d
+0035BA	double	mv_bx
+0035DA	double	mv_br
+003605	u8[6]	bm_rsvd_3605
+00360C	double	bm_rsvd_360c; low half $3610
+003614	double	bm_rsvd_3614; low half $3618
+003644	double[3]	cl_echo h, lat, lon
+00365C	date_rec	cl_date (names-last)
+00366C	double	cl_value; low half $3670
+003678	double	cl_rsvd_3678
+003680	double	cl_rsvd_3680
+00756C	double	clock_bias_corr; low half $7570
+00759A	double	datum_dy; low half $759E
+0081BA	double	pps_hw_delay; low half $81BE
+0081DB	u8[8]	corr_valid
+008298	double[8]	pr_pred per channel
+008F48	double[8]	sagnac per channel
+009CF3	u8[8]	sv_manual_chan_sv (names-last)
+009D20	double	en_seconds; low half $9D24
+009D2E	double	user_datum1 dx
+009D36	double	user_datum1_dy
+009D3E	double	user_datum1_dz
+009D46	double	user_datum1_inv_f
+009D4E	double	user_datum1_a
+009D88	double	traim_save_seconds; low half $9D8C
+009D90	double	traim_save_drift; low half $9D94
+00CB34	u32[34]	rtcm_words (header 0, 1, data from 2)
+009D58	double	user_datum2 dx
+009D60	double	user_datum2_dy
+009D68	double	user_datum2_dz
+009D70	double	user_datum2_inv_f
+009D78	double	user_datum2_a
+009D80	u8	user_datum2_num
+009D56	u8	user_datum1_num

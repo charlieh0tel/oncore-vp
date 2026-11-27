@@ -84,7 +84,7 @@
 000018	L	chan_bitsync	[8] bytes; bit sync found (cleared at state 4 entry); state 4->5 needs it
 000028	L	chan_lock_count	[8] bytes; lock count per second (chan_lock_detect), report +$16 (max 20)
 000040	L	chan_pullin_count	[8] bytes; freq pull-in confirmations (chan_freq_pullin, 2 -> state 4)
-000068	L	chan_bit_edge	[8] bytes; set when code phase crosses the data-bit edge (ms 19->0 or 9->10)
+000068	L	chan_blk_ready	[8] bytes; 10 ms block ready: set by chan_isr at bit_ms 0 or 10, and by task_chan_1s after a code-step wrap
 000070	L	chan_done_50ms	[8] bytes; channel processed this 50 ms; all set -> pending $8DD
 000078	L	chan_bit_ms	[8] bytes; 0-19 ms position in the 20 ms data bit
 000080	L	chan_bit_ms_epoch	[8] bytes; ms-in-bit at the second epoch, report +$19
@@ -127,7 +127,7 @@
 000762	L	chan_carrier_800ms	[8] longs; carrier phase at isr_50ms = 16; report +$10
 0007E2	L	chan_amp	[8] longs; search: noise floor (init $3FFFF); tracking: filtered |I,Q| amplitude
 000802	L	chan_amp_epoch	[8] longs; chan_amp at the epoch; report +2 (clipped $FFFF) -> $7042 signal
-000842	L	chan_power_sum	[8] longs; power sum over the last second (chan_code_disc)
+000842	L	chan_env_sum_1s	[8] longs; 1 s sum of the 10 ms envelope (max + 3/8 min of |I|,|Q|), latched at 50 ms 0 (chan_isr); not a power
 0008A2	L	chan_detect	[8] longs; search detection accumulator; > 0 -> detection
 0008C2	L	task_running	Bytes $8C2-$8DB (26 tasks): running flags per task (sched_dispatch)
 0008DC	L	task_pending	Bytes $8DC-$8F5: pending flags per task (sched_dispatch)

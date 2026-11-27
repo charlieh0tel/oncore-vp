@@ -199,69 +199,66 @@
 00CAF1	L	cd_accepted	return of cmd_Cd (cmd_C, cmd_F); 1 requests task 5 pred_alt; reply_Cd $0A945E reports it
 00CBBE	L	rtcm_seq_next	expected RTCM sequence number mod 8 (rtcm_init 1, rtcm_frame)
 01FFFC	L	sched_idle_pc	initial task frame at RAM top (sched_start): PC $08A76E (idle loop bra .), SR $2000 at $1FFFA, D0-D7/A0-A6 at $1FFBE
-000010	L	chan_u8_0010	per-channel array [8] (chan_isr), meaning not established
-000020	L	chan_u8_0020	per-channel array [8] (chan_isr), meaning not established
-000030	L	chan_u8_0030	per-channel array [8] (chan_isr), meaning not established
-000038	L	chan_u8_0038	per-channel array [8] (chan_isr), meaning not established
-000048	L	chan_u8_0048	per-channel array [8] (chan_isr), meaning not established
-000050	L	chan_u8_0050	per-channel array [8] (chan_isr), meaning not established
-000058	L	chan_u8_0058	per-channel array [8] (chan_isr), meaning not established
-000060	L	chan_u8_0060	per-channel array [8] (chan_isr), meaning not established
-000098	L	chan_u8_0098	per-channel array [8] (chan_isr), meaning not established
-0000B8	L	chan_u8_00b8	per-channel array [8] (chan_isr), meaning not established
-0000C8	L	chan_u8_00c8	per-channel array [8] (chan_isr), meaning not established
-0000D0	L	chan_u8_00d0	per-channel array [8] (chan_isr), meaning not established
-0000F0	L	chan_u8_00f0	per-channel array [8] (chan_isr), meaning not established
-0000F8	L	chan_u8_00f8	per-channel array [8] (chan_isr), meaning not established
-000104	L	chan_s16_0104	per-channel array [8] (chan_isr), meaning not established
-000114	L	chan_s16_0114	per-channel array [8] (chan_isr), meaning not established
-000124	L	chan_s16_0124	per-channel array [8] (chan_isr), meaning not established
-000134	L	chan_s16_0134	per-channel array [8] (chan_isr), meaning not established
-000154	L	chan_s16_0154	per-channel array [8] (chan_isr), meaning not established
-000164	L	chan_s16_0164	per-channel array [8] (chan_isr), meaning not established
-000174	L	chan_s16_0174	per-channel array [8] (chan_isr), meaning not established
-000184	L	chan_s16_0184	per-channel array [8] (chan_isr), meaning not established
-0001A4	L	chan_s16_01a4	per-channel array [8] (chan_isr), meaning not established
-0001B4	L	chan_s16_01b4	per-channel array [8] (chan_isr), meaning not established
-0001F4	L	chan_s16_01f4	per-channel array [8] (chan_isr), meaning not established
-000204	L	chan_s16_0204	per-channel array [8] (chan_isr), meaning not established
-000224	L	chan_s16_0224	per-channel array [8] (chan_isr), meaning not established
-000234	L	chan_s16_0234	per-channel array [8] (chan_isr), meaning not established
-000244	L	chan_s16_0244	per-channel array [8] (chan_isr), meaning not established
-000254	L	chan_s16_0254	per-channel array [8] (chan_isr), meaning not established
-000264	L	chan_s16_0264	per-channel array [8] (chan_isr), meaning not established
-000284	L	chan_s16_0284	per-channel array [8] (chan_isr), meaning not established
-000294	L	chan_s16_0294	per-channel array [8] (chan_isr), meaning not established
-0002A4	L	chan_s16_02a4	per-channel array [8] (chan_isr), meaning not established
-0002B4	L	chan_s16_02b4	per-channel array [8] (chan_isr), meaning not established
-0002C4	L	chan_s16_02c4	per-channel array [8] (chan_isr), meaning not established
-0002E2	L	chan_s32_02e2	per-channel array [8] (chan_isr), meaning not established
-000302	L	chan_s32_0302	per-channel array [8] (chan_isr), meaning not established
-0003A2	L	chan_s32_03a2	per-channel array [8] (chan_isr), meaning not established
-0003C2	L	chan_s32_03c2	per-channel array [8] (chan_isr), meaning not established
-0003E2	L	chan_s32_03e2	per-channel array [8] (chan_isr), meaning not established
-000402	L	chan_s32_0402	per-channel array [8] (chan_isr), meaning not established
-000422	L	chan_s32_0422	per-channel array [8] (chan_isr), meaning not established
-000442	L	chan_s32_0442	per-channel array [8] (chan_isr), meaning not established
-000462	L	chan_s32_0462	per-channel array [8] (chan_isr), meaning not established
-000482	L	chan_s32_0482	per-channel array [8] (chan_isr), meaning not established
-0004A2	L	chan_s32_04a2	per-channel array [8] (chan_isr), meaning not established
-0004C2	L	chan_s32_04c2	per-channel array [8] (chan_isr), meaning not established
-0004E2	L	chan_s32_04e2	per-channel array [8] (chan_isr), meaning not established
-000502	L	chan_s32_0502	per-channel array [8] (chan_isr), meaning not established
-000522	L	chan_s32_0522	per-channel array [8] (chan_isr), meaning not established
-000542	L	chan_s32_0542	per-channel array [8] (chan_isr), meaning not established
-0005E2	L	chan_s32_05e2	per-channel array [8] (chan_isr), meaning not established
-000602	L	chan_s32_0602	per-channel array [8] (chan_isr), meaning not established
-000622	L	chan_s32_0622	per-channel array [8] (chan_isr), meaning not established
-000642	L	chan_s32_0642	per-channel array [8] (chan_isr), meaning not established
-0006A2	L	chan_s32_06a2	per-channel array [8] (chan_isr), meaning not established
-0006C2	L	chan_s32_06c2	per-channel array [8] (chan_isr), meaning not established
-0006E2	L	chan_s32_06e2	per-channel array [8] (chan_isr), meaning not established
-000722	L	chan_s32_0722	per-channel array [8] (chan_isr), meaning not established
-000782	L	chan_s32_0782	per-channel array [8] (chan_isr), meaning not established
-0007A2	L	chan_s32_07a2	per-channel array [8] (chan_isr), meaning not established
-0007C2	L	chan_s32_07c2	per-channel array [8] (chan_isr), meaning not established
-000822	L	chan_s32_0822	per-channel array [8] (chan_isr), meaning not established
-000862	L	chan_s32_0862	per-channel array [8] (chan_isr), meaning not established
-000882	L	chan_s32_0882	per-channel array [8] (chan_isr), meaning not established
+000010	L	chan_phase_prev	State 2: last 1 ms carrier phase from atan table $088A20 (chan_isr $0805B2); cleared on entry to state 2 ($089BA0, chan_fll_check $089A70, chan_pll_check $089AC4)
+000020	L	chan_bits_pending	Set at the second epoch when a 10 ms block is still pending (chan_bit_edge); the $4E2 -> $562 copy is then done in block processing (chan_isr)
+000030	L	chan_blk_count_acc	10 ms blocks processed this second, states 4-5 (chan_isr); -> $38 at isr_50ms 0; cleared in chan_freq_pullin $08985C, chan_pll_check
+000038	L	chan_blk_count	Latched $30 per second (chan_isr); cleared in chan_pll_check; no reader found
+000048	L	chan_blk_50ms	isr_50ms at the last 10 ms block latch (chan_isr, task_chan_1s $08916C; 0 at the epoch)
+000050	L	chan_blk_50ms_done	Last $48 handled; $48 != $50 -> 50 ms latches ($482/$402/$4C2/$D0) and chan_done_50ms (chan_isr); state 1 restarts its dwell when $48 changes
+000058	L	chan_bits_good_acc	Set to 1 each second; cleared on a weak bit (state 5 bit decision: |I| < |Q| or |dot| x 2 < env x env_prev) (chan_isr); -> $60 at the epoch
+000060	L	chan_bits_ok	$58 of the previous second (chan_isr); report +$2A (chan_report_build $089670)
+000098	L	chan_pll_metric_n	Full-bit blocks summed in $642; > 4 -> chan_pll_lock = ($642 > 0) (chan_isr state 5); cleared at state 5 entry ($089BA0)
+0000B8	L	chan_bit_val	Current data bit (sign of 20 ms I, or toggled on negative dot product when chan_pll_weight < $80); shifted into $4E2 (chan_isr state 5)
+0000C8	L	chan_lock_inhibit_acc	Only ever cleared (chan_isr: when the power-fluctuation metric >= $80, and each 50 ms after copy to $D0); never set nonzero in the image
+0000D0	L	chan_lock_inhibit	50 ms copy of $C8 (chan_isr); = 1 makes chan_lock_detect $089DC0 clear chan_lock_count instead of incrementing
+0000F0	L	chan_edge_ms	State 4 bit sync: candidate bit-edge ms (ms where I changed sign), $FF = none (chan_isr; reset in task_chan_1s, chan_freq_pullin)
+0000F8	L	chan_edge_hits	State 4 bit sync: sign changes at chan_edge_ms; 4 -> chan_bitsync = 1 (chan_isr)
+000104	L	chan_i_sign	Sign of the last I sample (0 / -1) for the bit-edge search (chan_isr state 4)
+000114	L	chan_pll_agc	18400000 / chan_amp ($708 when chan_amp < $2770): gain on the PLL discriminator, set per 10 ms block states 2-5 (chan_isr)
+000124	L	chan_pll_z1	PLL discriminator history, filter -$7971 x z1 + $39C3 x z2 >> 6 (chan_isr states 3-5); cleared with $134 on state 2->3 ($089BA0) and Doppler steps (chan_freq_pullin)
+000134	L	chan_pll_z2	Previous chan_pll_z1 (chan_isr)
+000154	L	chan_disc_prev	Previous 1 ms CS7 +$A read, summed with the current one as a 2 ms pair (chan_isr)
+000164	L	chan_disc_acc	Sum of code discriminator x sign(I) over the current 10 ms (chan_isr states 1-5)
+000174	L	chan_disc_10ms	Latched $164 per 10 ms (chan_isr, task_chan_1s); sign drives +-55 cycle code steps in states 1-3; summed into $302
+000184	L	chan_slew_pending	Code slew steps (55 L1 cycles) still to apply; up to $F3 per ms (table $089E68); set from search window start in state 0; cleared in chan_restart $088E96
+0001A4	L	chan_fll_acc	State 2: sum of 2 ms carrier phase differences (atan table $088A20) over 10 ms (chan_isr)
+0001B4	L	chan_fll_10ms	Latched $1A4; state 2 NCO correction x -30 at blocks 1-2, ($1B4 + $5E2) x -10 at block 5 (chan_isr)
+0001F4	L	chan_fll_weight	State 5, trk_adapt_on: 0-$80 FLL-assist weight; $80 when the power-fluctuation metric >= $80, then -$10 per block (chan_isr); 0 on state 2->3 ($089BA0)
+000204	L	chan_pll_weight	$80 - chan_fll_weight; gain on the PLL discriminator (chan_isr); $80 on state 2->3 ($089BA0)
+000224	L	chan_i_pair	I of the first ms of the 2 ms pair (copy of $234 at even ms, read at $08140C); decompiler substitutes $234 (chan_isr)
+000234	L	chan_i_prev	Previous 1 ms prompt I (chan_isr)
+000244	L	chan_i_acc	Sum of 2 ms I / 4 over the current 10 ms (states 3-5); latest 2 ms I in states 1-2 (chan_isr)
+000254	L	chan_i_10ms	Latched $244 per 10 ms (chan_isr, task_chan_1s)
+000264	L	chan_i_10ms_prev	Previous chan_i_10ms, for the FLL cross/dot products (chan_isr state 5)
+000284	L	chan_q_pair	Q of the first ms of the 2 ms pair (copy of $294 at even ms, read at $081410) (chan_isr)
+000294	L	chan_q_prev	Previous 1 ms prompt Q (chan_isr)
+0002A4	L	chan_q_acc	Sum of 2 ms Q / 4 over the current 10 ms (states 3-5); latest 2 ms Q in states 1-2 (chan_isr)
+0002B4	L	chan_q_10ms	Latched $2A4 per 10 ms (chan_isr, task_chan_1s)
+0002C4	L	chan_q_10ms_prev_neg	Previous chan_q_10ms, negated (chan_isr state 5)
+0002E2	L	chan_fll_aid	FLL filter output ($602 x $79A - $622 x $6F4 >> 8), added to chan_nco_acc each ms in states 3-5 (chan_isr); 0 on state 2->3 ($089BA0)
+000302	L	chan_el_acc	Sum of chan_disc_10ms over the second (chan_isr states 4-5); -> chan_el_sum $322 at isr_50ms 0
+0003A2	L	chan_iq_diff_acc	Sum of I^2 - Q^2 (2 ms pairs) over the current 10 ms (chan_isr states 3-5)
+0003C2	L	chan_iq_diff_10ms	Latched $3A2 per 10 ms (chan_isr, task_chan_1s)
+0003E2	L	chan_iq_diff_50ms_acc	Sum of chan_iq_diff_10ms over 50 ms (chan_isr states 3-5)
+000402	L	chan_iq_diff_50ms	Latched $3E2 per 50 ms (chan_isr); ratio to $482 in chan_lock_detect $089DC0
+000422	L	chan_pow_acc	Sum of I^2 + Q^2 (2 ms pairs) over the current 10 ms (chan_isr states 3-5)
+000442	L	chan_pow_10ms	Latched $422 per 10 ms (chan_isr, task_chan_1s)
+000462	L	chan_pow_50ms_acc	Sum of chan_pow_10ms over 50 ms (chan_isr states 3-5)
+000482	L	chan_pow_50ms	Latched $462 per 50 ms (chan_isr); denominator in chan_lock_detect $089DC0
+0004A2	L	chan_env_50ms_acc	Sum of 10 ms envelope (max + 3/8 min of |I|,|Q|) over 50 ms (chan_isr states 3-5)
+0004C2	L	chan_env_50ms	Latched $4A2 per 50 ms (chan_isr); (env/25)^2 x 200 / ($482 >> 6) in chan_lock_detect $089DC0
+0004E2	L	chan_bit_shift	[8] x 4 longs: 128-bit data-bit shift register, newest bit = bit 0 of the 4th long (chan_isr state 5); copied to chan_bits $562 at the epoch
+0005E2	L	chan_fll_sum	State 2: sum of chan_fll_10ms over blocks 3-4 (chan_isr)
+000602	L	chan_fll_disc	State 5: FLL discriminator, cross product of consecutive 10 ms I/Q x chan_fll_weight / chan_pow_peak, clamped +-$7FFF (chan_isr)
+000622	L	chan_fll_disc_prev	Previous chan_fll_disc (chan_isr); cleared at state 5 entry ($089BA0)
+000642	L	chan_pll_metric	State 5: sum over 5 bits of (dot product - P/2 - 5/8 x 1 ms power) -> chan_pll_lock (chan_isr); cleared at state 5 entry ($089BA0)
+0006A2	L	chan_bit_i_prev	20 ms I of the previous bit (chan_isr state 5 bit decision)
+0006C2	L	chan_pow_floor	10 ms I^2 + Q^2 tracker: falls fast, rises 1/64 (chan_isr state 5); $800000 at state 5 entry ($089BA0)
+0006E2	L	chan_pow_peak	10 ms I^2 + Q^2 tracker: rises fast, falls 1/64 (chan_isr state 5); $800000 at state 5 entry; (peak - floor) x 19 / ((peak + floor) / 32) - 200 = fluctuation metric
+000722	L	chan_bit_env_prev	20 ms envelope of the previous bit (chan_isr state 5 bit decision)
+000782	L	chan_i_half	10 ms I of the first half of the current bit (chan_isr state 5)
+0007A2	L	chan_q_half	10 ms Q of the first half of the current bit (chan_isr state 5)
+0007C2	L	chan_bit_q_prev	20 ms Q of the previous bit (chan_isr state 5 bit decision)
+000822	L	chan_power_sum_acc	Sum of 10 ms envelope over the second (chan_isr states 4-5); -> chan_power_sum $842 at isr_50ms 0
+000862	L	chan_nco_acc	Carrier loop integrator, chan_carrier_nco << 8 (chan_isr states 3-5, clamp $26A7EF00); = $662 << 8 on Doppler changes ($089BA0, chan_freq_pullin)
+000882	L	chan_nco_acc_prev	Previous chan_nco_acc (second-order loop term) (chan_isr); = $862 when the fluctuation metric > 299

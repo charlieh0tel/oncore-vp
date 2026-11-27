@@ -361,18 +361,26 @@ Tracking loop ($0805B2), per channel:
   (L1 cycles per 1 ms code period), advanced by the carrier phase
   read from +$0 (carrier aiding).  Slew steps of $37 = 55 cycles.
 - Pairs of 1 ms samples are summed (2 ms coherent integration).
-- State per channel, RAM $B0 + n: 0 = search (envelope max + 3/8 min
-  against a running noise floor; slews +550 L1 cycles per dwell),
-  1 = code acquire, 2 = settle, 3 = frequency pull-in ($08985C; Doppler
-  +$12E02, -$25C04; gives up at count 6), 4 = frequency lock / bit sync
-  (phase from a 32 x 32 arctangent table at $088A20), 5 = carrier phase
-  lock (second order filter, coefficients -$7971 and $39C3, output to
-  +$0).  Transitions in `task_chan_50ms` $089BA0.
+- State per channel, RAM $B0 + n, transitions in `task_chan_50ms`
+  $089BA0:
+
+| State | Per ms (even ms, paired samples) | Per 10 ms block |
+|---|---|---|
+| 0 search | Envelope (max + 3/8 min of \|I\|, \|Q\|) against the noise floor `chan_amp`, detection in `chan_detect`; +550 L1 cycles per dwell | |
+| 1 code acquire | `chan_disc_acc` $164 += disc x sign(I) | +-1 code step (55 cycles) from the sign of the 10 ms discriminator |
+| 2 frequency pull-in | As 1, plus phase difference from the 32 x 32 arctangent table $088A20 into `chan_fll_acc` $1A4 | Code step; NCO correction from $1B4 / $5E2 |
+| 3 ($08985C: Doppler +$12E02, -$25C04, gives up at count 6) | Carrier loop: -Q sign(I) x weight $204 x AGC $114, filter $124/$134 (-$7971, $39C3), + FLL aid $2E2, integrator $862/$882; $862 >> 8 to CS7 +0 | Code step; 50 ms and 1 s sums |
+| 4 bit sync | Carrier loop; bit-edge search from I sign changes ($F0, $F8; 4 hits -> `chan_bitsync`) | 50 ms and 1 s sums |
+| 5 phase lock | Carrier loop | Fluctuation metric ($6E2/$6C2) sets the weight $1F4 if `trk_adapt_on`; FLL discriminator from the cross product of 10 ms vectors ($602/$622) drives the FLL aid; dot product -> $642 -> `chan_pll_lock`; data bit to $B8 and the shift register $4E2 (4 longs per channel) |
+
+- One pending 10 ms block is processed per interrupt (first channel
+  only); `chan_blk_ready` $68 marks a block at bit_ms 0 or 10.
 - Code loop once per second ($08916C): normalized early-late
   ($0890C0) / $800, clamped to +-2 steps of 55 L1 cycles; +-1 dither in
   state 5.  Carrier aiding of $382 once per second at the epoch.
 - Second epoch in the interrupt: snapshots code phase, carrier phase,
-  NCO rate, amplitude ($7E2 -> $802), data bits ($4E2 -> $562); $2D6
+  NCO rate, amplitude ($7E2 -> $802), data bits ($4E2, 4 longs per
+  channel -> $562); $2D6
   reduced by $2E0 (from $2924, `$091BFA`) each second to steer the epoch.
 - Task interface: command block $275C (8 x $C: SV, Doppler word, code
   window start, width $1809FC full / $133B3 1/20 ms) loaded by $08960C;
@@ -492,7 +500,7 @@ Handlers (first call in each case of the second-level dispatch):
 | Letter | Dispatch | Handlers |
 |---|---|---|
 | A | $0AD03E | Aa $0ACF46, Ab $0AC9F0, Ac $0AC61C, Ad $0ACAEA, Ae $0ACB32, Af $0ACA4E, Ah $0ACF02, Ai $0ACE30, Aj $0AC85A, Ak $0AC764, Al $0AC806, Am $0ACE8E, An $0AC226, Ao $0AC32A, Ap $0AC39C, Aq $0AC90A, Ar $0ACC30, At $0AC938, Au $0AC254, Av $0AC8B6, Aw $0AD2B6, Ax $0ACB7A, Ay $0ACBD2, Az $0ACBA8, AA $0AC8E4, AB $0AC2CE, AC $0AC7B2, AD $0AC5CC, AE $0ACBFC, AF $0ACE02, AG $0AC966, AH $0ACDB4, AI $0ACD6C, AJ $0AC73C |
-| B | $0A4712 | Each rate command saves its rate ($0ADE56), then: Ba $0AA750, Bb $0AAF74, Bc $0A8CD6, Bd $0A8768, Be $0A8560, Bf $0A937E (ephemeris input, acknowledged with @@Cc), Bg $0AAE4E, Bh $0AA822, Bi $0A8EA8 (ephemeris output; sent as @@Bf by the scheduler), Bj $0A9410, Bk $0A8F5C, Bm $0AACA8, Bn $0AAF2C, Bz $0A8D22 (always @@Ez, 8 x $2C records from $27BC) |
+| B | $0A4712 | Each rate command saves its rate ($0ADE56), then: Ba $0AA750, Bb $0AAF74, Bc $0A8CD6, Bd $0A8768, Be $0A8560 (sends 34 @@Cb-format frames: the almanac pages), Bf $0A937E (ephemeris input, acknowledged with @@Cc), Bg $0AAE4E, Bh $0AA822, Bi $0A8EA8 (ephemeris output; sent as @@Bf by the scheduler), Bj $0A9410, Bk $0A8F5C, Bm $0AACA8, Bn $0AAF2C, Bz $0A8D22 (always @@Ez, 8 x $2C records from $27BC) |
 | C | $0A5288 | In fix mode ($C651 = 1) Ca, Cf, Cg stop the channels ($088F78), write the EEPROM and go idle; when idle, Ca runs the self-test and Cf invalidates every EEPROM checksum (+$11111111, `eeprom_invalidate_all` $09AEA8) so defaults load, Cg 1 enters fix mode; Cb $0A9160, Cd $0A4FC2, Ce $0A508E, Ci $0A6CB2 or $0A6C3C (protocol mode 1 or 2), Cj $0A9F04, Cl $0A51D2, Cm $0A55C4 |
 | E | $0A4C44 | If-chain: Ea, Ec, Eg, Ek (save rate, then output), En (TRAIM: validates date and time fields) |
 | F | $0A54EA | Jump table, Fa-Fd |
