@@ -96,6 +96,8 @@ all match the dump.
 | $1174 | 6 | $117A | Oscillator record 1: ($50, $00B9, $501B) |
 | $117E | 1 | | Active record (0 or 1); dump: 1.  If invalid, defaults $67, $015E, $5091 ($09C096) |
 | $1180 | 8 | $1188 | Ionosphere model, Klobuchar alpha0-3, beta0-3, one byte each (scales 2^-30, 2^-27, 2^-24, 2^-24; 2^11, 2^14, 2^16, 2^16, used in $08B5CE): 11 FE FE 02 3C F5 FE 0C |
+| $118C, $118E | 2 + 2 | | Year hint, two slots (word, binary); $1190 selects (0 = $118C, 1 = $118E).  Written only by @@Ac, alternating slots ($09FE2A).  Invalid selector or year outside 1980-2070: $118C = 1992, $1190 = 0 ($09C52C).  Dump: $07EA, $07EA (2026) |
+| $1190 | 1 | | Year slot selector; dump 0 |
 | $11CC | 14 | $11DA | UTC parameters ($08BF50: 604800, 86400, 2^12, 2^-50 scales): bytes 0, 1 = delta-t LS and delta-t LSF = 18, 18; bytes 3, 4 handled as 8-bit week numbers; dump 12 12 24 8E 89 07 00 00 00 00 00 00 00 01 |
 
 Almanac bank ($09BEDE): 32 records of 24 bytes at bank + $18 x SV
@@ -392,6 +394,59 @@ EEPROM write routine $09B2DE (address, source, count): writes only
 bytes that differ, waits for completion after each, and sets bit 1 of
 RAM $7A38 if a byte reads back wrong.
 
+### Date and time
+
+Record (RAM $8EBA, and on the stack): +0 month, +1 day, +2 hour,
++3 minute, +4 year (word), +6 seconds (double).  $09C81A(record) ->
+GPS week mod 1024 ($81AE) and seconds ($819E); $09CE90 does the
+reverse, with year hint $81C4 choosing the 1024-week epoch and $9D86
+= 1 applying UTC.
+
+Boot ($08A714 -> $09B4AC RTC init, $09BD66 -> $09C52C, then the
+almanac check in $09BEDE):
+
+| Step | Detail |
+|---|---|
+| Year hint | $81C4 = EEPROM $118C/$118E per $1190; default 1992 |
+| RTC read | $09B138: no RTC ($2754 = 0) -> month 13, day 32, 25:60:60, 1999; else $09B5DE, year < 50 -> 20xx, else 19xx |
+| Valid | 1980-2070, month 1-12, day 1-31, h <= 23, min <= 59, 0 <= s <= 60.0: $CC5 = 1, week/seconds from the RTC + 2.0 s |
+| Invalid | $CC5 = 0, 01/01/<$81C4> 12:00:00.0 ($09C69C) |
+| Display | $08B1A4 rebuilds $8EBA from $81AE/$819E, $81C4, $819C, $9D86 |
+
+RTC write ($09FE2A): $8EBA minus local offset $819C/$819D; if
+$9D86 = 1, plus the double at $26AE ($09D3E6; UTC -> GPS, inferred);
+then $09B202 (date) and $09B25A (time).  The RTC holds GPS time
+(inferred).  If $9D82 = 1, $81C4 is saved to the other EEPROM year
+slot and $1190 flipped.
+
+| Trigger | Flags | Task |
+|---|---|---|
+| @@Ac (valid) | $81C4 = year, $9D82 = 1, $8E7 | $09FE06: $09FE2A, then $CC5 = 1 |
+| @@Aa (valid) | $8E8 | $09FF78: $09FE2A (date from $8EBA, time from the command) |
+| Mode-3 $C6 input ($0ADA48) | $8E7, $8E8 | Both |
+| GPS time, $08C67C (from $08B248 while $25FA = 0) | $25FA = 1, $8E7, $8E8 | Both; needs a channel state byte ($6FBD + $B6 x n) > 6 and $22F2 = 1 (subframe-1 week stored, $09A816); once per $08B1A4 |
+
+No periodic RTC write.  No time or week stored in EEPROM.
+
+| RAM | Use |
+|---|---|
+| $81C4 | Year hint (word) |
+| $CC5 | Time known: RTC valid at boot, @@Ac task, or navigation with $22F2 set ($08FD50); gates the almanac recheck ($08C718) |
+| $9D82 | Save year to EEPROM; set by @@Ac, cleared by $09FDFC (init) and $09FE2A |
+| $9D86 | 1 = UTC, 0 = GPS; @@Aw ($0AD2B6), protocol-mode entries ($0A63F2, $0A6CB2, $0A6D36); EEPROM block $1098 |
+| $25FA | GPS-time RTC write done; cleared by $08B1A4 |
+| $22F2 | Week from subframe 1 stored ($09A816); cleared by $097BDE |
+
+Readers of the RTC after boot: @@Ac/@@Aa replies in binary mode ($C651
+!= 1; tasks $0AB3B2 -> $0A2CEE, $0AB406 -> $0A41D2) report the RTC
+date/time plus $819C/$819D; with $C651 = 1 they report $8EBA.  @@Ea
+uses $8EBA.  Self-test $0A1D24 (from $0A1D8C): two RTC reads ~120 x
+$09D446 apart, equal seconds -> $2000.
+
+2026-11-26 date 01/03/2026 ~08:22 = week 2399 (95 mod 256) = the
+fallback 01/01/2026 12:00:00 (EEPROM year 2026) + 44 h 22 min
+(inferred: RTC first time-up set at power-up).
+
 ### @@Ea receiver status byte
 
 Built by $0A9BEC (via $0AA772) from RAM $8F1E, which $08ABD4 assembles:
@@ -471,9 +526,22 @@ never enabled.
 | MC68HC68T1 RTC | PCS0, active high | $A104 (8-bit, CPHA 1, ~2.1 MHz) | $09B4AC init and presence test (T1 RAM $00-$02), $09B5DE read time and date, $09B76C write date, $09B844 write time |
 | Oscillator tuning device (inferred) | PCS1, active low | $A008 (8-bit, CPOL 0, CPHA 0, 1.05 MHz) | $09B31A(v), below |
 
-RTC: control $B1 = $34 to stop, burst read $20-$26, then $B4 to
-start; interrupt control $B2 = $00 then $20.  Time and date in RAM
-$2755-$275A.
+RTC (MC68HC68T1, PCS0):
+
+| Routine | Transfers |
+|---|---|
+| $09B4AC init | Write $80-$82 = FF 55 AA, read $00-$02; match: $2754 = 1, $B2 = $00 then $20 (power sense on; watchdog, power-down, alarm, periodic off); else $2754 = 0 |
+| $09B5DE read | Read status $30; bit 4 (first time-up) clear: $B1 = $34 (stop), burst read $20-$26, $B1 = $B4 (start); set: BCD 60 s, 60 min, 25 h, day 32, month 13, year 99, then re-read status until bit 4 clears |
+| $09B76C write date | $B1 = $34; $A4-$A6 = day, month, year mod 100; $B1 = $B4 |
+| $09B844 write time | $B1 = $34; $A0-$A2 = s, min, h (24-hour); $B1 = $B4 |
+
+- Clock control $34/$B4: 32.768 kHz crystal, CLKOUT low, stop/start.
+  Not written at init; after a T1 power-on reset it stays $00
+  (stopped) until the next read with first time-up clear or a write.
+- Never written: day of week ($A3), alarms ($A8-$AA).
+- RAM: $2754 present flag; BCD $2759 s, $2757 min, $2756 h, $2755 day,
+  $2758 month, $275A year.
+- BCD helpers: $09B0F6 (BCD to binary), $09B116 (binary to BCD).
 
 QSM pins ($08A064): QPDR $F0, QPAR $7B, QDDR $FE; PCS0 idles low,
 PCS1-3 high.  Command RAM values in the image: $7C (PCS1), $FF/$7F
@@ -643,8 +711,9 @@ MC68HC68T1, 16-pin (third_party/moto/MC68HC68.pdf, REV 2):
   20507; defaults $67, 20625).
 - Live oscillator drift: rerun the BDM monitor now that the receiver
   tracks (after @@Ac/@@Aa, 2026-11-26).
-- Where the boot date comes from (RTC on QSPI?) and whether @@Ac/@@Aa
-  update it; a wrong boot date rejects the almanac (cold-start trouble).
+- T1 VBATT (pin 13) source on the 8ch board and jig; whether the RTC
+  keeps time across a power cycle (poll @@Ac in binary mode after a
+  power cycle).
 - Confirm the RF chain antenna -> A06 -> 95U01 SAW -> 58M01 by
   continuity.
 - Confirm the /656 is in the hybrid (29.110 kHz on a hybrid pin, traced
