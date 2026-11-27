@@ -25,6 +25,11 @@ moto/vponcoreengnotesarchive.pdf
     Motorola VP Oncore engineering notes.  Originally from
     https://synergy-gps.com/wp-content/uploads/2018/11/vponcoreengnotesarchive.pdf
 
+moto/ut-oncore-engnotes.pdf
+    Motorola UT Oncore engineering notes ("Oncore Technical Application
+    Note", April 2000).  Originally from
+    https://synergy-gps.com/wp-content/uploads/2018/11/ut-engg-notes.pdf
+
 onsemi/MC34064-D.PDF
     ON Semiconductor MC34064, MC33064, NCV33064 undervoltage sensing
     circuit data sheet (originally a Motorola part).
