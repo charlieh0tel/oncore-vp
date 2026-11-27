@@ -894,16 +894,21 @@ Z3805A's (SSG0163878) locked 84% of snapshots; the Z3801A's
   The two boards agree at every node within supply differences, except
   R27/R56 about 0.13 V lower on SSG0163878; no node is dead on either.
   The antenna pin carries DC (feed circuit works).
+- SSG0178541 with the antenna, almanac (@@Cb), position and date set:
+  9 visible, no channel tracked in 20 min.  It had reset during the
+  probing and come back at 01/01/2044 with the almanac rejected; date
+  and almanac were set again before the run.
 
 ## 6-channel firmware and EEPROM (read 2026-11-27)
 
-Read from SSG0163878 over the host port with `tools/loader/dump.py`
+Read from SSG0163878 (and the EEPROM of SSG0178541) over the host port with `tools/loader/dump.py`
 (factory loader @@Tq, stub at $C000; the 6ch loader returns to $09EBBC).
 
 | Image | Size | SHA-256 |
 |---|---|---|
 | `third_party/moto/B1121P1114-flash.bin` ($080000) | 256 KB | `7342ef6684d609daeb4d2b02461d89631837ee524c2799440407060d52384607` |
 | `eeprom/B1121P1114-SSG0163878-eeprom.bin` ($020000) | 8 KB | `fe98b0fe0c92f5d6a03dac8001cc5c81e8d7bccb74efed6b9b5e7a3d2c94590d` |
+| `eeprom/B1121P1114-SSG0178541-eeprom.bin` ($020000) | 8 KB | `06a4f02fb5a53a434812c59430084c127f3f42ca59b71e61dda2b1d73f68382c` |
 
 - Flash trailer: even-byte sum $00E270E2, odd-byte sum $00FF0E12, both
   match the image.  Reset vectors SSP $00020000, PC $0008797C.

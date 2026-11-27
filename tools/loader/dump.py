@@ -55,9 +55,19 @@ class Loader:
         return b'@@S' + letter + body + bytes([ord('S') ^ letter[0] ^ xor(body)]) + b'\r\n'
 
     def enter(self):
+        # Already in the loader?  @@Sd (no action) answers there.  Sending @@Tq
+        # inside the loader would start a frame that swallows what follows.
+        self.p.reset_input_buffer()
+        self.p.write(self.frame(b'd', b''))
+        try:
+            self.reply(b'Sd', 1.5)
+            return 'already in the loader'
+        except RuntimeError:
+            pass
         self.p.reset_input_buffer()
         self.p.write(b'@@Tq' + bytes([ord('T') ^ ord('q')]) + b'\r\n')
-        return self.reply(b'Tq')
+        self.reply(b'Tq')
+        return 'entered the loader'
 
     def write(self, addr, data, chunk=64):
         for o in range(0, len(data), chunk):
@@ -79,10 +89,7 @@ def main():
     ap.add_argument('out')
     a = ap.parse_args()
     L = Loader(a.port)
-    try:
-        L.enter()
-    except RuntimeError:
-        pass  # already in the loader from an earlier run
+    print(L.enter())
     L.write(RAM, STUB[:0x40] + struct.pack('>II', a.base, a.length))
     t = time.time()
     data, st = L.go(RAM, 4 + a.length, a.length * 10 / 9600 * 1.3 + 10)
