@@ -895,6 +895,22 @@ Z3805A's (SSG0163878) locked 84% of snapshots; the Z3801A's
   R27/R56 about 0.13 V lower on SSG0163878; no node is dead on either.
   The antenna pin carries DC (feed circuit works).
 
+## 6-channel firmware and EEPROM (read 2026-11-27)
+
+Read from SSG0163878 over the host port with `tools/loader/dump.py`
+(factory loader @@Tq, stub at $C000; the 6ch loader returns to $09EBBC).
+
+| Image | Size | SHA-256 |
+|---|---|---|
+| `third_party/moto/B1121P1114-flash.bin` ($080000) | 256 KB | `7342ef6684d609daeb4d2b02461d89631837ee524c2799440407060d52384607` |
+| `eeprom/B1121P1114-SSG0163878-eeprom.bin` ($020000) | 8 KB | `fe98b0fe0c92f5d6a03dac8001cc5c81e8d7bccb74efed6b9b5e7a3d2c94590d` |
+
+- Flash trailer: even-byte sum $00E270E2, odd-byte sum $00FF0E12, both
+  match the image.  Reset vectors SSP $00020000, PC $0008797C.
+- ID strings at flash $2C74E: SFTW P/N 98-P39972M, VER 8, REV 4,
+  13 JUL 1995.  EEPROM ID text at $087A, as on the 8ch: B1121P1114,
+  SSG0163878, 6G09, options IB.
+
 ## Host instruments
 
 CPU hand marks (owner): '03A = from the HP 58503A, '01A = Z3801A,

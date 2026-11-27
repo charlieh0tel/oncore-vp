@@ -6,6 +6,13 @@ moto/B4121P1115-flash.bin
     98-P36830P, VER 8, REV 8, 06 Aug 1996.  Read over BDM from the
     receiver in an HP 58503A.  Copyright 1991-1996 Motorola, Inc.
 
+moto/B1121P1114-flash.bin
+    Boot flash of a Motorola Oncore 6-channel receiver, model B1121P1114,
+    software P/N 98-P39972M, VER 8, REV 4, 13 Jul 1995 (serial
+    SSG0163878, from an HP Z3805A).  Read over the host port through the
+    firmware's factory loader (tools/loader).  Copyright 1991-1995
+    Motorola, Inc.
+
 moto/decompiled/B4121P1115.c
     Ghidra decompiler output for moto/B4121P1115-flash.bin, with names and
     types from tools/ghidra.  Derived from the vendor image; regenerate
