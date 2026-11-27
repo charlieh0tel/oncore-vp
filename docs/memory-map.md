@@ -832,10 +832,17 @@ Same layout as the 6ch board (TM-AB / BM-AB, 84D43579M03).
 
 ## 6-channel receivers over serial (2026-11-27)
 
-Both boards on USB serial, no antennas.  Which receiver is which board
-is not recorded.
+Both boards on USB serial, no antennas.  Serial to instrument and board
+(smartclock docs and pForth captures): SSG0178541 = Z3801A (3542A01548),
+*7VGN4*; SSG0163878 = Z3805A (3625A01487), *7VENR*.  The label pairing
+assumes each module stayed in its instrument.
 
-| | First | Second |
+In service (smartclock daemon logs, 2026-09-26 to 10-11, same feed):
+both tracked only with 20 dB extra gain, and then 2-4 satellites.  The
+Z3805A's (SSG0163878) locked 84% of snapshots; the Z3801A's
+(SSG0178541) 20%, and lost all satellites where the other held.
+
+| | First (Z3805A) | Second (Z3801A) |
 |---|---|---|
 | @@Cj model / serial | B1121P1114 / SSG0163878 | B1121P1114 / SSG0178541 |
 | Manufactured | 6G09 | 6J25 |
