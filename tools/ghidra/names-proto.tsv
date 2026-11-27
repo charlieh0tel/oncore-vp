@@ -1,4 +1,4 @@
-# address	kind	name	note
+# address	kind	name	note	type (S rows, optional)
 00633A	L	alm_auto_update	rename: cfg_An. @@An 0/1, default 1, EEPROM $1026. 1 = almanac_switch validates and adopts almanacs collected from the satellites (task from alm_word_store); 0 = only an @@Cb almanac (alm_new_ready) is adopted
 0079F6	L	dgps_max_age	@@AJ 5-180 s, default 90, EEPROM block $10D0; diff_age_check: corrections stale when age >= this x 10
 0079F7	L	svset_dop_kind	rename: cfg_Aj. @@Aj, default internal 2; DOP used to rank SV sets (copied to pred bank +$619, dop_compute $08C7DE). Host 0 GDOP, 1 PDOP, 2 HDOP, 3 VDOP, 4 TDOP -> internal 0, 2, 1, 4, 3 (internal 0 G, 1 H, 2 P, 3 T, 4 V); EEPROM $1027
@@ -36,27 +36,27 @@
 09C72E	F	bm_fields_clear	Zeroes $3605-$3618 and @@Cm values $3630-$3642; only caller boot_search_reset
 006347+00	S	bin_sel	test_hdr (@@Tc/@@Td head, 12 bytes): doppler_bin_sel (@@AB)
 006347+01	S	sel_mode	0 auto, 1 manual (sv_manual), 2 by elevation (srch_by_elev)
-006347+02	S	vel_n	word m/s, dtoui of search_ctl +$14
-006347+04	S	vel_e	word m/s, search_ctl +$1C
-006347+06	S	vel_u	word m/s, search_ctl +$0C
-006347+08	S	center	word, search center $113C
+006347+02	S	vel_n	word m/s, dtoui of search_ctl +$14	s16
+006347+04	S	vel_e	word m/s, search_ctl +$1C	s16
+006347+06	S	vel_u	word m/s, search_ctl +$0C	s16
+006347+08	S	center	word, search center $113C	s16
 006347+0A	S	center_set	$113E
 006347+0B	S	cold	$113F
 006353+00	S	sv	test_rec[8] x 7 (6 sent in @@Tc): SV ($CF6)
 006353+01	S	state	search state ($CF7)
 006353+02	S	strategy	$CF9
-006353+03	S	bin_hz	word, Doppler bin offset x 100 Hz
-006353+05	S	doppler_hz	word, chan_cmd doppler x 3.3111572265625
+006353+03	S	bin_hz	word, Doppler bin offset x 100 Hz	s16
+006353+05	S	doppler_hz	word, chan_cmd doppler x 3.3111572265625	s16
 00638B+00	S	chan	test_chan_rec[8] x 18: channel
 00638B+01	S	sv	$CF6
 00638B+02	S	state	$CF7
 00638B+03	S	strategy	$CF9
 00638B+04	S	step_on	$CFF
 00638B+05	S	bin	$D00
-00638B+06	S	bin_hz	word
-00638B+08	S	doppler_hz	word
-00638B+0A	S	code_width	long, chan_cmd +8
-00638B+0E	S	code_start	long, chan_cmd +4
+00638B+06	S	bin_hz	word	s16
+00638B+08	S	doppler_hz	word	s16
+00638B+0A	S	code_width	long, chan_cmd +8	s32
+00638B+0E	S	code_start	long, chan_cmd +4	s32
 001106+0C	S	vel_up	search_ctl: copy of $8F20-$8F47 (vel up, north, east, heading, speed) when fix_valid (chan_search_center)
-001106+14	S	vel_north	double
-001106+1C	S	vel_east	double
+001106+14	S	vel_north	double	double
+001106+1C	S	vel_east	double	double

@@ -1,4 +1,4 @@
-# address	kind	name	note
+# address	kind	name	note	type (S rows, optional)
 08048E	F	sci_isr	docs/memory-map.md
 0805B2	F	chan_isr	docs/memory-map.md; renamed per names-io review
 088E96	F	chan_restart	docs/memory-map.md

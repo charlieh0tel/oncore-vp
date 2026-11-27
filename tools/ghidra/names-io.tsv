@@ -1,4 +1,4 @@
-# address	kind	name	note
+# address	kind	name	note	type (S rows, optional)
 0008E9	L	settings_dirty	set by A-command handlers on a valid change (e.g. cmd_Ay, cmd_Az, cmd_AJ)
 0008ED	L	rx_event	set by sci_isr on each received byte before waking task $08A11A
 002428	L	iono_params	8 bytes Klobuchar, EEPROM $1180

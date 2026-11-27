@@ -1,4 +1,4 @@
-# address	kind	name	note
+# address	kind	name	note	type (S rows, optional)
 0008C3	L	task_run_chan_50ms	task 1 running flag (sched_dispatch)
 0008C4	L	task_run_chan_1s	task 2 running flag (sched_dispatch)
 0008C5	L	task_run_restart	task 3 running flag (sched_dispatch)

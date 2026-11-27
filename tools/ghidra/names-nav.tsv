@@ -1,4 +1,4 @@
-# address	kind	name	note
+# address	kind	name	note	type (S rows, optional)
 08A7AE	F	task_meas_epoch	1 Hz task: diff_age_check, nav_data_task $097D2A, channel mgmt $095582, nav_step, rcvr_status_build, traim $0A053A; nav_mode_drop if $9D11 = 0
 08A8A2	F	chan_status_snapshot	Copies per-channel SV/mode/C-N ($CF6 + $28n) and $2760/$2764 into output staging $6347-$63FF; x 3.3111572265625 scale
 08AC74	F	epoch_timing_probe	Only when $2621 = 1: stamps level-5 epoch counters $2D6/$100 into $7042 + $B6n (up to 8 per epoch)
@@ -212,35 +212,35 @@
 007A3C+000	S	valid	eph[ch], stride $EC, ch 0-7
 007A3C+001	S	iode	IODE copy from eph_store +$46
 007A3C+002	S	new	Set at decode; forces phasor init
-007A3C+004	S	toe	double
-007A3C+00C	S	m0	2^-31 pi
-007A3C+014	S	dn	2^-43 pi
-007A3C+01C	S	e	2^-33
-007A3C+024	S	sqrta	2^-19
-007A3C+02C	S	omega0	2^-31 pi
-007A3C+034	S	i0	2^-31 pi (phasor with IDOT)
-007A3C+03C	S	w	2^-31 pi; sin/cos at +$CC/+$D4
-007A3C+044	S	omegadot	2^-43 pi
-007A3C+04C	S	idot	2^-43 pi
-007A3C+054	S	cuc	2^-29
-007A3C+05C	S	cus	2^-29
-007A3C+064	S	crc	2^-5
-007A3C+06C	S	crs	2^-5
-007A3C+074	S	cic	2^-29
-007A3C+07C	S	cis	2^-29
-007A3C+084	S	tgd	2^-31
-007A3C+08C	S	toc	x 16
-007A3C+094	S	af2	2^-55
-007A3C+09C	S	af1	2^-43
-007A3C+0A4	S	af0	2^-31
-007A3C+0AC	S	n	sqrt(mu)/A^1.5 + dn
-007A3C+0B4	S	sqrt1e2	sqrt(1 - e^2)
-007A3C+0BC	S	omegadot_we	Omegadot - We
-007A3C+0C4	S	omega0_we	Omega0 - We x toe
-007A3C+0CC	S	sinw	sin w
-007A3C+0D4	S	cosw	cos w
-007A3C+0DC	S	a	sqrtA^2
-007A3C+0E4	S	esqrta	e x sqrtA (relativistic term with F)
+007A3C+004	S	toe	double	double
+007A3C+00C	S	m0	2^-31 pi	double
+007A3C+014	S	dn	2^-43 pi	double
+007A3C+01C	S	e	2^-33	double
+007A3C+024	S	sqrta	2^-19	double
+007A3C+02C	S	omega0	2^-31 pi	double
+007A3C+034	S	i0	2^-31 pi (phasor with IDOT)	double
+007A3C+03C	S	w	2^-31 pi; sin/cos at +$CC/+$D4	double
+007A3C+044	S	omegadot	2^-43 pi	double
+007A3C+04C	S	idot	2^-43 pi	double
+007A3C+054	S	cuc	2^-29	double
+007A3C+05C	S	cus	2^-29	double
+007A3C+064	S	crc	2^-5	double
+007A3C+06C	S	crs	2^-5	double
+007A3C+074	S	cic	2^-29	double
+007A3C+07C	S	cis	2^-29	double
+007A3C+084	S	tgd	2^-31	double
+007A3C+08C	S	toc	x 16	double
+007A3C+094	S	af2	2^-55	double
+007A3C+09C	S	af1	2^-43	double
+007A3C+0A4	S	af0	2^-31	double
+007A3C+0AC	S	n	sqrt(mu)/A^1.5 + dn	double
+007A3C+0B4	S	sqrt1e2	sqrt(1 - e^2)	double
+007A3C+0BC	S	omegadot_we	Omegadot - We	double
+007A3C+0C4	S	omega0_we	Omega0 - We x toe	double
+007A3C+0CC	S	sinw	sin w	double
+007A3C+0D4	S	cosw	cos w	double
+007A3C+0DC	S	a	sqrtA^2	double
+007A3C+0E4	S	esqrta	e x sqrtA (relativistic term with F)	double
 00641C+000	S	omega_ph	svst[ch], stride $174; phasor: +0 t, +8 rate, +$10 rate dt, +$18/+$20 sin/cos step, +$28/+$30 sin/cos, +$38 angle
 00641C+040	S	m_ph	Mean-anomaly phasor (same layout)
 00641C+080	S	i_ph	Inclination phasor (same layout)
@@ -268,7 +268,7 @@
 008FDA+054	S	sum	~sum8 of 84 bytes
 0082D8+000	S	status	eph_collect[SV], stride $50; 2 when complete
 0082D8+001	S	words	24 x 3 bytes
-0082D8+04A	S	mask	Word bitmask, $FFFFFF = all
+0082D8+04A	S	mask	Word bitmask, $FFFFFF = all	s16
 0082D8+04E	S	ready	1 = ready to commit
 0058DE+000	S	rec	Almanac buffer: record SV n at +$18 x n: +0 dataID/SVid, +1 e, +3 toa, +4 di, +6 Omegadot, +8 health, +9 sqrtA, +$C Omega0, +$F w, +$12 M0, +$15 af0/af1
 0058DE+318	S	page25	Two 24-byte records: sf5 page 25 (+$319 toa, +$31A week), sf4 page 25
@@ -277,22 +277,22 @@
 0058DE+36F	S	week	Almanac week (mod 256)
 0058DE+370	S	toa	toa (s, long)
 00116A+000	S	e	alm_exp[SV], stride $88; 2^-21
-00116A+008	S	i	inclination
-00116A+010	S	omegadot	2^-38 pi
-00116A+018	S	sqrta	2^-11
-00116A+020	S	omega0	2^-23 pi
-00116A+028	S	w	2^-23 pi
-00116A+030	S	m0	2^-23 pi
-00116A+038	S	a	semi-major axis
-00116A+040	S	n	mean motion
-00116A+048	S	ea	e x A
-00116A+050	S	omega0_we	Omega0 - We x toa
-00116A+058	S	omegadot_we	Omegadot - We
-00116A+060	S	sqrt1e2	sqrt(1 - e^2)
-00116A+068	S	sini	sin i
-00116A+070	S	cosi	cos i
-00116A+078	S	af0	2^-20
-00116A+080	S	af1	2^-38
+00116A+008	S	i	inclination	double
+00116A+010	S	omegadot	2^-38 pi	double
+00116A+018	S	sqrta	2^-11	double
+00116A+020	S	omega0	2^-23 pi	double
+00116A+028	S	w	2^-23 pi	double
+00116A+030	S	m0	2^-23 pi	double
+00116A+038	S	a	semi-major axis	double
+00116A+040	S	n	mean motion	double
+00116A+048	S	ea	e x A	double
+00116A+050	S	omega0_we	Omega0 - We x toa	double
+00116A+058	S	omegadot_we	Omegadot - We	double
+00116A+060	S	sqrt1e2	sqrt(1 - e^2)	double
+00116A+068	S	sini	sin i	double
+00116A+070	S	cosi	cos i	double
+00116A+078	S	af0	2^-20	double
+00116A+080	S	af1	2^-38	double
 0037A2+000	S	nsets	Prediction buffer ($B14): number of SV sets
 0037A2+001	S	nsearch	Search list length
 0037A2+002	S	nvisible	Visible SV count
@@ -311,7 +311,7 @@
 000E36+036	S	shreg	32-bit bit shift register
 000E36+03A	S	nbits	Bits in register
 000E36+03B	S	subframe	Subframe id 1-5
-000E36+03C	S	word	Word 1-10
+000E36+03C	S	word	Word 1-10	s16
 000E36+03D	S	d29	D29*
 000E36+03E	S	d30	D30* (invert)
 000E36+03F	S	page_sv	sf4/5 SV id (word 3)
@@ -332,3 +332,26 @@
 006FBC+0A2	S	zcount	TOW from HOW (6 s units)
 006FBC+0A6	S	tx_time	Transmit time (s, double)
 006FBC+0AE	S	range_rate	Carrier range rate (m/s, double)
+008FDA+0F	S	tgd	raw ICD-200 field, read by eph_unpack $098C68	s8
+008FDA+11	S	toc	raw ICD-200 field, read by eph_unpack $098C68	u16
+008FDA+13	S	af2	raw ICD-200 field, read by eph_unpack $098C68	s8
+008FDA+14	S	af1	raw ICD-200 field, read by eph_unpack $098C68	s16
+008FDA+16	S	af0_hi	raw ICD-200 field, read by eph_unpack $098C68	s8
+008FDA+17	S	af0_lo	raw ICD-200 field, read by eph_unpack $098C68	u16
+008FDA+1A	S	crs	raw ICD-200 field, read by eph_unpack $098C68	s16
+008FDA+1C	S	dn	raw ICD-200 field, read by eph_unpack $098C68	s16
+008FDA+1E	S	m0	raw ICD-200 field, read by eph_unpack $098C68	s32
+008FDA+22	S	cuc	raw ICD-200 field, read by eph_unpack $098C68	s16
+008FDA+24	S	e	raw ICD-200 field, read by eph_unpack $098C68	u32
+008FDA+28	S	cus	raw ICD-200 field, read by eph_unpack $098C68	s16
+008FDA+2A	S	sqrta	raw ICD-200 field, read by eph_unpack $098C68	u32
+008FDA+31	S	cic	raw ICD-200 field, read by eph_unpack $098C68	s16
+008FDA+33	S	omega0	raw ICD-200 field, read by eph_unpack $098C68	s32
+008FDA+37	S	cis	raw ICD-200 field, read by eph_unpack $098C68	s16
+008FDA+39	S	i0	raw ICD-200 field, read by eph_unpack $098C68	s32
+008FDA+3D	S	crc	raw ICD-200 field, read by eph_unpack $098C68	s16
+008FDA+3F	S	w	raw ICD-200 field, read by eph_unpack $098C68	s32
+008FDA+43	S	omegadot_hi	raw ICD-200 field, read by eph_unpack $098C68	s8
+008FDA+44	S	omegadot_lo	raw ICD-200 field, read by eph_unpack $098C68	u16
+008FDA+46	S	iode	raw ICD-200 field, read by eph_unpack $098C68	u8
+008FDA+47	S	idot	raw ICD-200 field, read by eph_unpack $098C68	u16

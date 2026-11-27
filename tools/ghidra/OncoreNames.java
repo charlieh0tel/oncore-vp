@@ -1,7 +1,8 @@
 // Applies the name tables names-*.tsv in this directory (columns: address,
 // kind, name, note).  Kinds: F function (created if missing), L label,
 // S struct field "BASE+OFF" (renames or defines a byte field in the
-// struct or struct array at BASE).  Later files win where they disagree:
+// struct or struct array at BASE; optional 5th column gives the field
+// type: u8 s8 s16 u16 s32 u32 float double).  Later files win where they disagree:
 // files are read in name order with names-core.tsv first.  Replaces
 // Ghidra default names and names this script set; leaves other names
 // (OncoreFloat, OncoreLibNames) alone.  Run after OncoreLibNames.java.
@@ -45,7 +46,7 @@ public class OncoreNames extends GhidraScript {
                 if (line.isBlank() || line.startsWith("#")) continue;
                 String[] c = line.split("\t");
                 if (c.length < 3) { bad++; continue; }
-                try { apply(c[0].trim(), c[1].trim(), c[2].trim()); }
+                try { apply(c[0].trim(), c[1].trim(), c[2].trim(), c.length > 4 ? c[4].trim() : ""); }
                 catch (Exception e) { println(f.getName() + ": " + line + ": " + e.getMessage()); bad++; }
             }
             println(f.getName() + ": " + (fn + lb + sf - before) + " applied");
@@ -53,8 +54,8 @@ public class OncoreNames extends GhidraScript {
         println(fn + " functions, " + lb + " labels, " + sf + " struct fields, " + kept + " kept, " + bad + " bad");
     }
 
-    private void apply(String addr, String kind, String name) throws Exception {
-        if (kind.equals("S")) { field(addr, name); return; }
+    private void apply(String addr, String kind, String name, String type) throws Exception {
+        if (kind.equals("S")) { field(addr, name, type); return; }
         Address a = toAddr(Long.parseLong(addr, 16));
         if (kind.equals("X")) {
             Function f = getFunctionAt(a);
@@ -88,7 +89,7 @@ public class OncoreNames extends GhidraScript {
         }
     }
 
-    private void field(String spec, String name) throws Exception {
+    private void field(String spec, String name, String type) throws Exception {
         String[] p = spec.split("\\+");
         Address base = toAddr(Long.parseLong(p[0], 16));
         int off = Integer.parseInt(p[1], 16);
@@ -99,6 +100,12 @@ public class OncoreNames extends GhidraScript {
         if (!(t instanceof Structure)) { println("no struct at " + base + " for field " + name); bad++; return; }
         Structure s = (Structure) t;
         if (off >= s.getLength()) { println("offset past " + s.getName() + " for " + name); bad++; return; }
+        DataType ft = fieldType(type);
+        if (ft != null && off + ft.getLength() <= s.getLength()) {
+            s.replaceAtOffset(off, ft, ft.getLength(), name, null);
+            sf++;
+            return;
+        }
         DataTypeComponent c = s.getComponentContaining(off);
         if (c != null && c.getOffset() == off && c.getDataType() != DataType.DEFAULT) {
             if (!name.equals(c.getFieldName())) c.setFieldName(name);
@@ -106,5 +113,19 @@ public class OncoreNames extends GhidraScript {
             s.replaceAtOffset(off, ByteDataType.dataType, 1, name, null);
         }
         sf++;
+    }
+
+    private DataType fieldType(String t) {
+        switch (t) {
+            case "u8": return ByteDataType.dataType;
+            case "s8": return SignedByteDataType.dataType;
+            case "s16": return ShortDataType.dataType;
+            case "u16": return UnsignedShortDataType.dataType;
+            case "s32": return IntegerDataType.dataType;
+            case "u32": return UnsignedIntegerDataType.dataType;
+            case "float": return FloatDataType.dataType;
+            case "double": return DoubleDataType.dataType;
+            default: return null;
+        }
     }
 }

@@ -1,4 +1,4 @@
-# address	kind	name	note
+# address	kind	name	note	type (S rows, optional)
 0805B2	F	chan_isr	Level-5 autovector (vector 29); reads 8 CS7 channel blocks, 1 ms tick ($2D6 x50, $100 x20); OncoreNames.java has sci_tx here (wrong; SCI is $08048E)
 088F8A	F	cs7_ctl_bit0_set	Sets bit 0 of CS7 control shadow $2D8 -> $FFE8F4; called only from task $08A6F0 (pending $8EC, set by @@F)
 088F98	F	chan_start_all	Clears bit 1 of $2D8 -> $FFE8F4 (set by chan_stop_all) and PPS enable $103; after channel restarts in $08A692
@@ -158,23 +158,23 @@
 006FBC+04	S	ura	Subframe 1 URA index (init $3F)
 006FBC+06	S	sf_buf	Subframe being assembled: +0 id, +1 SV, 10 x (data long, flag) (nav_data_decode)
 006FBC+44	S	sf_last	Last complete subframe ($7000 + $B6 x n), copy of chrec_sf_buf
-006FBC+84	S	code_err	Word, code discriminator ($7040)
-006FBC+86	S	signal	Word, amplitude ($7042); @@Ea signal = high byte; timing probe when $2621 = 1
-006FBC+88	S	code_phase	Long, code phase in L1 cycles ($7044)
-006FBC+8C	S	carrier	Long, carrier phase at epoch, +$8000 if data inverted ($7048)
-006FBC+90	S	range_raw	Double, raw code range m mod 1 ms ($704C)
-006FBC+98	S	range_smooth	Double, carrier-smoothed range m ($7054)
-006FBC+A0	S	smooth_count	Word, smoothing count ($705C)
-006FBC+A2	S	tow	Long, HOW TOW count (x 6 s) ($705E)
-006FBC+A6	S	tx_time	Double, signal transmit time s of week ($7062)
+006FBC+84	S	code_err	Word, code discriminator ($7040)	s16
+006FBC+86	S	signal	Word, amplitude ($7042); @@Ea signal = high byte; timing probe when $2621 = 1	s16
+006FBC+88	S	code_phase	Long, code phase in L1 cycles ($7044)	s32
+006FBC+8C	S	carrier	Long, carrier phase at epoch, +$8000 if data inverted ($7048)	s32
+006FBC+90	S	range_raw	Double, raw code range m mod 1 ms ($704C)	double
+006FBC+98	S	range_smooth	Double, carrier-smoothed range m ($7054)	double
+006FBC+A0	S	smooth_count	Word, smoothing count ($705C)	s16
+006FBC+A2	S	tow	Long, HOW TOW count (x 6 s) ($705E)	s32
+006FBC+A6	S	tx_time	Double, signal transmit time s of week ($7062)	double
 0027BC+00	S	sv	Report (stride $2C): SV ($E0)
 0027BC+01	S	state	ISR state ($B0); forced to 4 when chrec_pll_unstable
-0027BC+02	S	amp	Word, chan_amp_epoch clipped to $FFFF
-0027BC+04	S	code_phase	Long, chan_code_phase (L1 cycles)
-0027BC+08	S	carrier_nco	Long, carrier NCO at epoch (x 0.012934 = Hz)
-0027BC+0C	S	carrier_phase	Long, carrier phase at epoch
-0027BC+10	S	carrier_800ms	Long, carrier phase at ms 800
-0027BC+14	S	code_err	Word, chan_code_err
+0027BC+02	S	amp	Word, chan_amp_epoch clipped to $FFFF	s16
+0027BC+04	S	code_phase	Long, chan_code_phase (L1 cycles)	s32
+0027BC+08	S	carrier_nco	Long, carrier NCO at epoch (x 0.012934 = Hz)	s32
+0027BC+0C	S	carrier_phase	Long, carrier phase at epoch	s32
+0027BC+10	S	carrier_800ms	Long, carrier phase at ms 800	s32
+0027BC+14	S	code_err	Word, chan_code_err	s16
 0027BC+16	S	lock_count	Lock count, max 20
 0027BC+17	S	pll_count	PLL lock count, max 20 (= +$16 below state 5)
 0027BC+18	S	pll_loss	PLL loss count
@@ -191,20 +191,20 @@
 000CF6+09	S	step_on	1 = stepping allowed (cleared for forced channels $9CEB)
 000CF6+0A	S	bin	Current Doppler bin index
 000CF6+0B	S	dwell	Dwell count: report code phase moved > $C04FE from srch_code_last
-000CF6+0C	S	doppler	Long, total Doppler offset -(center + user + SV)
-000CF6+10	S	code_expect	Long, expected code phase (L1 cycles)
-000CF6+14	S	code_last	Long, last code phase (init $C04FE)
-000CF6+18	S	doppler_sv	Long, SV Doppler from measured carrier (srch_state_update)
-000CF6+1C	S	doppler_user	Long, user-motion Doppler (chan_doppler_user)
-000CF6+20	S	timer	Long, ms since loss (+1000 + adjust per second)
+000CF6+0C	S	doppler	Long, total Doppler offset -(center + user + SV)	s32
+000CF6+10	S	code_expect	Long, expected code phase (L1 cycles)	s32
+000CF6+14	S	code_last	Long, last code phase (init $C04FE)	s32
+000CF6+18	S	doppler_sv	Long, SV Doppler from measured carrier (srch_state_update)	s32
+000CF6+1C	S	doppler_user	Long, user-motion Doppler (chan_doppler_user)	s32
+000CF6+20	S	timer	Long, ms since loss (+1000 + adjust per second)	s32
 000E36+00	S	sv	Decoder record (stride $5A): SV
-000E36+02	S	code_weight	Word, $2000000 / dec_code_noise
-000E36+04	S	code_noise	Long, filtered |delta code err| (init $8000)
-000E36+08	S	smooth_base	Double, Hatch filter base range
-000E36+12	S	smooth_w	Double, Hatch weight 1/N
-000E36+1C	S	smooth_n	Word, N (1..128)
-000E36+1E	S	smooth_corr	Double, carrier correction
-000E36+36	S	shift	Long, data-bit shift register
+000E36+02	S	code_weight	Word, $2000000 / dec_code_noise	s16
+000E36+04	S	code_noise	Long, filtered |delta code err| (init $8000)	s32
+000E36+08	S	smooth_base	Double, Hatch filter base range	double
+000E36+12	S	smooth_w	Double, Hatch weight 1/N	double
+000E36+1C	S	smooth_n	Word, N (1..128)	s16
+000E36+1E	S	smooth_corr	Double, carrier correction	double
+000E36+36	S	shift	Long, data-bit shift register	s32
 000E36+3A	S	shift_n	Bits in dec_shift (32 = full)
 000E36+3B	S	subframe	Subframe id 1-5
 000E36+3C	S	word	Word number 1-10
@@ -216,22 +216,22 @@
 000E36+43	S	sync	Preamble found
 000E36+44	S	tow_ok	TOW verified (how_decode or tow_cross_check)
 000E36+45	S	how_seen	HOW decoded this sync
-000E36+46	S	smooth_count	Word, seconds of smoothing (to $705C)
+000E36+46	S	smooth_count	Word, seconds of smoothing (to $705C)	s16
 000E36+48	S	tow_bad	TOW mismatch flag
-000E36+4A	S	tow	Long, last TOW
-000E36+54	S	ms_week	Long, ms of week at epoch (mod 604800000)
+000E36+4A	S	tow	Long, last TOW	s32
+000E36+54	S	ms_week	Long, ms of week at epoch (mod 604800000)	s32
 007A3C+00	S	valid	Per-channel ephemeris record (stride $EC): valid (eph_unpack)
 007A3C+01	S	iode	IODE copy
 007A3C+02	S	new	New ephemeris flag
 00275C+00	S	sv	Channel command (stride $C): SV
-00275C+02	S	doppler	Word, Doppler in NCO units (Hz x 0.30201)
-00275C+04	S	code_start	Long, code window start (L1 cycles)
-00275C+08	S	code_width	Long, code window width ($1809FC full, $133B3 narrow, min $26766)
+00275C+02	S	doppler	Word, Doppler in NCO units (Hz x 0.30201)	s16
+00275C+04	S	code_start	Long, code window start (L1 cycles)	s32
+00275C+08	S	code_width	Long, code window width ($1809FC full, $133B3 narrow, min $26766)	s32
 001106+00	S	changed	Search control block (= *$271E): [8] channel reassigned flags
 001106+08	S	settle	Settle countdown (srch_settle_count)
-001106+0A	S	drift_ref	Word, osc_drift_ref copy
+001106+0A	S	drift_ref	Word, osc_drift_ref copy	s16
 001106+34	S	hold_prev	Previous nav_hold_mode
-001106+36	S	center	Word, search center ($113C)
+001106+36	S	center	Word, search center ($113C)	s16
 001106+38	S	center_set	Center updated this pass
 001106+39	S	cold	Cold strategy exhausted -> strategy 1
 001106+3A	S	hold_ready	Position-hold SV-set mode enabled
