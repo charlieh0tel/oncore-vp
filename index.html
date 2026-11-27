@@ -213,10 +213,9 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
   <ul>
     <li>At power-up the date comes from the MC68HC68T1. If it lost power, the firmware falls back to 01/01/&lt;EEPROM year&gt; 12:00:00.</li>
     <li>The almanac is used only if the current week is no more than 2 weeks before and 127 after its week ($09C782). A fallback date rejects a good almanac and the receiver searches blind.</li>
-    <li>2026-11-26, antenna connected: 12.5 min with nothing tracked (date 01/03/2026). After @@Ac/@@Aa with UTC: 9 visible, 6 tracked within 12 s.</li>
+    <li>With the RTC set: first fix about 48 s after power-up; with a fallback date: no track in 12.5 min.</li>
     <li>@@Ac, @@Aa and the first GPS time each boot write the RTC.</li>
     <li>The 58503A host's power-up script sends no @@Ac or @@Aa, so in the instrument the boot date depends on the T1 keeping time.</li>
-    <li>2026-11-27, power cycle with the RTC kept: first fix about 48 s after power-up. After hours without signal the 8ch's search stuck (no track in 30 min, even with @@Ac/@@Aa); a power cycle cleared it (fix within 49 s).</li>
   </ul>
 </section>
 <section>
@@ -227,7 +226,7 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
     <li>Once per power-up, after 10 steady fixes, the drift is driven toward 20625 and the record saved.</li>
     <li><code>@@Ta</code> payload: drift reference (u16, HP "Offs"), setting (u8, "Warp"), Hz/LSB (u16, "Step"). All or nothing: stored only if word &lt; $8000, byte &lt; $D8, word &lt; $8000, then saved to EEPROM at once and sent to the DCXO. <code>@@Ta FF FF FF FF FF CA</code> reads the record without changing it. Default with no valid record: $67, 350 Hz/LSB, 20625.</li>
     <li>Records: 8ch 20625, $50, 185 Hz/LSB. 6ch SSG0163878 20549, $5F, 351; SSG0178541 20749, $5C, 339 (same firmware rules).</li>
-    <li>Live, tracking: drift 20355 Hz at L1, 270 Hz below the 20625 target. 20625 Hz is exactly 1575.42 MHz &minus; 82.5 &times; 19.09575 MHz, the carrier left after mixing down, so the reference is off by 0.17 ppm (sign not determined); the boot's update moved the reference to 20572, as the rule predicts.</li>
+    <li>Drift while tracking: 20355 Hz at L1, 270 Hz below the 20625 target. 20625 Hz = 1575.42 MHz &minus; 82.5 &times; 19.09575 MHz, the carrier left after mixing down; the reference is off by 0.17 ppm (sign not determined).</li>
   </ul>
 </section>
 
@@ -238,15 +237,13 @@ CS7    $FFE8 $7830   CS8 $0004 $7830   CS9 $1006 $7870   CS10 $1806 $7870</pre>
     <tr><td class="t">Instrument / board</td><td>Z3805A (3625A01487), *7VENR*</td><td>Z3801A (3542A01548), *7VGN4*</td></tr>
     <tr><td class="t">Model / manufactured</td><td>B1121P1114, 6G09</td><td>B1121P1114, 6J25</td></tr>
     <tr><td class="t">Software</td><td colspan="2">98-P39972M VER 8 REV 4, 13 Jul 1995; the two flashes are identical</td></tr>
-    <tr><td class="t">In service (smartclock logs)</td><td>locked 84%, needed +20 dB</td><td>locked 20%, needed +20 dB; the worse</td></tr>
     <tr><td class="t">Self-test (@@Ca)</td><td>all pass</td><td>all pass</td></tr>
   </table></div>
   <ul>
-    <li>Firmware and EEPROMs read over the host port through the factory loader with a 72-byte RAM stub (<code>tools/loader/dump.py</code>), no BDM: 256 KB in 4.6 min, both flash checksums match.</li>
-    <li>Same code as the 8ch, cut to 6 channels, without @@E*/@@F*: byte-identical search tables, same @@Ta and boot trim, same almanac week window and RTC fallback. 557 functions named by matching the 8ch.</li>
-    <li>As found: silent until polled, idle at power-up (fix mode 0 saved), RTC at the fallback 01/01/2026 12:00:00, almanac rejected. EEPROMs show an @@Cf (ionosphere and UTC blocks invalidated). After @@Cg 1, @@Ac/@@Aa, an almanac by @@Cb and a position: 9 visible, and they boot searching.</li>
-    <li>On the plain distribution-amplifier feed neither tracks (20 min aided runs, and after a clean power cycle). On a higher-gain feed: SSG0178541 3D with 5-6 SVs at once; SSG0163878 4 SVs in 17 s, first fix 46.5 s.</li>
-    <li>Top-side DC bias agrees between the boards at every node (supply-fed chokes, a 0.765 V transistor base, a 2.2&ndash;2.4 V mid-rail node), so the loss is in the RF path (A06, SAW filter, coupling or the 58M01 input; inferred).</li>
+    <li>Firmware and EEPROMs read over the host port through the factory loader with a 72-byte RAM stub (<code>tools/loader/dump.py</code>): 256 KB in 4.6 min; flash checksums match.</li>
+    <li>Same code as the 8ch, 6 channels, no @@E*/@@F*: identical search tables, @@Ta, boot trim, almanac week window and RTC fallback.</li>
+    <li>Output: none until polled. Application type: Land.</li>
+    <li>Track only with about 20 dB more antenna gain than the 8ch needs. Top-side DC bias agrees between the boards at every node; the loss is in the RF path (A06, SAW filter, coupling or the 58M01 input; inferred).</li>
   </ul>
   <h3>Top-side DC bias, volts to ground (USB-fed jigs)</h3>
   <div class="scroll"><table>
