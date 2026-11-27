@@ -19,7 +19,8 @@ $GHIDRA/support/analyzeHeadless ~/ghidra-projects oncore-vp \
     -postScript OncoreTypes.java \
     -postScript OncoreNames.java \
     -postScript OncoreStackParameters.java \
-    -postScript OncoreFixups.java
+    -postScript OncoreFixups.java \
+    -postScript OncoreExportC.java $PWD/third_party/moto/decompiled/B4121P1115.c
 ```
 
 Result: 64 switches recovered, 574 functions and every RAM global named (`OncoreExportC.java` reports the count), none failing to decompile.
@@ -40,7 +41,7 @@ Run from the repository root.  The project lives outside the repository.
 | `OncoreLibNames.java` | Names the B3640 run-time library routines and data (table from `tools/libsig.py`) |
 | `OncoreNames.java` | Applies the name tables `names-*.tsv` (address, kind F/L/S/X, name, note, optional field type for S): `names-core.tsv` from `docs/memory-map.md`, then `names-globals.tsv` (scheduler and most-referenced globals), `names-io.tsv` (host I/O), `names-last.tsv` (remaining globals), `names-nav.tsv` (navigation, ephemeris, almanac, TRAIM, 1PPS), `names-proto.tsv` (configuration commands, message fields), `names-tracking.tsv` (channels, search, nav-data decode); later files win; kind X removes a wrongly created function |
 | `OncoreTypes.java` | Data types: date record ($8EBA), per-channel record arrays ($CF6, $E36, $1106, $275C, $27BC, $6FBC, $7A3C), SV-indexed records, prediction banks, almanac buffers, navigation matrices, CS7 channel registers, typed globals, plus the table `types-globals.tsv` (address, type: doubles, vectors, arrays, DGPS/UTC records); run before OncoreNames.java |
-| `OncoreExportC.java` | Decompiles every function to one C file; prints named/unnamed counts |
+| `OncoreExportC.java` | Decompiles every function to one C file, with each function's note from `names-*.tsv`; prints named/unnamed counts.  Output committed as `third_party/moto/decompiled/B4121P1115.c` |
 | `OncoreFixups.java` | Signatures the decompiler gets wrong: return values in D0 (`gps_parity_check`, whose body otherwise decompiles empty), missing stack arguments (`gps_to_date`, geoid helpers, `geoid_height` with two structs by value), libm (double arguments on the stack) and `sprintf` (varargs); run after OncoreStackParameters.java |
 | `OncoreStackParameters.java` | Narrow stack parameters (from smartclock); run last |
 

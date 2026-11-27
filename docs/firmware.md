@@ -4,7 +4,8 @@ B4121P1115, SFTW P/N 98-P36830P VER 8 REV 8 (06 Aug 1996), from an HP
 58503A.  C, built with HP B3640 A.04.10 and its CPU32 run-time
 library; Motorola's own startup code.  Details and addresses:
 [memory-map.md](memory-map.md), [messages.md](messages.md); Ghidra
-rebuild: [tools/ghidra](../tools/ghidra/README.md).
+rebuild: [tools/ghidra](../tools/ghidra/README.md); decompiled C:
+[B4121P1115.c](../third_party/moto/decompiled/B4121P1115.c).
 
 ```mermaid
 flowchart LR

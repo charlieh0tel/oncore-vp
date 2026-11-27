@@ -6,6 +6,11 @@ moto/B4121P1115-flash.bin
     98-P36830P, VER 8, REV 8, 06 Aug 1996.  Read over BDM from the
     receiver in an HP 58503A.  Copyright 1991-1996 Motorola, Inc.
 
+moto/decompiled/B4121P1115.c
+    Ghidra decompiler output for moto/B4121P1115-flash.bin, with names and
+    types from tools/ghidra.  Derived from the vendor image; regenerate
+    with tools/ghidra (OncoreExportC.java).
+
 moto/MC68HC68.pdf
     Motorola MC68HC68T1 real-time clock data sheet, REV 2.
 

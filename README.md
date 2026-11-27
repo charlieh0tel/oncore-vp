@@ -15,6 +15,7 @@ Pages: <https://charlieh0tel.github.io/oncore-vp/>
 | [`docs/firmware.md`](docs/firmware.md) | Firmware overview: one diagram of tasks, tracking, navigation, I/O, DCXO and RTC, and where the details are |
 | [`docs/messages.md`](docs/messages.md) | Binary output message payloads, from the firmware |
 | [`tools/ghidra/`](tools/ghidra/) | Ghidra scripts and name/type tables that rebuild the fully named project from the flash image ([README](tools/ghidra/README.md)) |
+| [`third_party/moto/decompiled/B4121P1115.c`](third_party/moto/decompiled/B4121P1115.c) | Decompiled C of the whole firmware (Ghidra output, all 574 functions named; derived from the vendor image, see [NOTICE](third_party/NOTICE)) |
 | [`tools/oncore.py`](tools/oncore.py) | Host-port tool: decode @@Ea/@@Ba, set date and time, read the DCXO record and the clock drift, self-test, time to first fix |
 | [`tools/libsig.py`](tools/libsig.py) | Matches HP B3640 run-time library modules (IEEE-695) against the flash |
 | [`docs/board.md`](docs/board.md) | The 6-channel board: parts, test points and their positions, BDM header wiring, flash-read procedure |
