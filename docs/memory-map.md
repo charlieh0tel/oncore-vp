@@ -252,8 +252,18 @@ $015E, $5091.
   derived from $75BE, limited to 0-$D6.
 - Dump: active record 1 = $50, $00B9, $501B (20507, 118 below the
   default 20625); record 0 = $50, $00B9, $5055 (20565).
-- Meaning of 20625 and the absolute TCXO offset: not established.
-  Can be watched live over BDM while tracking: $81D2, $75BC-$75C1.
+- Record layout: byte +0, byte +1 (not read by the code above; $00 in
+  record 0, $06 in record 1), word +2, word +4, then the 4-byte
+  checksum.
+- Live read, 2026-11-26, receiver not tracking (no satellites; all
+  channels in search): $81D2 = 3902.352348076068; x 5.2550354685707275
+  = 20507.0000 = $75C0 = the active EEPROM record.  With no fixes,
+  $81D2 holds $75C0 / 5.2550354685707275, i.e. the same quantity in
+  the other unit.  Unchanged over 8 minutes.
+- Meaning of 20625 and the absolute TCXO offset: not established.  If
+  20625 is the zero point (Hz at L1), the stored value is -118 Hz
+  (-0.075 ppm); if $75C0 is an absolute L1 offset, 20507 Hz is 13.0 ppm.
+  A live measurement needs the receiver tracking (antenna).
 
 ### CS7: the tracking channels
 
