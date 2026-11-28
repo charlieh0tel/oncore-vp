@@ -14,6 +14,8 @@ stays in the loader; power-cycle it afterwards (the stub overwrites RAM).
 import argparse
 import struct
 import time
+from collections.abc import Iterable
+from typing import Protocol
 
 import serial
 
@@ -25,14 +27,14 @@ RAM = 0xC000
 PORT = "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5C8D070210-if00"
 
 
-def xor(bs):
+def xor(bs: Iterable[int]) -> int:
     c = 0
     for b in bs:
         c ^= b
     return c
 
 
-def loader_frame(letter, addr, data=b""):
+def loader_frame(letter: bytes, addr: bytes, data: bytes = b"") -> bytes:
     """A loader frame: @@S<letter>, count, address, data, checksum, CR LF.
 
     count covers itself, the address and the data; the checksum is the XOR of
@@ -41,18 +43,28 @@ def loader_frame(letter, addr, data=b""):
     return b"@@S" + letter + body + bytes([ord("S") ^ letter[0] ^ xor(body)]) + b"\r\n"
 
 
+class Port(Protocol):
+    """What Loader needs from a port: serial.Serial or a test fake."""
+
+    def read(self, size: int) -> bytes: ...
+
+    def write(self, data: bytes) -> object: ...
+
+    def reset_input_buffer(self) -> None: ...
+
+
 class Loader:
-    def __init__(self, port):
+    def __init__(self, port: Port) -> None:
         """port: an open serial.Serial (9600 8N1), or any object with read/write/reset_input_buffer."""
         self.p = port
 
-    def read_exact(self, n, timeout):
+    def read_exact(self, n: int, timeout: float) -> bytes:
         end, buf = time.time() + timeout, b""
         while len(buf) < n and time.time() < end:
             buf += self.p.read(n - len(buf))
         return buf
 
-    def reply(self, letters, timeout=3):
+    def reply(self, letters: bytes, timeout: float = 3) -> int:
         want, buf, end = b"@@" + letters, b"", time.time() + timeout
         while time.time() < end:
             buf += self.p.read(64)
@@ -63,7 +75,7 @@ class Loader:
                 return buf[i + 4]
         raise RuntimeError(f"no @@{letters.decode()} reply")
 
-    def enter(self):
+    def enter(self) -> str:
         # Already in the loader?  @@Sd (no action) answers there.  Sending @@Tq
         # inside the loader would start a frame that swallows what follows.
         self.p.reset_input_buffer()
@@ -78,19 +90,19 @@ class Loader:
         self.reply(b"Tq")
         return "entered the loader"
 
-    def write(self, addr, data, chunk=64):
+    def write(self, addr: int, data: bytes, chunk: int = 64) -> None:
         for o in range(0, len(data), chunk):
             self.p.write(loader_frame(b"a", struct.pack(">H", addr + o), data[o : o + chunk]))
             if self.reply(b"Sa"):
                 raise RuntimeError("@@Sa rejected at %04X" % (addr + o))
 
-    def go(self, addr, n, timeout):
+    def go(self, addr: int, n: int, timeout: float) -> tuple[bytes, int]:
         self.p.write(loader_frame(b"g", struct.pack(">H", addr)))
         out = self.read_exact(n, timeout)
         return out, self.reply(b"Sg", 5)
 
 
-def main():
+def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--port", default=PORT)
     ap.add_argument("base", type=lambda s: int(s, 16))

@@ -10,7 +10,7 @@ import sys
 funcs, globs, repo = sys.argv[1:4]
 d8 = os.path.join(repo, "tools/ghidra")
 files = sorted(glob.glob(d8 + "/names-*.tsv"), key=lambda p: (not p.endswith("names-core.tsv"), p))
-names8 = {}  # addr -> (kind, name)
+names8: dict[int, tuple[str, str]] = {}  # addr -> (kind, name)
 for p in files:
     for line in open(p):
         if not line.strip() or line.startswith("#"):
@@ -28,7 +28,7 @@ hdr = (
     "# call = reached from a matched caller, fuzzy = similarity ratio).  Generated;\n"
     "# corrections go in names-manual.tsv, which is read later and wins.\n"
 )
-used6 = set()
+used6: set[int] = set()  # 6ch function addresses named
 with open(os.path.join(out, "names-core.tsv"), "w") as w:
     w.write(hdr)
     for line in open(funcs):

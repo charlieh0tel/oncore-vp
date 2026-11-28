@@ -26,6 +26,7 @@ files = ["tools", "tests"]
 exclude = ["third_party"]
 mypy_path = ["tools", "tools/loader", "tools/matchdecomp"]
 explicit_package_bases = true
+strict = true
 
 # pyserial ships no type information.
 [[tool.mypy.overrides]]

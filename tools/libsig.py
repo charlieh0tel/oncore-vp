@@ -16,34 +16,48 @@ table rows for tools/ghidra/OncoreLibNames.java.
 
 import argparse
 import re
+from collections.abc import Container
+
+# An RPN token: a number, an operator ("+", "-", else hex of the byte), or a
+# variable letter and index ("P<n>" the field address, "R1" section 1's base,
+# "X3" external 3).
+Token = int | str
+# An RPN expression.
+Expr = list[Token]
+# A relocated field: (offset in section, RPN expr, size in bytes).
+Reloc = tuple[int, Expr, int]
+# A placed section's key: (module name, section name).
+Key = tuple[str, str]
+# A placed section: (address, length, known bytes, how placed, module, section index).
+Placed = tuple[int, int, int, str, "Mod", int]
 
 
 class Mod:
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         self.name = name
-        self.secs = {}  # section index -> name
-        self.size = {}  # section index -> size
-        self.data = {}  # section index -> bytearray
-        self.mask = {}  # section index -> bytearray (1 = known byte)
-        self.relocs = {}  # section index -> [(offset, RPN expr, size)]
-        self.pub = {}  # symbol index -> name
-        self.ext = {}  # symbol index -> name
-        self.val = {}  # public name -> (section, offset)
+        self.secs: dict[int, str] = {}  # section index -> name
+        self.size: dict[int, int] = {}  # section index -> size
+        self.data: dict[int, bytearray] = {}  # section index -> bytes
+        self.mask: dict[int, bytearray] = {}  # section index -> 1 per known byte
+        self.relocs: dict[int, list[Reloc]] = {}  # section index -> relocated fields
+        self.pub: dict[int, str] = {}  # symbol index -> name
+        self.ext: dict[int, str] = {}  # symbol index -> name
+        self.val: dict[str, tuple[int, int]] = {}  # public name -> (section, offset)
 
 
 class Reader:
-    def __init__(self, b, p):
+    def __init__(self, b: bytes, p: int) -> None:
         self.b, self.p = b, p
 
-    def byte(self):
+    def byte(self) -> int:
         v = self.b[self.p]
         self.p += 1
         return v
 
-    def peek(self):
+    def peek(self) -> int:
         return self.b[self.p]
 
-    def num(self):
+    def num(self) -> int:
         v = self.byte()
         if v < 0x80:
             return v
@@ -52,7 +66,7 @@ class Reader:
         self.p += n
         return r
 
-    def string(self):
+    def string(self) -> str:
         n = self.byte()
         if n == 0xDE:
             n = self.byte()
@@ -62,9 +76,9 @@ class Reader:
         self.p += n
         return s
 
-    def expr(self, stop):
+    def expr(self, stop: Container[int]) -> Expr:
         """RPN expression as a list of tokens, up to a byte in stop."""
-        out = []
+        out: Expr = []
         while self.peek() not in stop:
             c = self.peek()
             if c <= 0x88:
@@ -79,16 +93,16 @@ class Reader:
         return out
 
 
-def is_rec(c):
+def is_rec(c: int) -> bool:
     return c >= 0xE0
 
 
-def parse_module(b, start):
+def parse_module(b: bytes, start: int) -> Mod:
     r = Reader(b, start)
     assert r.byte() == 0xE0
     r.string()
     m = Mod(r.string())
-    w = {}
+    w: dict[int, int] = {}  # W-record index -> part offset from start
     while True:
         c = r.peek()
         if c == 0xEC:
@@ -120,12 +134,15 @@ def parse_module(b, start):
             i = r.num()
             e = r.expr(range(0xE0, 0x100))
             if v == 0xD3:
-                m.size[i] = e[0]
+                size = e[0]
+                assert isinstance(size, int)
+                m.size[i] = size
             elif v == 0xC9:
                 # R<sec> <off> +   or   R<sec>
-                sec = int(e[0][1:])
+                ref = e[0]
                 off = e[1] if len(e) > 1 else 0
-                m.val[m.pub[i]] = (sec, off)
+                assert isinstance(ref, str) and isinstance(off, int)
+                m.val[m.pub[i]] = (int(ref[1:]), off)
         elif c == 0xE8:
             i = r.num()
             m.pub[i] = r.string()
@@ -138,7 +155,8 @@ def parse_module(b, start):
             raise ValueError(f"{m.name}: record {c:#x} at {r.p - 1:#x}")
     # Data part (W5..W6).
     r.p = start + w[5]
-    sec = pos = None
+    sec: int | None = None
+    pos = 0
     while w[5] and r.p < start + w[6]:
         c = r.peek()
         if c == 0xE5:
@@ -153,9 +171,12 @@ def parse_module(b, start):
             r.byte()
             r.num()
             e = r.expr(range(0xE0, 0x100))
-            pos = e[1] if len(e) > 2 else 0
+            off = e[1] if len(e) > 2 else 0
+            assert isinstance(off, int)
+            pos = off
         elif c == 0xE4:
             r.byte()
+            assert sec is not None
             while not is_rec(r.peek()):
                 if r.peek() < 0x80:
                     n = r.byte()
@@ -172,13 +193,16 @@ def parse_module(b, start):
                     for t in e:
                         depth += -1 if t in ("+", "-") else 1
                     if depth == 2:
-                        n = e.pop()
+                        size = e.pop()
+                        assert isinstance(size, int)
+                        n = size
                     m.relocs[sec].append((pos, e, n))
                     pos += n
                 else:
                     raise ValueError(f"{m.name}: LR byte {r.peek():#x} at {r.p:#x}")
         elif c == 0xED:
             r.byte()
+            assert sec is not None
             n = r.num()
             m.data[sec][pos : pos + n] = b[r.p : r.p + n]
             m.mask[sec][pos : pos + n] = b"\1" * n
@@ -191,7 +215,7 @@ def parse_module(b, start):
     return m
 
 
-def modules(path):
+def modules(path: str) -> list[Mod]:
     b = open(path, "rb").read()
     if b[2:9] != b"LIBRARY":
         return [parse_module(b, 0)]
@@ -204,7 +228,7 @@ def modules(path):
     return [parse_module(b, s) for s in sorted(set(starts))]
 
 
-def search(flash, data, mask):
+def search(flash: bytes, data: bytearray, mask: bytearray) -> list[int]:
     """Offsets where data matches flash on the masked bytes."""
     # Anchor on the longest run of known bytes.
     best, i = (0, 0), 0
@@ -221,7 +245,7 @@ def search(flash, data, mask):
     if n < 4:
         return []
     anchor = bytes(data[a : a + n])
-    hits = []
+    hits: list[int] = []
     p = flash.find(anchor)
     while p >= 0:
         s = p - a
@@ -235,12 +259,14 @@ def search(flash, data, mask):
     return hits
 
 
-def check(flash, base, m, sec, s):
+def check(flash: bytes, base: int, m: Mod, sec: int, s: int) -> int:
     """Count intra-section relocations that resolve to s; -1 if one fails."""
     good = 0
     for off, e, n in m.relocs[sec]:
         if n == 4 and e[0] == f"R{sec}":
-            want = base + s + (e[1] if len(e) > 2 else 0)
+            addend = e[1] if len(e) > 2 else 0
+            assert isinstance(addend, int)
+            want = base + s + addend
             got = int.from_bytes(flash[s + off : s + off + 4], "big")
             if got != want:
                 return -1
@@ -248,9 +274,10 @@ def check(flash, base, m, sec, s):
     return good
 
 
-def evaluate(e, field, sec_addr):
+def evaluate(e: Expr, field: int, sec_addr: dict[int, int]) -> tuple[int, str | None]:
     """Value of e with its one X or foreign R term set to 0, and that term."""
-    st, term = [], None
+    st: list[int] = []
+    term: str | None = None
     for t in e:
         if t == "+":
             b = st.pop()
@@ -270,9 +297,9 @@ def evaluate(e, field, sec_addr):
     return st[0], term
 
 
-def resolve(flash, base, m, sec, addr):
+def resolve(flash: bytes, base: int, m: Mod, sec: int, addr: int) -> list[tuple[str, int, int, int]]:
     """(term, address, field, size) for each external relocation."""
-    out = []
+    out: list[tuple[str, int, int, int]] = []
     for off, e, n in m.relocs[sec]:
         f = addr + off
         v0, term = evaluate(e, f, {sec: addr})
@@ -294,15 +321,15 @@ DATA = {"__ctype", "__infinity", "__hex_NaN", "__hex_NaNf"}
 EXTRA = [(0x0B4AD4, "_fabs", "F", "by position and error code")]
 
 
-def jump(flash, base, f, n):
+def jump(flash: bytes, base: int, f: int, n: int) -> bool:
     """True if the field at f is the operand of jsr/jmp abs.l or bsr/bra."""
     op = int.from_bytes(flash[f - base - 2 : f - base], "big")
     return op in (0x4EB9, 0x4EF9) if n == 4 else op in (0x6100, 0x6000, 0x4EBA, 0x4EFA)
 
 
-def implications(flash, base, placed):
+def implications(flash: bytes, base: int, placed: dict[Key, Placed]) -> dict[str, dict[int, set[bool]]]:
     """name -> {address: {is jump target}} from relocations of placed sections."""
-    implied = {}
+    implied: dict[str, dict[int, set[bool]]] = {}
     for _key, (addr, _ln, _known, _how, m, sec) in placed.items():
         for term, x, f, n in resolve(flash, base, m, sec, addr):
             j = jump(flash, base, f, n)
@@ -315,7 +342,7 @@ def implications(flash, base, placed):
     return implied
 
 
-def main():
+def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("libs", nargs="+")
     ap.add_argument("--flash", default="third_party/moto/B4121P1115-flash.bin")
@@ -326,15 +353,16 @@ def main():
     flash = open(a.flash, "rb").read()
     base = int(a.base, 16)
     libs = [(lib.split("/")[-1], modules(lib)) for lib in a.libs]
-    placed = {}  # (module, section name) -> (address, length, known, how, Mod, sec)
+    placed: dict[Key, Placed] = {}
 
-    def end(k):
+    def end(k: Key) -> int:
         x = placed[k][0] + placed[k][1]
         return x + x % 2
 
-    allunits = []
+    # (library, key, module, section index, flash addresses that match)
+    allunits: list[tuple[str, Key, Mod, int, list[int]]] = []
     for lib, mods in libs:
-        units = []
+        units: list[tuple[Key, Mod, int, list[int]]] = []
         for m in mods:
             for sec, data in m.data.items():
                 key = (m.name, m.secs[sec])
@@ -351,7 +379,8 @@ def main():
         changed = True
         while changed:
             changed = False
-            todo = {}
+            # matching addresses -> sections that match only there
+            todo: dict[tuple[int, ...], list[tuple[Key, Mod, int]]] = {}
             for key, m, sec, hits in units:
                 if key in placed:
                     continue
@@ -383,8 +412,8 @@ def main():
         if not new:
             break
     # Names defined in placed sections.
-    names = {}  # address -> [(name, kind, how)]
-    seen = set()
+    names: dict[int, list[tuple[str, str, str]]] = {}  # address -> [(name, kind, how)]
+    seen: set[str] = set()
     for key, (addr, _ln, _known, _how, m, sec) in sorted(placed.items(), key=lambda x: x[1][0]):
         for n, (s_, o) in sorted(m.val.items(), key=lambda x: x[1][1]):
             if s_ == sec and n not in seen:
@@ -394,7 +423,7 @@ def main():
     for x, n, kind, src in EXTRA:
         seen.add(n)
         names.setdefault(x, []).append((n, kind, src))
-    conflicts = []
+    conflicts: list[tuple[str, list[int]]] = []  # (name, addresses)
     for nm, xs in sorted(implied.items()):
         if len(xs) > 1:
             conflicts.append((nm, sorted(xs)))
@@ -418,8 +447,8 @@ def main():
     for addr in sorted(names):
         for n, kind, src in names[addr]:
             print(f"{addr:06X} {n:18} {kind} {src}")
-    for nm, xs in conflicts:
-        print("# conflict", nm, " ".join(f"{x:06X}" for x in xs))
+    for nm, addrs in conflicts:
+        print("# conflict", nm, " ".join(f"{x:06X}" for x in addrs))
     for m in libs[0][1]:
         for sec, data in m.data.items():
             if m.secs[sec] in CODE and len(data) and (m.name, m.secs[sec]) not in placed:

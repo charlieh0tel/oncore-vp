@@ -1,5 +1,8 @@
 """Tests for tools/matchdecomp/compare.py: names, relocations, placement."""
 
+from collections.abc import Sequence
+from pathlib import Path
+
 import compare
 import libsig
 
@@ -9,7 +12,12 @@ RTS = b"\x4e\x75"
 NOP = b"\x4e\x71"
 
 
-def make_module(code, publics, relocs=(), ext=None):
+def make_module(
+    code: bytes,
+    publics: dict[str, int],
+    relocs: Sequence[libsig.Reloc] = (),
+    ext: dict[int, str] | None = None,
+) -> libsig.Mod:
     """A one-section module (section 1, "prog") with known bytes except relocated fields."""
     m = libsig.Mod("t")
     m.secs[1] = "prog"
@@ -23,14 +31,14 @@ def make_module(code, publics, relocs=(), ext=None):
     return m
 
 
-def flash_with(addr, code, size=0x100):
+def flash_with(addr: int, code: bytes, size: int = 0x100) -> bytes:
     """Flash image of FF with code at addr."""
     f = bytearray(b"\xff" * size)
     f[addr - BASE : addr - BASE + len(code)] = code
     return bytes(f)
 
 
-def test_load_names_order(tmp_path):
+def test_load_names_order(tmp_path: Path) -> None:
     ghidra = tmp_path / "ghidra"
     ghidra.mkdir()
     (ghidra / "OncoreLibNames.java").write_text('        {"0B0E08", "add64", "F"},  // faddsub64\n')
@@ -44,14 +52,14 @@ def test_load_names_order(tmp_path):
     assert names == {"add64": 0x0B0E08, "mem_copy": 0x0A1A0E, "settings_dirty": 0x08E9}
 
 
-def test_lookup_strips_underscore():
+def test_lookup_strips_underscore() -> None:
     names = {"sum8": 0x09C7CC, "__fp_status": 0xCC14}
     assert compare.lookup(names, "_sum8") == 0x09C7CC
     assert compare.lookup(names, "__fp_status") == 0xCC14
     assert compare.lookup(names, "_missing") is None
 
 
-def test_evaluate():
+def test_evaluate() -> None:
     ext = {3: 0x1234, 4: None}
     assert compare.evaluate(["X3"], 0, {}, ext) == 0x1234
     assert compare.evaluate(["R1", 6, "+"], 0, {1: 0x80100}, ext) == 0x80106
@@ -60,7 +68,7 @@ def test_evaluate():
     assert compare.evaluate(["R2"], 0, {1: 0}, ext) is None
 
 
-def test_match_with_checked_relocation():
+def test_match_with_checked_relocation() -> None:
     code = JSR_ABS_L + (0x0A5696).to_bytes(4, "big") + NOP + RTS
     m = make_module(code, {"_f": 0}, [(2, ["X1"], 4)], {1: "_g"})
     names = {"f": 0x80010, "g": 0x0A5696}
@@ -68,14 +76,14 @@ def test_match_with_checked_relocation():
     assert (r.name, r.start, r.length, r.bad, r.masked, r.in_place) == ("_f", 0x80010, 10, [], 0, True)
 
 
-def test_wrong_relocation_target_differs():
+def test_wrong_relocation_target_differs() -> None:
     code = JSR_ABS_L + (0x0A5696).to_bytes(4, "big") + RTS
     m = make_module(code, {"_f": 0}, [(2, ["X1"], 4)], {1: "_g"})
     (r,) = compare.compare_section(flash_with(0x80010, code), BASE, m, 1, {"f": 0x80010, "g": 0x0A5698})
     assert r.bad == [2, 3, 4, 5]
 
 
-def test_unknown_relocation_masked():
+def test_unknown_relocation_masked() -> None:
     code = JSR_ABS_L + bytes(4) + RTS
     image = JSR_ABS_L + (0x0A5696).to_bytes(4, "big") + RTS
     m = make_module(code, {"_f": 0}, [(2, ["X1"], 4)], {1: "_unnamed"})
@@ -83,7 +91,7 @@ def test_unknown_relocation_masked():
     assert (r.bad, r.masked) == ([], 1)
 
 
-def test_byte_difference_and_split():
+def test_byte_difference_and_split() -> None:
     code = RTS + NOP + RTS
     image = RTS + NOP + NOP
     m = make_module(code, {"_a": 0, "_b": 2})
@@ -91,7 +99,7 @@ def test_byte_difference_and_split():
     assert (a.bad, b.start, b.length, b.bad, b.in_place) == ([], 0x80022, 4, [3], True)
 
 
-def test_not_contiguous():
+def test_not_contiguous() -> None:
     code = RTS + RTS
     m = make_module(code, {"_a": 0, "_b": 2})
     image = flash_with(0x80020, RTS)
@@ -100,7 +108,7 @@ def test_not_contiguous():
     assert (a.bad, a.in_place, b.bad, b.in_place) == ([], True, [], False)
 
 
-def test_unnamed_section_start():
+def test_unnamed_section_start() -> None:
     code = NOP + RTS + RTS
     m = make_module(code, {"_f": 4})
     first, f = compare.compare_section(flash_with(0x80030, code), BASE, m, 1, {"f": 0x80034})

@@ -6,16 +6,24 @@ import collections
 import difflib
 import sys
 
+# An instruction: (address, mnemonic and operands with addresses and large
+# constants abstracted, ";"-terminated refs: c<hex> call, r<hex> data, s<hex> scalar).
+Instruction = tuple[int, str, str]
+# A function: (name, instructions).
+Function = tuple[str, list[Instruction]]
 
-def load(p):
-    funcs = {}
-    cur = None
+
+def load(p: str) -> dict[int, Function]:
+    """Function entry -> function, from an OncoreFingerprint dump."""
+    funcs: dict[int, Function] = {}
+    cur: int | None = None
     for line in open(p):
         c = line.rstrip("\n").split("\t")
         if c[0] == "F":
             cur = int(c[1])
             funcs[cur] = (c[2], [])
         else:
+            assert cur is not None
             funcs[cur][1].append((int(c[1], 16), c[2], c[3]))
     return funcs
 
@@ -28,7 +36,7 @@ m: dict[int, tuple[int, str, float]] = {}  # 8ch entry -> (6ch entry, how, ratio
 used: set[int] = set()  # 6ch entries already matched
 
 
-def add(a8, a6, how, r):
+def add(a8: int, a6: int, how: str, r: float) -> bool:
     if a8 in m or a6 in used or a6 not in f6 or a8 not in f8:
         return False
     m[a8] = (a6, how, r)
@@ -37,10 +45,10 @@ def add(a8, a6, how, r):
 
 
 # 1. exact unique
-by6 = collections.defaultdict(list)
+by6: collections.defaultdict[tuple[str, ...], list[int]] = collections.defaultdict(list)  # stream -> 6ch entries
 for a, n in norm6.items():
     by6[n].append(a)
-by8 = collections.defaultdict(list)
+by8: collections.defaultdict[tuple[str, ...], list[int]] = collections.defaultdict(list)  # stream -> 8ch entries
 for a, n in norm8.items():
     by8[n].append(a)
 for n, a8s in by8.items():
@@ -48,17 +56,17 @@ for n, a8s in by8.items():
         add(a8s[0], by6[n][0], "exact", 1.0)
 
 
-def calls(ins):
-    r = []
+def calls(ins: Instruction) -> list[int]:
+    r: list[int] = []
     for x in ins[2].split(";"):
         if x.startswith("c"):
             r.append(int(x[1:], 16))
     return r
 
 
-def align(a8, a6):
+def align(a8: int, a6: int) -> tuple[difflib.SequenceMatcher[str], list[tuple[Instruction, Instruction, bool]]]:
     s = difflib.SequenceMatcher(None, norm8[a8], norm6[a6], autojunk=False)
-    pairs = []
+    pairs: list[tuple[Instruction, Instruction, bool]] = []  # (8ch, 6ch, equal)
     for tag, i1, i2, j1, j2 in s.get_opcodes():
         if tag == "equal" or (tag == "replace" and i2 - i1 == j2 - j1):
             for k in range(i2 - i1):

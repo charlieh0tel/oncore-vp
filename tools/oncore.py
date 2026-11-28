@@ -22,6 +22,8 @@ import struct
 import sys
 import threading
 import time
+from collections.abc import Callable, Iterator
+from typing import Protocol, TypedDict
 
 import serial
 
@@ -33,18 +35,24 @@ STATUS = {7: "b7", 6: "dop/singular", 5: "3D", 4: "2D", 3: "acq/hold", 2: "diff"
 FLAGS = {7: "used", 6: "alert", 5: "A-S", 4: "unhealthy", 3: "URA>=6", 0: "parity"}
 
 
-def frame(cmd, payload=b""):
+def frame(cmd: bytes, payload: bytes = b"") -> bytes:
     c = 0
     for b in cmd + payload:
         c ^= b
     return b"@@" + cmd + payload + bytes([c]) + b"\r\n"
 
 
-def bits(v, names):
+def bits(v: int, names: dict[int, str]) -> str:
     return ",".join(n for b, n in sorted(names.items(), reverse=True) if v >> b & 1) or "-"
 
 
-def frames(port, seconds, letters):
+class Reader(Protocol):
+    """What frames() needs from a port: serial.Serial or a test fake."""
+
+    def read(self, size: int) -> bytes: ...
+
+
+def frames(port: Reader, seconds: float, letters: tuple[bytes, ...]) -> Iterator[tuple[float, bytes, bytes]]:
     """Yield (time, letters, payload) for checksummed frames with the given letters."""
     end = time.time() + seconds
     buf = b""
@@ -69,12 +77,30 @@ def frames(port, seconds, letters):
                 yield time.time(), m[2:4], m[4:-1]
 
 
-def decode_pos(p):
+# One channel of @@Ea/@@Ba: SV, mode, signal strength, flags (FLAGS).
+Channel = tuple[int, ...]
+
+
+class Position(TypedDict):
+    """decode_pos() result."""
+
+    date: str  # MM/DD/YYYY
+    time: str  # HH:MM:SS
+    lat: float  # degrees
+    lon: float  # degrees
+    h: float  # GPS height, meters
+    vis: int  # visible satellites
+    trk: int  # tracked satellites
+    status: int  # receiver status byte (STATUS)
+    chans: list[Channel]
+
+
+def decode_pos(p: bytes) -> Position:
     """Ea/Ba payload -> dict.  nch = 8 for Ea, 6 for Ba."""
     nch = (len(p) - 37) // 4
     lat, lon, hg = struct.unpack(">iii", p[11:23])
     chans = [tuple(p[36 + 4 * k : 40 + 4 * k]) for k in range(nch)]
-    return dict(
+    return Position(
         date=f"{p[0]:02d}/{p[1]:02d}/{p[2] << 8 | p[3]:04d}",
         time=f"{p[4]:02d}:{p[5]:02d}:{p[6]:02d}",
         lat=lat / 3.6e6,
@@ -87,7 +113,7 @@ def decode_pos(p):
     )
 
 
-def cmd_watch(port, a):
+def cmd_watch(port: serial.Serial, a: argparse.Namespace) -> None:
     port.reset_input_buffer()
     for _t, _letters, p in frames(port, a.seconds, (b"Ea", b"Ba")):
         d = decode_pos(p)
@@ -99,7 +125,7 @@ def cmd_watch(port, a):
         )
 
 
-def settime(port):
+def settime(port: serial.Serial) -> None:
     now = datetime.datetime.now(datetime.UTC)
     port.write(frame(b"Ac", bytes([now.month, now.day]) + now.year.to_bytes(2, "big")))
     time.sleep(0.3)
@@ -108,7 +134,7 @@ def settime(port):
     print("sent @@Ac/@@Aa", now.isoformat(timespec="seconds"), flush=True)
 
 
-def cmd_ta(port, a):
+def cmd_ta(port: serial.Serial, a: argparse.Namespace) -> None:
     # Every field out of range: nothing is written; the reply carries the record.
     port.reset_input_buffer()
     port.write(frame(b"Ta", b"\xff" * 5))
@@ -123,7 +149,7 @@ L1_PER_M = 5.2550354685707275  # L1 cycles per meter: m/s -> Hz at L1
 DRIFT_TARGET = 20625  # Hz at L1, the firmware's drift target ($08C252)
 
 
-def cmd_drift(port, a):
+def cmd_drift(port: serial.Serial, a: argparse.Namespace) -> None:
     # One poll (rate 0) per sample; the stored rate is unchanged.
     port.reset_input_buffer()
     letters = None
@@ -169,12 +195,12 @@ SELFTEST = {
 }
 
 
-def unpack_selftest(w):
+def unpack_selftest(w: int) -> int:
     """Undo @@Fa's packing to the @@Ca bit order: 0-5 kept, 6-7 <- 14-15, 8-15 <- 6-13."""
     return (w & 0x3F) | (w >> 6 & 3) << 14 | (w >> 8) << 6
 
 
-def cmd_selftest(port, a):
+def cmd_selftest(port: serial.Serial, a: argparse.Namespace) -> None:
     # In fix mode the first @@Ca/@@Fa only stops the channels and goes idle;
     # the second runs the test (answer in about 6 s).  @@Cg 1 resumes fixing.
     port.reset_input_buffer()
@@ -197,7 +223,7 @@ def cmd_selftest(port, a):
     sys.exit("no self-test reply; sent @@Cg 1")
 
 
-def cmd_ttff(port, a):
+def cmd_ttff(port: serial.Serial, a: argparse.Namespace) -> None:
     t0 = time.time()
     port.reset_input_buffer()
     if a.settime:
@@ -220,8 +246,8 @@ def cmd_ttff(port, a):
     sys.exit(f"no fix within {a.seconds:.0f} s")
 
 
-def poller(port, letters):
-    def run():
+def poller(port: serial.Serial, letters: str) -> None:
+    def run() -> None:
         while True:
             port.write(frame(letters.encode(), b"\x00"))
             time.sleep(1)
@@ -229,7 +255,7 @@ def poller(port, letters):
     threading.Thread(target=run, daemon=True).start()
 
 
-def main():
+def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--port", default=PORT)
     ap.add_argument("--poll", choices=("Ba", "Ea"))
@@ -249,7 +275,7 @@ def main():
     port = serial.Serial(a.port, 9600, timeout=0.2)
     if a.poll:
         poller(port, a.poll)
-    {
+    commands: dict[str, Callable[[serial.Serial, argparse.Namespace], object]] = {
         "fix": lambda p, a: (p.write(frame(b"Cg", b"\x01")), print("sent @@Cg 1")),
         "watch": cmd_watch,
         "settime": lambda p, a: settime(p),
@@ -257,7 +283,8 @@ def main():
         "drift": cmd_drift,
         "selftest": cmd_selftest,
         "ttff": cmd_ttff,
-    }[a.cmd](port, a)
+    }
+    commands[a.cmd](port, a)
 
 
 if __name__ == "__main__":

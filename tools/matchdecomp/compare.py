@@ -73,7 +73,7 @@ class Result:
     masked: int = 0  # relocated fields not checked
 
 
-def evaluate(expr: list, pc: int, sections: dict[int, int], ext: dict[int, int | None]) -> int | None:
+def evaluate(expr: libsig.Expr, pc: int, sections: dict[int, int], ext: dict[int, int | None]) -> int | None:
     """Value of a relocation's RPN expression, or None if a term is unknown."""
     stack: list[int] = []
     for t in expr:
@@ -86,8 +86,8 @@ def evaluate(expr: list, pc: int, sections: dict[int, int], ext: dict[int, int |
             stack.append(pc)
         elif t[0] == "R" and int(t[1:]) in sections:
             stack.append(sections[int(t[1:])])
-        elif t[0] == "X" and ext.get(int(t[1:])) is not None:
-            stack.append(ext[int(t[1:])])  # type: ignore[arg-type]
+        elif t[0] == "X" and (value := ext.get(int(t[1:]))) is not None:
+            stack.append(value)
         else:
             return None
     return stack[0]
