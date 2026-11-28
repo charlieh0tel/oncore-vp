@@ -93,13 +93,28 @@ class Reader:
         return out
 
 
+def as_int(v: Token, what: str) -> int:
+    """v from an expression, which must be a number."""
+    if not isinstance(v, int):
+        raise ValueError(f"{what}: expected a number, got {v!r}")
+    return v
+
+
+def as_str(v: Token, what: str) -> str:
+    """v from an expression, which must be a name (section or external)."""
+    if not isinstance(v, str):
+        raise ValueError(f"{what}: expected a name, got {v!r}")
+    return v
+
+
 def is_rec(c: int) -> bool:
     return c >= 0xE0
 
 
 def parse_module(b: bytes, start: int) -> Mod:
     r = Reader(b, start)
-    assert r.byte() == 0xE0
+    if (c := r.byte()) != 0xE0:
+        raise ValueError(f"module start: record {c:#x} at {start:#x}, expected 0xe0")
     r.string()
     m = Mod(r.string())
     w: dict[int, int] = {}  # W-record index -> part offset from start
@@ -134,14 +149,11 @@ def parse_module(b: bytes, start: int) -> Mod:
             i = r.num()
             e = r.expr(range(0xE0, 0x100))
             if v == 0xD3:
-                size = e[0]
-                assert isinstance(size, int)
-                m.size[i] = size
+                m.size[i] = as_int(e[0], f"{m.name}: section {i} size")
             elif v == 0xC9:
                 # R<sec> <off> +   or   R<sec>
-                ref = e[0]
-                off = e[1] if len(e) > 1 else 0
-                assert isinstance(ref, str) and isinstance(off, int)
+                ref = as_str(e[0], f"{m.name}: value of {m.pub[i]}")
+                off = as_int(e[1], f"{m.name}: value of {m.pub[i]}") if len(e) > 1 else 0
                 m.val[m.pub[i]] = (int(ref[1:]), off)
         elif c == 0xE8:
             i = r.num()
@@ -171,12 +183,11 @@ def parse_module(b: bytes, start: int) -> Mod:
             r.byte()
             r.num()
             e = r.expr(range(0xE0, 0x100))
-            off = e[1] if len(e) > 2 else 0
-            assert isinstance(off, int)
-            pos = off
+            pos = as_int(e[1], f"{m.name}: load address") if len(e) > 2 else 0
         elif c == 0xE4:
             r.byte()
-            assert sec is not None
+            if sec is None:
+                raise ValueError(f"{m.name}: LR record before a section at {r.p:#x}")
             while not is_rec(r.peek()):
                 if r.peek() < 0x80:
                     n = r.byte()
@@ -193,16 +204,15 @@ def parse_module(b: bytes, start: int) -> Mod:
                     for t in e:
                         depth += -1 if t in ("+", "-") else 1
                     if depth == 2:
-                        size = e.pop()
-                        assert isinstance(size, int)
-                        n = size
+                        n = as_int(e.pop(), f"{m.name}: relocation size")
                     m.relocs[sec].append((pos, e, n))
                     pos += n
                 else:
                     raise ValueError(f"{m.name}: LR byte {r.peek():#x} at {r.p:#x}")
         elif c == 0xED:
             r.byte()
-            assert sec is not None
+            if sec is None:
+                raise ValueError(f"{m.name}: LD record before a section at {r.p:#x}")
             n = r.num()
             m.data[sec][pos : pos + n] = b[r.p : r.p + n]
             m.mask[sec][pos : pos + n] = b"\1" * n
@@ -264,8 +274,7 @@ def check(flash: bytes, base: int, m: Mod, sec: int, s: int) -> int:
     good = 0
     for off, e, n in m.relocs[sec]:
         if n == 4 and e[0] == f"R{sec}":
-            addend = e[1] if len(e) > 2 else 0
-            assert isinstance(addend, int)
+            addend = as_int(e[1], f"{m.name}: relocation addend") if len(e) > 2 else 0
             want = base + s + addend
             got = int.from_bytes(flash[s + off : s + off + 4], "big")
             if got != want:
