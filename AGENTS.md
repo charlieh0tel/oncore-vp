@@ -27,7 +27,7 @@
   commit before moving onto something unrelated.
 - All checks must pass before committing.
 - Never use -a to commit; always enumerate the files.
-
+- Use typing and mypy.
 
 ## Coding
 
